@@ -1,0 +1,668 @@
+@import '../../index.scss';
+
+.chats {
+    height: 100%;
+
+    // small to medium devices
+    @media screen and (max-width:767px) {}
+
+    .all-chats {
+        padding-top: 1.5rem;
+        width: 16rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: calc(100% - 1.5rem);
+        overflow: hidden;
+
+        .search {
+            margin: 0 1.5rem;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            position: relative;
+
+            .svg_path {
+                padding-left: .5rem;
+                position: absolute;
+
+                path {
+                    fill: $Text-Secondary;
+                }
+            }
+
+            input {
+                width: 10rem;
+                padding: .8rem;
+                padding-left: 2.5rem;
+                background: var(--bg-grey);
+                border: none;
+                border-radius: 10px;
+                outline: none;
+                color: $Text-Secondary;
+            }
+
+            input::placeholder {
+                color: $Text-Secondary;
+            }
+        }
+
+        .title {
+            margin: 0 1.5rem;
+            margin-bottom: 1rem;
+
+            h1 {
+                color: var(--text-primary);
+                font-size: x-large;
+                font-weight: 500;
+
+                span {
+                    color: $bg-violet;
+                }
+            }
+        }
+
+        .stories {
+            margin: 0 1.5rem;
+            margin-bottom: .5rem;
+            display: flex;
+            flex-direction: row;
+            gap: 1rem;
+
+            .item img {
+                width: 3rem;
+                height: 3rem;
+                aspect-ratio: 1/1;
+                object-position: center;
+                object-fit: cover;
+                border-radius: 9999px; //15px
+                border: 2px solid $bg-violet;
+            }
+        }
+
+        .list {
+            width: 15rem;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            gap: .5rem;
+            margin: 0 1rem;
+            margin-top: 1.5rem;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-color: transparent transparent;
+            scrollbar-width: 0px;
+
+            &::-webkit-scrollbar {
+                width: 0px;
+            }
+
+            &::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                background: transparent;
+            }
+
+            .card {
+                position: relative;
+                background: transparent;
+                border-radius: 15px;
+                padding: .5rem;
+                width: 13.3rem;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: .8rem;
+                transition: all .5s ease-in-out;
+                -moz-transition: all .5s ease-in-out;
+                cursor: pointer;
+
+                &:is(.active) {
+                    background: var(--bg-grey);
+                }
+
+                &:hover {
+                    background: var(--bg-grey);
+                }
+
+                .count {
+                    position: absolute;
+                    right: .7rem;
+                    z-index: 500;
+                    border: none;
+                    background: $bg-violet;
+                    width: 1.3rem;
+                    height: 1.3rem;
+                    border-radius: 9999px;
+                    font-size: 11px;
+                    color: #ffffff;
+                    cursor: pointer;
+                }
+
+                .cover {
+                    display: flex;
+                    align-items: center;
+
+                    img {
+                        width: 3rem;
+                        height: 3rem;
+                        aspect-ratio: 1/1;
+                        object-position: center;
+                        object-fit: cover;
+                        border-radius: 9999px; //15px
+                    }
+                }
+
+                .content {
+                    h1 {
+                        width: 8rem;
+                        font-size: small;
+                        font-weight: 500;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        color: var(--text-primary);
+                    }
+
+                    p {
+                        width: 8rem;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        font-size: x-small;
+                        color: $Text-Secondary;
+                        font-weight: normal;
+                        line-height: 1.5rem;
+                    }
+                }
+            }
+        }
+    }
+
+    .live {
+        padding-top: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: calc(100% - 1.5rem);
+        overflow: hidden;
+
+        .head {
+            display: flex;
+            flex-direction: row;
+            gap: .8rem;
+            align-content: center;
+
+            .cover {
+                display: flex;
+                align-items: center;
+
+                img {
+                    width: 3rem;
+                    height: 3rem;
+                    aspect-ratio: 1/1;
+                    object-position: center;
+                    object-fit: cover;
+                    border-radius: 9999px; //15px
+                }
+            }
+
+            .details {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-right: auto;
+
+                h1 {
+                    width: 8rem;
+                    font-size: small;
+                    font-weight: bold;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    color: var(--text-primary);
+                }
+
+                p {
+                    width: 8rem;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    font-size: x-small;
+                    color: $Text-Secondary;
+                    font-weight: normal;
+                    line-height: 1.5rem;
+                    text-transform: lowercase;
+                }
+            }
+
+            .actions {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 1.5rem;
+
+                button {
+                    height: auto;
+                    width: auto;
+                    border: none;
+                    background: none;
+
+                    .svg_path_fill path {
+                        fill: $Text-Secondary;
+                        transition: all .3s ease-in-out;
+                        -moz-transition: all .3s ease-in-out;
+                    }
+
+                    &:hover {
+                        cursor: pointer;
+
+                        .svg_path_fill path {
+                            fill: $bg-violet;
+                        }
+                    }
+                }
+            }
+        }
+
+        .body {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background: var(--bg-grey); //transparent
+            margin-top: 1.5rem;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            overflow: hidden;
+
+            .messages {
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+                height: 100%;
+                padding: 1rem;
+                overflow-y: auto;
+                overflow-x: hidden;
+                scrollbar-color: transparent transparent;
+                scrollbar-width: 0px;
+
+                &::-webkit-scrollbar {
+                    width: 0px;
+                }
+
+                &::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+
+                &::-webkit-scrollbar-thumb {
+                    background: transparent;
+                }
+
+                .others {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: start;
+                    gap: .8rem;
+
+                    .cover {
+                        display: flex;
+                        align-items: center;
+
+                        img {
+                            width: 2.5rem;
+                            height: 2.5rem;
+                            aspect-ratio: 1/1;
+                            object-position: center;
+                            object-fit: cover;
+                            border-radius: 9999px; //15px
+                        }
+                    }
+
+                    .card {
+                        max-width: 16rem;
+                        background: var(--bg-primary);
+                        padding: .5rem;
+                        border-radius: 15px;
+                        border-top-left-radius: 0;
+
+                        .from {
+                            display: flex;
+                            flex-direction: row;
+                            align-items: center;
+                            gap: 1.5rem;
+
+                            p {
+                                color: $Text-Secondary;
+                                font-size: x-small;
+                            }
+
+                            .author {
+                                margin-right: auto;
+                                max-width: 5rem;
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                            }
+                        }
+
+                        .msg {
+                            font-size: small;
+                            color: var(--text-primary);
+
+                            img {
+                                margin-top: .5rem;
+                                border-radius: 10px;
+                                width: 100%;
+                                max-height: 15rem;
+                                height: auto;
+                            }
+                        }
+                    }
+                }
+
+                .me {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: start;
+                    gap: .8rem;
+
+                    .cover {
+                        display: flex;
+                        align-items: center;
+
+                        img {
+                            width: 2.5rem;
+                            height: 2.5rem;
+                            aspect-ratio: 1/1;
+                            object-position: center;
+                            object-fit: cover;
+                            border-radius: 9999px; //15px
+                        }
+                    }
+
+                    .card {
+                        margin-left: auto;
+                        max-width: 16rem;
+                        background: $bg-violet;
+                        padding: .5rem;
+                        border-radius: 15px;
+                        border-top-right-radius: 0;
+
+                        .from {
+                            display: flex;
+                            flex-direction: row;
+                            align-items: center;
+                            gap: 1.5rem;
+
+                            p {
+                                color: #f5f5f7;
+                                font-size: x-small;
+                            }
+
+                            .author {
+                                margin-right: auto;
+                                max-width: 5rem;
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                            }
+                        }
+
+                        .msg {
+                            font-size: small;
+                            color: #ffffff;
+                        }
+                    }
+                }
+            }
+
+            .textarea {
+                position: relative;
+                width: auto;
+                background: transparent;
+                margin-top: auto;
+                display: flex;
+                flex-direction: row;
+                align-content: center;
+                justify-content: center;
+                padding: .5rem;
+                gap: .5rem;
+
+                .border {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: center;
+                    width: 80%;
+                    background: transparent;
+                    padding: .2rem .5rem;
+                    border-radius: 10px;
+                    border: 2px solid var(--bg-primary);
+
+                    input {
+                        width: 100%;
+                        border-radius: 10px;
+                        height: 1.5rem;
+                        padding: .5rem;
+                        resize: none;
+                        outline: none;
+                        border: none;
+                        background: transparent;
+                        scrollbar-color: transparent transparent;
+                        scrollbar-width: 0px;
+                        color: $Text-Secondary;
+
+                        &::-webkit-scrollbar {
+                            width: 0px;
+                        }
+
+                        &::-webkit-scrollbar-track {
+                            background: transparent;
+                        }
+
+                        &::-webkit-scrollbar-thumb {
+                            background: transparent;
+                        }
+                    }
+
+                    button {
+                        cursor: pointer;
+                        width: auto;
+                        height: auto;
+                        background: transparent;
+                        border: none;
+                        border-radius: 10px;
+
+                        .svg_path_stroke path {
+                            stroke: $Text-Secondary;
+                            transition: all .3s ease-in-out;
+                            -moz-transition: all .3s ease-in-out;
+                        }
+
+                        .svg_fill {
+                            fill: $Text-Secondary;
+                            transition: all .3s ease-in-out;
+                            -moz-transition: all .3s ease-in-out;
+                        }
+
+                        &:hover {
+                            .svg_path_stroke path {
+                                stroke: $bg-violet;
+                            }
+
+                            .svg_fill {
+                                fill: $bg-violet;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .details-chat {
+        margin: 3.5rem 0;
+        //background: var(--bg-secondary);
+        height: calc(100% - 6rem);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+
+        .scrollable {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-color: transparent transparent;
+            scrollbar-width: 0px;
+
+            &::-webkit-scrollbar {
+                width: 0px;
+            }
+
+            &::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                background: transparent;
+            }
+
+            .basic {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: .5rem;
+                height: auto;
+
+                .cover {
+                    display: flex;
+                    align-items: center;
+                    gap: 0;
+
+                    img {
+                        width: 5rem;
+                        height: 5rem;
+                        aspect-ratio: 1/1;
+                        object-position: center;
+                        object-fit: cover;
+                        border-radius: 15px;
+                    }
+                }
+
+                h1 {
+                    margin: 0;
+                    padding: 0;
+                    font-size: large;
+                    font-weight: normal;
+                    color: var(--text-primary);
+                }
+
+                p {
+                    margin: -8px;
+                    padding: 0;
+                    font-size: small;
+                    font-weight: normal;
+                    color: $Text-Secondary;
+                    text-transform: lowercase;
+                }
+
+                .actions {
+                    margin-top: 1rem;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: center;
+                    gap: .5rem;
+
+                    button {
+                        cursor: pointer;
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        justify-content: center;
+                        gap: .5rem;
+                        width: 7rem;
+                        height: 2.5rem;
+                        background: var(--bg-grey);
+                        border: none;
+                        border-radius: 5px;
+                        color: var(--text-primary);
+                        font-size: small;
+
+                        .svg_path_fill path {
+                            fill: var(--text-primary);
+                            transition: all .3s ease-in-out;
+                            -moz-transition: all .3s ease-in-out;
+                        }
+                    }
+                }
+            }
+
+            .files {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 0 2rem;
+                height: auto;
+
+                h1 {
+                    margin-top: 1rem;
+                    font-size: medium;
+                    font-weight: normal;
+                    margin-right: auto;
+                    color: var(--text-primary);
+                }
+
+                .grid {
+                    margin-top: .5rem;
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
+                    gap: .5rem;
+
+                    img {
+                        width: 100%;
+                        aspect-ratio: 1/1;
+                        border-radius: 10px;
+                        object-position: center;
+                        object-fit: cover;
+                    }
+                }
+
+                button {
+                    color: $bg-violet;
+                    margin: .5rem;
+                    background: none;
+                    border: none;
+                    font-weight: bold;
+                    font-size: small;
+                }
+            }
+
+            .delete {
+                height: auto;
+                margin-top: auto;
+
+                button {
+                    background: rgb(238, 37, 37);
+                    color: #fff;
+                    border: none;
+                    height: 2.5rem;
+                    width: 10rem;
+                    border-radius: 10px;
+                    text-transform: uppercase;
+                    cursor: pointer;
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,49 @@
+@import './index.scss';
+
+#root {
+    div[data-for="contents"] {
+        display: block;
+        position: fixed;
+        z-index: 1000;
+        width: calc(100% - 4rem);
+        height: 100%;
+        background: transparent;
+        left: 4rem;
+        top: 0;
+        bottom: 0;
+        right: 0;
+
+        // small to medium devices
+        @media screen and (max-width:767px) {}
+
+        .chats {
+            display: grid;
+            grid-template-columns: 16rem auto 30%;
+            gap: 1rem;
+            margin-right: 1rem;
+
+            @media screen and (max-width:900px) {
+                grid-template-columns: 16rem auto;
+            }
+
+            .mesg_empty {
+                top: 0;
+                left: 20.5rem;
+                z-index: 1000;
+                position: fixed;
+                width: calc(100% - 20.5rem);
+                height: 100%;
+                background: var(--bg-grey);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                h1 {
+                    font-size: small;
+                    font-weight: normal;
+                    color: var(--text-primary);
+                }
+            }
+        }
+    }
+}

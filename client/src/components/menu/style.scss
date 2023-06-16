@@ -1,0 +1,98 @@
+@import '../../index.scss';
+
+.menu-global {
+    position: fixed;
+    background: var(--bg-secondary);
+    width: 4rem;
+    height: 100%;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    transition: all .3s ease-in-out;
+    -moz-transition: all .3s ease-in-out;
+
+    .main {
+        align-items: center;
+        justify-content: center;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+
+        h1 {
+            color: var(--text-primary);
+            text-transform: uppercase;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+            font-size: x-large;
+            font-weight: bolder;
+            transform: rotate(90deg);
+        }
+
+        button {
+            margin: .8rem 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+
+            .path_svg_fill path {
+                transition: all .3s ease-in-out;
+                -moz-transition: all .3s ease-in-out;
+                fill: $Text-Secondary;
+            }
+
+            .svg_fill {
+                transition: all .3s ease-in-out;
+                -moz-transition: all .3s ease-in-out;
+                fill: $Text-Secondary;
+            }
+
+            .path_svg_stroke path {
+                transition: all .3s ease-in-out;
+                -moz-transition: all .3s ease-in-out;
+                stroke: $Text-Secondary;
+            }
+
+            &:is(.active) {
+                .path_svg_fill path {
+                    transition: all .3s ease-in-out;
+                    -moz-transition: all .3s ease-in-out;
+                    fill: var(--text-primary);
+                }
+
+                .svg_fill {
+                    transition: all .3s ease-in-out;
+                    -moz-transition: all .3s ease-in-out;
+                    fill: var(--text-primary);
+                }
+
+                .path_svg_stroke path {
+                    transition: all .3s ease-in-out;
+                    -moz-transition: all .3s ease-in-out;
+                    stroke: var(--text-primary);
+                }
+            }
+
+            &:hover {
+                .path_svg_fill path {
+                    fill: var(--text-primary);
+                }
+
+                .svg_fill {
+                    fill: var(--text-primary);
+                }
+
+                .path_svg_stroke path {
+                    stroke: var(--text-primary);
+                }
+            }
+
+            &:is(.logout) {
+                margin-top: auto;
+            }
+        }
+    }
+
+    // small to medium devices
+    @media screen and (max-width:767px) {}
+}

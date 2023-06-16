@@ -13,7 +13,8 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "scss": "^0.2.4"
+    "react-router-dom": "^6.12.1",
+    "sass": "^1.63.4"
   },
   "devDependencies": {
     "@types/react": "^18.0.37",

@@ -1,0 +1,13 @@
+export { default as SettingsSvg } from "./settings";
+export { default as ChatsSvg } from "./chats";
+export { default as LogoutSvg } from "./logout";
+export { default as GroupsSvg } from "./groups";
+export { default as SmileySvg } from "./smiley";
+export { default as ThemeSvg } from "./theme";
+export { default as SearchSvg } from "./search";
+export { default as PhoneSvg } from "./phone";
+export { default as VideoSvg } from "./video";
+export { default as DotsSvg } from "./dots";
+export { default as PlusSvg } from "./plus";
+export { default as SendSvg } from "./send";
+export { default as ClipSvg } from "./clip";
