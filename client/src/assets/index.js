@@ -11,3 +11,6 @@ export { default as DotsSvg } from "./dots";
 export { default as PlusSvg } from "./plus";
 export { default as SendSvg } from "./send";
 export { default as ClipSvg } from "./clip";
+export { default as TrashSvg } from "./trash";
+export { default as ParticleSvg } from "./particle";
+export { default as AvatarSvg } from "./avatar";

@@ -1,5 +1,12 @@
 import React, { useEffect, useRef } from "react";
-import { ClipSvg, PhoneSvg, PlusSvg, SendSvg, VideoSvg } from "../../assets";
+import {
+  ClipSvg,
+  PhoneSvg,
+  PlusSvg,
+  SendSvg,
+  TrashSvg,
+  VideoSvg,
+} from "../../assets";
 import "./style.scss";
 
 const ChatLive = () => {
@@ -66,11 +73,17 @@ const ChatLive = () => {
           <div className="me">
             <div className="card">
               <div className="from">
-                <p className="author">Ajith</p>
+                <p className="author">You</p>
                 <p className="time">08:30</p>
               </div>
 
               <div className="msg">Hello How Are You</div>
+
+              <div className="delete">
+                <button onClick={() => window.alert("click")}>
+                  <TrashSvg width={"20px"} height={"20px"} />
+                </button>
+              </div>
             </div>
 
             <div className="cover">
@@ -101,11 +114,17 @@ const ChatLive = () => {
           <div className="me">
             <div className="card">
               <div className="from">
-                <p className="author">Ajith</p>
+                <p className="author">You</p>
                 <p className="time">08:30</p>
               </div>
 
               <div className="msg">Today is good not bad.</div>
+
+              <div className="delete">
+                <button onClick={() => window.alert("click")}>
+                  <TrashSvg width={"20px"} height={"20px"} />
+                </button>
+              </div>
             </div>
 
             <div className="cover">
@@ -143,6 +162,7 @@ const ChatLive = () => {
               </div>
             </div>
           </div>
+
           <div className="others">
             <div className="cover">
               <img
@@ -157,17 +177,18 @@ const ChatLive = () => {
               </div>
 
               <div className="msg">
-                <img src="https://images.mktw.net/im-764473?width=1280&size=1"/>
+                <img src="https://images.mktw.net/im-764473?width=1280&size=1" />
               </div>
             </div>
           </div>
         </div>
+
         <div className="textarea">
           <div className="border">
             <button>
               <ClipSvg width={"18px"} height={"18px"} class_name={"svg_fill"} />
             </button>
-            <input placeholder="Write a message..." />
+            <input placeholder="Type Something..." />
             <button>
               <SendSvg
                 width={"18px"}

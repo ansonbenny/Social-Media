@@ -18,9 +18,9 @@
 
         .chats {
             display: grid;
-            grid-template-columns: 16rem auto 30%;
+            grid-template-columns: 16rem auto 16rem;
             gap: 1rem;
-            margin-right: 1rem;
+            margin: 0 1rem;
 
             @media screen and (max-width:900px) {
                 grid-template-columns: 16rem auto;
@@ -28,10 +28,10 @@
 
             .mesg_empty {
                 top: 0;
-                left: 20.5rem;
+                left: 22rem;
                 z-index: 1000;
                 position: fixed;
-                width: calc(100% - 20.5rem);
+                width: calc(100% - 22rem);
                 height: 100%;
                 background: var(--bg-grey);
                 display: flex;
