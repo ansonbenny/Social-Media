@@ -31,25 +31,28 @@ const Chats = () => {
 
   return (
     <section className="chats">
-      {!id && <AllChats />}
       {id ? (
         <>
           {!size?.sm && <AllChats />}
 
           <ChatLive setModal={!size?.lg ? setModal : null} />
 
-          {size?.lg && <ChatDetails />}
-
-          {!size?.lg && modal?.details ? (
-            <ChatDetails isModal setModal={setModal} />
-          ) : null}
+          {size?.lg ? (
+            <ChatDetails />
+          ) : (
+            modal?.details && <ChatDetails isModal setModal={setModal} />
+          )}
         </>
       ) : (
-        !size?.sm && (
-          <div className="mesg_empty">
-            <h1>Select a chat to start messaging</h1>
-          </div>
-        )
+        <>
+          <AllChats />
+
+          {!size?.sm && (
+            <div className="mesg_empty">
+              <h1>Select a chat to start messaging</h1>
+            </div>
+          )}
+        </>
       )}
     </section>
   );
