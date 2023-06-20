@@ -4,7 +4,7 @@
     div[data-for="contents"] {
         display: block;
         position: fixed;
-        z-index: 1000;
+        z-index: 1100;
         width: calc(100% - 4rem);
         height: 100%;
         background: transparent;
@@ -13,17 +13,27 @@
         bottom: 0;
         right: 0;
 
-        // small to medium devices
-        @media screen and (max-width:767px) {}
+        // small devices
+        @media screen and (max-width:680px) {
+            width: 100%;
+            left: 0;
+            height: calc(100% - 3.5rem); // 3.5rem menu bar height
+        }
 
         .chats {
             display: grid;
             grid-template-columns: 16rem auto 16rem;
             gap: 1rem;
             margin: 0 1rem;
+            height: 100%;
 
             @media screen and (max-width:900px) {
                 grid-template-columns: 16rem auto;
+            }
+
+            @media screen and (max-width:680px) {
+                display: block;
+                gap: 0;
             }
 
             .mesg_empty {

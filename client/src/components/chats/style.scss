@@ -1,11 +1,6 @@
 @import '../../index.scss';
 
 .chats {
-    height: 100%;
-
-    // small to medium devices
-    @media screen and (max-width:767px) {}
-
     .all-chats {
         padding-top: 1.5rem;
         width: 100%;
@@ -38,7 +33,7 @@
                 padding-left: 2.5rem;
                 background: var(--bg-grey);
                 border: none;
-                border-radius: 10px;
+                border-radius: 15px;
                 outline: none;
                 color: $Text-Secondary;
             }
@@ -204,6 +199,10 @@
                 display: flex;
                 align-items: center;
 
+                @media screen and (max-width:900px) {
+                    cursor: pointer;
+                }
+
                 img {
                     width: 3rem;
                     height: 3rem;
@@ -219,6 +218,10 @@
                 flex-direction: column;
                 align-items: center;
                 margin-right: auto;
+
+                @media screen and (max-width:900px) {
+                    cursor: pointer;
+                }
 
                 h1 {
                     width: 8rem;
@@ -240,6 +243,16 @@
                     font-weight: normal;
                     line-height: 1.5rem;
                     text-transform: lowercase;
+                }
+
+                @media screen and (max-width:350px) {
+                    h1 {
+                        width: 5rem;
+                    }
+
+                    p {
+                        width: 5rem;
+                    }
                 }
             }
 
@@ -326,42 +339,100 @@
                     }
 
                     .card {
+                        position: relative;
                         max-width: 16rem;
-                        background: var(--bg-primary);
-                        padding: .5rem;
-                        border-radius: 15px;
-                        border-top-left-radius: 0;
+                        min-width: 7rem;
+                        transition: all .3s ease-in-out;
+                        -moz-transition: all .3s ease-in-out;
 
-                        .from {
-                            display: flex;
-                            flex-direction: row;
-                            align-items: center;
-                            gap: 1.5rem;
+                        .inner {
+                            width: 100%;
+                            background: var(--bg-primary);
+                            border-radius: 15px;
+                            border-top-left-radius: 0;
 
-                            p {
-                                color: $Text-Secondary;
-                                font-size: x-small;
+                            .from {
+                                padding: 0 .5rem;
+                                padding-top: .5rem;
+                                display: flex;
+                                flex-direction: row;
+                                align-items: center;
+                                gap: 1.5rem;
+
+                                p {
+                                    color: $Text-Secondary;
+                                    font-size: x-small;
+                                }
+
+                                .author {
+                                    margin-right: auto;
+                                    max-width: 5rem;
+                                    white-space: nowrap;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                }
                             }
 
-                            .author {
-                                margin-right: auto;
-                                max-width: 5rem;
-                                white-space: nowrap;
-                                overflow: hidden;
-                                text-overflow: ellipsis;
+                            .msg {
+                                padding: 0 .5rem;
+                                padding-bottom: .5rem;
+                                font-size: small;
+                                color: var(--text-primary);
+
+                                img {
+                                    margin-top: .5rem;
+                                    border-radius: 10px;
+                                    width: 100%;
+                                    max-height: 15rem;
+                                    height: auto;
+                                }
                             }
                         }
 
-                        .msg {
-                            font-size: small;
-                            color: var(--text-primary);
+                        .actions-msg {
+                            position: absolute;
+                            z-index: 999;
+                            bottom: .2rem;
+                            left: 0;
+                            background: var(--bg-primary);
+                            display: none;
+                            flex-direction: row;
+                            gap: .5rem;
+                            align-items: center;
+                            justify-content: center;
+                            height: 2rem;
+                            width: auto;
+                            padding: 0 .5rem;
+                            border-radius: 999px;
 
-                            img {
-                                margin-top: .5rem;
-                                border-radius: 10px;
-                                width: 100%;
-                                max-height: 15rem;
-                                height: auto;
+                            button {
+                                background: none;
+                                cursor: pointer;
+                                border: none;
+
+                                svg {
+                                    width: 1.2rem;
+                                    height: 1.2rem;
+                                    fill: var(--text-primary);
+                                }
+
+                                .path_fill {
+                                    fill: none;
+
+                                    path {
+                                        fill: var(--text-primary);
+                                    }
+                                }
+                            }
+                        }
+
+                        &:hover {
+                            &:is(.actionable) {
+                                padding-bottom: 2.5rem;
+
+                                .actions-msg {
+                                    display: flex;
+                                }
                             }
                         }
                     }
@@ -391,51 +462,68 @@
                         position: relative;
                         margin-left: auto;
                         max-width: 16rem;
-                        min-width: 4rem;
-                        background: $bg-violet;
-                        padding: .5rem;
-                        border-radius: 15px;
-                        border-top-right-radius: 0;
+                        min-width: 7rem;
                         transition: all .3s ease-in-out;
                         -moz-transition: all .3s ease-in-out;
 
-                        .from {
-                            display: flex;
-                            flex-direction: row;
-                            align-items: center;
-                            gap: 1.5rem;
+                        .inner {
+                            width: 100%;
+                            border-radius: 15px;
+                            background: $bg-violet;
+                            border-top-right-radius: 0;
 
-                            p {
-                                color: #f5f5f7;
-                                font-size: x-small;
+                            .from {
+                                padding: 0 .5rem;
+                                padding-top: .5rem;
+                                display: flex;
+                                flex-direction: row;
+                                align-items: center;
+                                gap: 1.5rem;
+
+                                p {
+                                    color: #f5f5f7;
+                                    font-size: x-small;
+                                }
+
+                                .author {
+                                    margin-right: auto;
+                                    max-width: 5rem;
+                                    white-space: nowrap;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                }
                             }
 
-                            .author {
-                                margin-right: auto;
-                                max-width: 5rem;
-                                white-space: nowrap;
-                                overflow: hidden;
-                                text-overflow: ellipsis;
+                            .msg {
+                                padding: 0 .5rem;
+                                padding-bottom: .5rem;
+                                font-size: small;
+                                color: #ffffff;
+
+                                img {
+                                    margin-top: .5rem;
+                                    border-radius: 10px;
+                                    width: 100%;
+                                    max-height: 15rem;
+                                    height: auto;
+                                }
                             }
                         }
 
-                        .msg {
-                            font-size: small;
-                            color: #ffffff;
-                        }
-
-                        .delete {
+                        .actions-msg {
                             position: absolute;
                             z-index: 999;
                             bottom: .2rem;
-                            left: .2rem;
+                            left: 0;
                             background: var(--bg-primary);
                             display: none;
-                            flex-direction: column;
+                            flex-direction: row;
+                            gap: .5rem;
                             align-items: center;
                             justify-content: center;
                             height: 2rem;
-                            width: 3rem;
+                            width: auto;
+                            padding: 0 .5rem;
                             border-radius: 999px;
 
                             button {
@@ -444,7 +532,17 @@
                                 border: none;
 
                                 svg {
+                                    width: 1.2rem;
+                                    height: 1.2rem;
                                     fill: var(--text-primary);
+                                }
+
+                                .path_fill {
+                                    fill: none;
+
+                                    path {
+                                        fill: var(--text-primary);
+                                    }
                                 }
                             }
                         }
@@ -452,7 +550,7 @@
                         &:hover {
                             padding-bottom: 2.5rem;
 
-                            .delete {
+                            .actions-msg {
                                 display: flex;
                             }
                         }
@@ -507,6 +605,10 @@
                         &::-webkit-scrollbar-thumb {
                             background: transparent;
                         }
+
+                        @media screen and (max-width:680px) {
+                            padding: .3rem .5rem;
+                        }
                     }
 
                     button {
@@ -545,12 +647,13 @@
     }
 
     .details-chat {
-        //background: var(--bg-secondary);
         padding-top: 1.5rem;
         height: calc(100% - 1.5rem);
         display: flex;
         flex-direction: column;
         overflow: hidden;
+        transition: all .3s ease-in-out;
+        -moz-transition: all .3s ease-in-out;
 
         .scrollable {
             display: flex;
@@ -831,6 +934,42 @@
 
                 svg {
                     fill: red;
+                }
+            }
+        }
+
+        &:is(.modal-details-chat) {
+            position: fixed;
+            z-index: 999;
+            top: 0;
+            background: var(--bg-primary);
+            padding: 0 3rem;
+            padding-left: 2rem;
+            padding-top: 1.5rem;
+            height: calc(100% - 1.5rem);
+            bottom: 0;
+
+            @media screen and (max-width:680px) {
+                left: 0;
+                right: 0;
+                padding-left: 3rem;
+            }
+
+            .exit {
+                margin-left: auto;
+
+                button {
+                    background: transparent;
+                    border: none;
+
+                    svg {
+                        width: 1.5rem;
+                        height: 1.5rem;
+
+                        path {
+                            fill: var(--text-primary);
+                        }
+                    }
                 }
             }
         }

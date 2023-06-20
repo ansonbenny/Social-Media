@@ -1,17 +1,26 @@
 import React from "react";
-import {
-  AvatarSvg,
-  ParticleSvg,
-  PhoneSvg,
-  PlusSvg,
-  TrashSvg,
-  VideoSvg,
-} from "../../assets";
+import { AvatarSvg, ParticleSvg, PlusSvg, TrashSvg, Xsvg } from "../../assets";
 import "./style.scss";
 
-const ChatDetails = () => {
+const ChatDetails = ({ isModal, setModal }) => {
   return (
-    <section className="details-chat">
+    <section
+      className={`details-chat ${isModal ? "modal-details-chat" : null}`}
+    >
+      {isModal && (
+        <div className="exit">
+          <button
+            onClick={() => {
+              setModal((state) => ({
+                ...state,
+                details: false,
+              }));
+            }}
+          >
+            <Xsvg />
+          </button>
+        </div>
+      )}
       <div className="scrollable">
         <div className="basic">
           <div className="cover">

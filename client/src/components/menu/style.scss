@@ -30,6 +30,7 @@
         }
 
         button {
+            outline: none;
             margin: .8rem 0;
             background: none;
             border: none;
@@ -94,5 +95,29 @@
     }
 
     // small to medium devices
-    @media screen and (max-width:767px) {}
+    @media screen and (max-width:680px) {
+        top: auto;
+        left: .5rem;
+        right: 0;
+        bottom: 0;
+        height: 3.4rem;
+        width: calc(100% - 1rem);
+        border-radius: 10px;
+
+        .main {
+            flex-direction: row;
+
+            h1 {
+                display: none;
+            }
+
+            button {
+                margin: auto;
+            }
+
+            .logout {
+                display: none;
+            }
+        }
+    }
 }
