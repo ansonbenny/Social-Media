@@ -1,6 +1,6 @@
 import React from "react";
 
-const ChatsSvg = ({ width, height, class_name }) => {
+const ChatsSvg = ({ width, height }) => {
   return (
     <svg
       width={width}
@@ -9,7 +9,7 @@ const ChatsSvg = ({ width, height, class_name }) => {
       id="chat"
       data-name="Line Color"
       xmlns="http://www.w3.org/2000/svg"
-      className={`icon line-color ${class_name}`}
+      className="icon line-color path_svg_stroke"
     >
       <path
         id="primary"

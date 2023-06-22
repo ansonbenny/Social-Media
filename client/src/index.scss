@@ -32,3 +32,9 @@ body {
   transition: all .3s ease-in-out;
   -moz-transition: all .3s ease-in-out;
 }
+
+button,
+input,
+textarea {
+  outline: none;
+}

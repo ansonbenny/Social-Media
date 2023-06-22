@@ -1,5 +1,14 @@
 import React from "react";
-import { AvatarSvg, ParticleSvg, PlusSvg, TrashSvg, Xsvg } from "../../assets";
+import {
+  AvatarSvg,
+  ChatsSvg,
+  ParticleSvg,
+  PhoneSvg,
+  PlusSvg,
+  TrashSvg,
+  VideoSvg,
+  Xsvg,
+} from "../../assets";
 import "./style.scss";
 
 const ChatDetails = ({ isModal, setModal }) => {
@@ -11,7 +20,7 @@ const ChatDetails = ({ isModal, setModal }) => {
         <div className="exit">
           <button
             onClick={() => {
-              setModal((state) => ({
+              setModal?.((state) => ({
                 ...state,
                 details: false,
               }));
@@ -31,6 +40,28 @@ const ChatDetails = ({ isModal, setModal }) => {
           </div>
           <h1>Anson Benny</h1>
           <p className="status">online</p>
+
+          <div className="more_actions">
+            <button
+              onClick={() => {
+                setModal?.((state) => ({
+                  ...state,
+                  details: false,
+                }));
+              }}
+            >
+              <ChatsSvg width={"20px"} height={"20px"} />
+            </button>
+            <button>
+              <PhoneSvg width={"18px"} height={"18px"} />
+            </button>
+            <button>
+              <VideoSvg width={"20px"} height={"20px"} />
+            </button>
+            <button>
+              <TrashSvg isFull width={"18px"} height={"18px"} />
+            </button>
+          </div>
 
           <div className="description">
             <h1>Description</h1>
@@ -127,12 +158,6 @@ const ChatDetails = ({ isModal, setModal }) => {
             )}
           </div>
         </div>
-      </div>
-
-      <div className="delete">
-        <button>
-          <TrashSvg width={"16px"} height={"16px"} /> Delete And Leave
-        </button>
       </div>
     </section>
   );

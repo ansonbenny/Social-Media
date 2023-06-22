@@ -61,29 +61,27 @@ const Menu = () => {
         <h1>AB</h1>
         <button className="active">
           <ChatsSvg
-            class_name={"path_svg_stroke"}
             width={"22px"}
             height={"22px"}
           />
         </button>
         <button>
-          <GroupsSvg class_name={"svg_fill"} width={"22px"} height={"22px"} />
+          <GroupsSvg width={"22px"} height={"22px"} />
         </button>
         <button>
-          <SmileySvg class_name={"svg_fill"} width={"22px"} height={"22px"} />
+          <SmileySvg width={"22px"} height={"22px"} />
         </button>
         <button onClick={() => ChangeTheme(true)}>
-          <ThemeSvg class_name={"svg_fill"} width={"22px"} height={"22px"} />
+          <ThemeSvg width={"22px"} height={"22px"} />
         </button>
         <button>
           <SettingsSvg
-            class_name={"path_svg_fill"}
             width={"22px"}
             height={"22px"}
           />
         </button>
         <button className="logout">
-          <LogoutSvg class_name={"svg_fill"} width={"22px"} height={"22px"} />
+          <LogoutSvg width={"22px"} height={"22px"} />
         </button>
       </div>
     </section>

@@ -45,7 +45,6 @@ const ChatLive = ({ setModal }) => {
             // for groups
             <button>
               <PlusSvg
-                class_name={"svg_path_fill"}
                 width={"19px"}
                 height={"19px"}
               />
@@ -53,14 +52,12 @@ const ChatLive = ({ setModal }) => {
           }
           <button>
             <PhoneSvg
-              class_name={"svg_path_fill"}
               width={"18px"}
               height={"18px"}
             />
           </button>
           <button>
             <VideoSvg
-              class_name={"svg_path_fill"}
               width={"25px"}
               height={"25px"}
             />

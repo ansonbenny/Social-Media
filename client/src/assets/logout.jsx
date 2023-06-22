@@ -1,11 +1,11 @@
 import React from "react";
 
-const LogoutSvg = ({ width, height, class_name }) => {
+const LogoutSvg = ({ width, height }) => {
   return (
     <svg
       width={width}
       height={height}
-      className={`icon ${class_name}`}
+      className={`icon svg_fill`}
       viewBox="0 0 1024 1024"
       xmlns="http://www.w3.org/2000/svg"
     >

@@ -1,12 +1,12 @@
 import React from "react";
 
-const SmileySvg = ({ width, height, class_name }) => {
+const SmileySvg = ({ width, height }) => {
   return (
     <svg
       width={width}
       height={height}
       viewBox="0 0 24 24"
-      className={class_name}
+      className="svg_fill"
       xmlns="http://www.w3.org/2000/svg"
     >
       <rect x={0} fill="none" width={24} height={24} />

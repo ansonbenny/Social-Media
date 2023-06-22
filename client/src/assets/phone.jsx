@@ -1,11 +1,11 @@
 import React from "react";
 
-const PhoneSvg = ({ width, height, class_name }) => {
+const PhoneSvg = ({ width, height }) => {
   return (
     <svg
       width={width}
       height={height}
-      className={class_name}
+      className="svg_path_fill"
       viewBox="0 0 15 15"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

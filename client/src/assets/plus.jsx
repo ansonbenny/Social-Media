@@ -1,6 +1,6 @@
 import React from "react";
 
-const PlusSvg = ({ width, height, class_name }) => {
+const PlusSvg = ({ width, height }) => {
   return (
     <svg
       width={width}
@@ -10,7 +10,7 @@ const PlusSvg = ({ width, height, class_name }) => {
       xmlnsXlink="http://www.w3.org/1999/xlink"
       aria-hidden="true"
       role="img"
-      className={`iconify iconify--twemoji ${class_name}`}
+      className={`iconify iconify--twemoji svg_path_fill`}
       preserveAspectRatio="xMidYMid meet"
     >
       <path d="M31 15H21V5a3 3 0 1 0-6 0v10H5a3 3 0 1 0 0 6h10v10a3 3 0 1 0 6 0V21h10a3 3 0 1 0 0-6z" />
