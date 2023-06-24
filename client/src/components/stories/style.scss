@@ -132,7 +132,6 @@
             display: flex;
             flex-direction: row;
             gap: 1rem;
-            padding: 0 2px;
 
             .item {
                 cursor: pointer;
@@ -150,7 +149,6 @@
         }
 
         .items {
-            padding: 2px;
             width: 100%;
             height: 100%;
             overflow-x: hidden;
@@ -281,9 +279,9 @@
             }
 
             .card-add {
-                width: 100%;
-                height: 100%;
-                outline: 2px solid var(--bg-grey);
+                width: auto;
+                height: auto;
+                border: 2px solid var(--bg-grey);
                 border-radius: 10px;
                 display: flex;
                 flex-direction: column;
@@ -291,6 +289,7 @@
                 justify-content: center;
                 max-height: 25rem;
                 text-align: center;
+                padding: .5rem;
 
                 button {
                     display: flex;
@@ -299,9 +298,8 @@
                     width: 3rem;
                     height: 3rem;
                     background: transparent;
-                    border: 3px solid var(--bg-grey);
+                    border: 3px dashed var(--bg-grey);
                     border-radius: 9999px;
-                    border-style: dashed;
                     cursor: pointer;
                     transition: all .3s ease-in-out;
                     -moz-transition: all .3s ease-in-out;
@@ -327,7 +325,7 @@
                 }
 
                 p {
-                    margin: .5rem 0;
+                    margin-top: .5rem;
                     color: var(--text-primary);
                     font-size: small;
                     font-weight: normal;

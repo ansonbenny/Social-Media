@@ -1,0 +1,141 @@
+@import '../../index.scss';
+
+.auth {
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(130deg, $bg-primary 50%, $bg-dark-grey 50%);
+    display: flex;
+    align-items: center;
+    overflow-y: auto;
+
+    .content {
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: .3rem;
+        width: 19rem;
+        height: auto;
+        padding: 1rem 0;
+        overflow: hidden;
+
+        @media screen and (max-width: 20rem) {
+            padding: 1rem;
+            width: calc(100% - 2rem); // plus padding
+        }
+
+        h1 {
+            color: $bg-violet;
+            font-size: larger;
+        }
+
+        p {
+            font-size: small;
+            color: $Text-Secondary;
+        }
+
+        .google {
+            width: 100%;
+            height: 2.5rem;
+            margin: .5rem 0;
+            padding: 0 .5rem;
+            border-radius: 10px;
+            border: 2px solid $bg-grey;
+            background: #fff;
+            font-weight: bold;
+            color: $Text-primary;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .3rem;
+        }
+
+        .border {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .3rem;
+            width: 100%;
+
+            .left,
+            .right {
+                width: 100%;
+                border-bottom: 2px solid $bg-grey;
+            }
+
+            p {
+                font-size: medium;
+                font-weight: normal;
+                color: $bg-violet;
+            }
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: auto;
+            overflow: hidden;
+
+            label {
+                font-size: small;
+                font-weight: normal;
+                color: $Text-Secondary;
+            }
+
+            input {
+                margin: .2rem 0;
+                padding: 0 .5rem;
+                height: 2.2rem;
+                border-radius: 10px;
+                border: 2px solid $bg-grey;
+                background: #fff;
+                color: $Text-primary;
+                font-size: small;
+            }
+
+            .otp {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-content: center;
+
+                button {
+                    text-align: right;
+                    margin-left: auto;
+                    width: 5rem;
+                    height: auto;
+                    border-radius: 5px;
+                    background: transparent;
+                    border: transparent;
+                    color: $Text-Secondary;
+                    cursor: pointer;
+                }
+            }
+
+            button[type="submit"] {
+                margin: 1rem 0;
+                width: 100%;
+                height: 2.3rem;
+                padding: 0 .5rem;
+                border: 2px solid $bg-violet;
+                background: $bg-violet;
+                border-radius: 10px;
+                font-weight: bold;
+                color: #fff;
+                text-align: center;
+                transition: all .5s ease-in-out;
+                -moz-transition: all .5s ease-in-out;
+
+                &:hover {
+                    cursor: pointer;
+                    background: transparent;
+                    color: $Text-Secondary;
+                }
+            }
+        }
+    }
+}

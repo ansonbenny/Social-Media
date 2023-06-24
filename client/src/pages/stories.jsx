@@ -7,14 +7,12 @@ const Stories = () => {
   const { id } = useParams();
 
   const [size, setSize] = useState({
-    lg: !window.matchMedia("(max-width:900px)")?.matches,
     sm: window.matchMedia("(max-width:680px)")?.matches,
   });
 
   useEffect(() => {
     const onResize = () => {
       setSize({
-        lg: !window.matchMedia("(max-width:900px)")?.matches,
         sm: window.matchMedia("(max-width:680px)")?.matches,
       });
     };

@@ -5,3 +5,4 @@ export { default as ChatLive } from "./chats/live";
 export { default as StoriesUser } from "./stories/stories";
 export { default as StoryComponent } from "./stories/story";
 export { default as UsersStories } from "./stories/users";
+export { default as Input } from "./input";

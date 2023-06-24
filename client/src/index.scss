@@ -1,5 +1,9 @@
 $Text-Secondary: #9ca3af;
 $bg-violet: #6b8afd;
+$bg-primary: #fff;
+$bg-dark-grey: #2e333d;
+$Text-primary: #333;
+$bg-grey: #f3f4f6;
 
 :root {
   .light {
@@ -11,7 +15,7 @@ $bg-violet: #6b8afd;
 
   .dark {
     --bg-secondary: #131313;
-    --bg-primary: #2e333d; //2e333d
+    --bg-primary: #2e333d;
     --text-primary: #fff;
     --bg-grey: #393f4b;
   }
