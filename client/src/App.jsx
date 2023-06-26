@@ -1,7 +1,7 @@
 import React, { Fragment } from "react";
 import { Route, Routes } from "react-router-dom";
 import { Account, Chats, Groups, Stories } from "./pages";
-import { Menu } from "./components";
+import { Loading, Menu } from "./components";
 import { Login, SignUp } from "./features";
 import "./App.scss";
 
@@ -9,6 +9,7 @@ function App() {
   return (
     <Fragment>
       {true && <Menu />}
+      {false && <Loading />}
       <section data-for={true ? "contents" : "fit-content"}>
         {
           // false for auth page

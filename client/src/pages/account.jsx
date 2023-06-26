@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Input } from "../components";
+import { LogoutSvg } from "../assets";
 
 const Account = () => {
   const [size, setSize] = useState({
@@ -23,6 +24,10 @@ const Account = () => {
   return (
     <section className="account">
       <div className="content">
+        <button className="logout">
+          <LogoutSvg width={"20px"} height={"20px"} />
+        </button>
+
         <form action="">
           <div className="cover">
             <img

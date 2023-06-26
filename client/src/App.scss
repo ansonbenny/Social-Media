@@ -120,8 +120,24 @@
                 flex-direction: column;
                 align-items: center;
 
+                .logout {
+                    display: none;
+                }
+
                 @media screen and (max-width:680px) {
                     width: calc(100% - 2rem); // plus margin
+
+                    .logout {
+                        display: block;
+                        margin-left: auto;
+                        background: none;
+                        border: none;
+                        cursor: pointer;
+
+                        svg {
+                            fill: red;
+                        }
+                    }
                 }
 
                 form {

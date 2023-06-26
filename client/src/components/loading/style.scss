@@ -1,0 +1,64 @@
+@import '../../index.scss';
+
+@keyframes Loading-FullPage {
+    0% {
+        rotate: 0deg;
+    }
+
+    10% {
+        rotate: 10deg;
+    }
+
+    100% {
+        rotate: 180deg;
+    }
+}
+
+@keyframes Loading-FullPage-Inner {
+    0% {
+        rotate: 180deg;
+    }
+
+    10% {
+        rotate: 170deg;
+    }
+
+    100% {
+        rotate: 0deg;
+    }
+}
+
+
+#Loading-FullPage {
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-primary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    .animation {
+        background: transparent;
+        width: 3.5rem;
+        height: 3.5rem;
+        border: 3px solid $bg-violet;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: Loading-FullPage 1s ease-in-out infinite;
+    }
+
+    .animation-inner {
+        position: absolute;
+        width: 2.5rem;
+        height: 2.5rem;
+        border: 3px solid $bg-violet;
+        rotate: 180deg;
+        animation: Loading-FullPage-Inner 1s ease-in-out infinite;
+    }
+}
