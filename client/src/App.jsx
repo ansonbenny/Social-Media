@@ -3,29 +3,35 @@ import { Route, Routes } from "react-router-dom";
 import { Account, Chats, Groups, Stories } from "./pages";
 import { Loading, Menu } from "./components";
 import { Login, SignUp } from "./features";
+import { useSelector } from "react-redux";
+import ProtectedRoute from "./utils/ProtectedRoute";
 import "./App.scss";
 
 function App() {
+  const { loading, menu } = useSelector((state) => state?.additional);
   return (
     <Fragment>
-      {true && <Menu />}
-      {false && <Loading />}
-      <section data-for={true ? "contents" : "fit-content"}>
-        {
-          // false for auth page
-        }
+      {menu && <Menu />}
+      {loading && <Loading />}
 
+      <section data-for={menu ? "contents" : "fit-content"}>
         <Routes>
-          <Route path="/" exact element={<Chats />} />
-          <Route path="/chat/:id" element={<Chats />} />
-          <Route path="/groups" element={<Groups />} />
-          <Route path="/groups/:id" element={<Groups />} />
-          <Route path="/stories" element={<Stories />} />
-          <Route path="/stories/:id" element={<Stories />} />
-          <Route path="/account" element={<Account />} />
+          <Route element={<ProtectedRoute isAuth />}>
+            <Route path="/" exact element={<Chats />} />
+            <Route path="/chat/:id" element={<Chats />} />
+            <Route path="/groups" element={<Groups />} />
+            <Route path="/groups/:id" element={<Groups />} />
+            <Route path="/stories" element={<Stories />} />
+            <Route path="/stories/:id" element={<Stories />} />
+            <Route path="/account" element={<Account />} />
+          </Route>
 
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+          </Route>
+
+          <Route path="*" element={<h1>Error</h1>} />
         </Routes>
       </section>
     </Fragment>

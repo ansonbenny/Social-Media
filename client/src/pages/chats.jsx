@@ -1,9 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { AllChats, ChatDetails, ChatLive } from "../components";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { setLoading } from "../redux/additional";
 
 const Chats = () => {
+  const dispatch = useDispatch();
+
+  const location = useLocation();
+
   const { id } = useParams();
+
+  const { user } = useSelector((state) => state);
 
   const [size, setSize] = useState({
     lg: !window.matchMedia("(max-width:900px)")?.matches,
@@ -15,6 +23,17 @@ const Chats = () => {
   });
 
   useEffect(() => {
+    document.title = "Soft Chat - Chats";
+   // console.log(location)
+
+    if (user) {
+      setTimeout(() => {
+        dispatch(setLoading(false));
+      }, 1000);
+    } else {
+      dispatch(setLoading(true));
+    }
+
     const onResize = () => {
       setSize({
         lg: !window.matchMedia("(max-width:900px)")?.matches,
@@ -27,7 +46,7 @@ const Chats = () => {
     return () => {
       window.removeEventListener("resize", onResize);
     };
-  }, [id]);
+  }, [id, location, user]);
 
   return (
     <section className="chats">

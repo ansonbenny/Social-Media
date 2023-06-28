@@ -30,9 +30,27 @@
             font-size: larger;
         }
 
+        .error {
+            color: red;
+        }
+
         p {
             font-size: small;
             color: $Text-Secondary;
+        }
+
+        .or {
+            a {
+                margin-left: .3rem;
+                font-size: small;
+                text-decoration: none;
+                color: $bg-violet;
+
+                &:hover {
+                    text-decoration: none;
+                    color: $bg-violet;
+                }
+            }
         }
 
         .google {

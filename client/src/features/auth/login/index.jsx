@@ -1,16 +1,140 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { GoogleSvg } from "../../../assets";
 import { Input } from "../../../components";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setLoading } from "../../../redux/additional";
+import { useGoogleLogin } from "@react-oauth/google";
+import axios from "../../../lib/axios";
 import "../style.scss";
 
 const Login = () => {
+  const location = useLocation();
+
+  const dispatch = useDispatch();
+
+  const navigate = useNavigate();
+
+  const [state, setState] = useState({
+    form: {},
+    otp: undefined,
+    error: undefined,
+  });
+
+  const Google = useGoogleLogin({
+    onSuccess: async (response) => {
+      try {
+        const res = await axios.get("/user/login-google", {
+          params: {
+            google: response?.access_token,
+          },
+        });
+
+        if (res?.["data"]) {
+          console.log(res?.data);
+          navigate("/");
+        }
+      } catch (err) {
+        setState((state) => ({
+          ...state,
+          error:
+            typeof err?.response?.data?.message === "string"
+              ? err?.response?.data?.message
+              : "Failing Google Login",
+        }));
+      }
+    },
+    onError: (err) => {
+      setState((state) => ({
+        ...state,
+        error: "Failing Google Login",
+      }));
+    },
+    cookiePolicy: "single-host-origin",
+  });
+
+  const InputHandle = (e) => {
+    e?.preventDefault?.();
+
+    if (e?.target?.name === "email") {
+      setState((state) => ({
+        ...state,
+        form: { ...state?.form, OTP: "" },
+        otp: undefined,
+      }));
+    }
+
+    setState((state) => ({
+      ...state,
+      form: {
+        ...state?.form,
+        [e?.target?.name]: e?.target?.value,
+      },
+    }));
+  };
+
+  const FormHandle = async (e, resend) => {
+    e?.preventDefault?.();
+
+    setState((state) => ({
+      ...state,
+      error: undefined,
+    }));
+
+    try {
+      if (resend) {
+        let res = await axios.post("/user/login-otp", state?.form);
+
+        if (res?.["data"]) {
+          setState((state) => ({
+            ...state,
+            otp: true,
+          }));
+        }
+      } else if (state?.otp) {
+        let res = await axios.post("/user/login-verify", state?.form);
+
+        if (res?.["data"]) {
+          navigate("/");
+        }
+      } else {
+        let res = await axios.post("/user/login-otp", state?.form);
+
+        if (res?.["data"]) {
+          setState((state) => ({
+            ...state,
+            otp: true,
+          }));
+        }
+      }
+    } catch (err) {
+      setState((state) => ({
+        ...state,
+        error:
+          typeof err?.response?.data?.message === "string"
+            ? err?.response?.data?.message
+            : "Something Went Wrong",
+      }));
+    }
+  };
+
+  useEffect(() => {
+    document.title = "Soft Chat - Login";
+
+    setTimeout(() => {
+      dispatch(setLoading(false));
+    }, 1000);
+  }, [location]);
   return (
     <section className="auth">
       <div className="content">
         <h1>Login</h1>
+
+        {state?.error && <p className="error">{state?.error}</p>}
+
         <p>Login and chat to your friends.</p>
 
-        <button className="google">
+        <button className="google" onClick={Google}>
           <GoogleSvg width={"20px"} height={"20px"} />
           Login With Google
         </button>
@@ -21,22 +145,50 @@ const Login = () => {
           <div className="right" />
         </div>
 
-        <form action="">
+        <form onSubmit={FormHandle}>
           <Input
-            name={"number"}
-            placeholder={"Enter Number"}
-            label={"Number*"}
+            name={"email"}
+            placeholder={"Enter Email"}
+            label={"Email*"}
+            type={"email"}
+            value={state?.form?.email || ""}
+            onChange={InputHandle}
+            required
           />
 
-          <div className="otp">
-            <Input name={"OTP"} placeholder={"Enter OTP"} label={"OTP*"} />
-            <button type="button" className="resend">
-              Resend
-            </button>
-          </div>
-
-          <button type="submit">Login</button>
+          {state?.otp ? (
+            <>
+              <div className="otp">
+                <Input
+                  name={"OTP"}
+                  placeholder={"Enter OTP"}
+                  label={"OTP*"}
+                  type={"number"}
+                  value={state?.form?.OTP || ""}
+                  onChange={InputHandle}
+                  required
+                />
+                <button
+                  type="button"
+                  className="resend"
+                  onClick={() => {
+                    FormHandle(undefined, true);
+                  }}
+                >
+                  Resend
+                </button>
+              </div>
+              <button type="submit">Login</button>
+            </>
+          ) : (
+            <button type="submit">Sent Otp</button>
+          )}
         </form>
+
+        <p className="or">
+          Don't you have account?
+          <Link to={"/signup"}>SignUp</Link>
+        </p>
       </div>
     </section>
   );

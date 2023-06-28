@@ -1,14 +1,10 @@
 import React, { Fragment } from "react";
 
-const Input = ({ placeholder, name, label, onHandle, isTextArea }) => {
+const Input = ({ label, isTextArea, ...others }) => {
   return (
     <Fragment>
       <label>{label}</label>
-      {isTextArea ? (
-        <textarea name={name} placeholder={placeholder} onChange={onHandle} />
-      ) : (
-        <input name={name} placeholder={placeholder} onChange={onHandle} />
-      )}
+      {isTextArea ? <textarea {...others} /> : <input {...others} />}
     </Fragment>
   );
 };
