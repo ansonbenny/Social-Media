@@ -1,16 +1,32 @@
 import React, { useEffect, useState } from "react";
 import UsersStories from "../components/stories/users";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { StoriesUser } from "../components";
+import { useDispatch, useSelector } from "react-redux";
+import { setLoading } from "../redux/additional";
 
 const Stories = () => {
+  const dispatch = useDispatch();
+
+  const location = useLocation();
+
   const { id } = useParams();
+
+  const user = useSelector((state) => state?.user);
 
   const [size, setSize] = useState({
     sm: window.matchMedia("(max-width:680px)")?.matches,
   });
 
   useEffect(() => {
+    if (user) {
+      setTimeout(() => {
+        dispatch(setLoading(false));
+      }, 1000);
+    } else {
+      dispatch(setLoading(true));
+    }
+
     const onResize = () => {
       setSize({
         sm: window.matchMedia("(max-width:680px)")?.matches,
@@ -22,7 +38,7 @@ const Stories = () => {
     return () => {
       window.removeEventListener("resize", onResize);
     };
-  }, [id]);
+  }, [id, user, location]);
 
   return (
     <section className="stories">

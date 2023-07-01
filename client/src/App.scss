@@ -153,6 +153,8 @@
                     .cover {
                         display: flex;
                         justify-content: center;
+                        align-items: center;
+                        position: relative;
 
                         img {
                             width: 4.5rem;
@@ -161,6 +163,32 @@
                             object-position: center;
                             border-radius: 9999px;
                             border: 2px solid $bg-violet;
+                        }
+
+                        svg {
+                            border: 2px solid $bg-violet;
+                            border-radius: 9999px;
+                            fill: var(--text-primary);
+                        }
+
+                        .uploading {
+                            background: linear-gradient(to right, $bg-violet 10%, var(--bg-grey) 0%);
+                            height: 5px;
+                            width: 3.5rem;
+                            border-radius: 9999px;
+                            position: absolute;
+                        }
+
+                        input[type="file"] {
+                            border: none;
+                            padding: 0;
+                            margin: 0;
+                            width: 4.5rem;
+                            height: 4.5rem;
+                            position: absolute;
+                            background: transparent;
+                            border-radius: 9999px;
+                            opacity: 0;
                         }
                     }
 
@@ -180,6 +208,7 @@
                         margin: .2rem 0;
                         resize: none;
                         background: var(--bg-primary);
+                        color: var(--text-primary);
                     }
 
                     .otp {

@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   ChatsSvg,
   GroupsSvg,
@@ -8,11 +8,15 @@ import {
   SmileySvg,
   ThemeSvg,
 } from "../../assets";
+import axios from "../../lib/axios";
 import "./style.scss";
 
 const Menu = () => {
   const location = useLocation();
 
+  const navigate = useNavigate();
+
+  // change theme to light or dark
   const ChangeTheme = (click) => {
     let theme = localStorage.getItem("theme");
 
@@ -51,6 +55,19 @@ const Menu = () => {
     }
   };
 
+  // to logout button
+  const logout = async () => {
+    try {
+      let res = await axios.get("/user/logout");
+
+      if (res?.["data"]) {
+        navigate("/login");
+      }
+    } catch (err) {
+      alert("Sorry Something Went Wrong");
+    }
+  };
+
   useEffect(() => {
     ChangeTheme();
   }, [location]);
@@ -59,28 +76,53 @@ const Menu = () => {
     <section className="menu-global">
       <div className="main">
         <h1>AB</h1>
-        <button className="active">
-          <ChatsSvg
-            width={"22px"}
-            height={"22px"}
-          />
+        <button
+          className={
+            location?.pathname === "/"
+              ? "active"
+              : location?.pathname?.includes("/chat")
+              ? "active"
+              : ""
+          }
+          onClick={() => {
+            navigate("/");
+          }}
+        >
+          <ChatsSvg width={"22px"} height={"22px"} />
         </button>
-        <button>
+        <button
+          className={location?.pathname?.includes("/groups") ? "active" : ""}
+          onClick={() => {
+            navigate("/groups");
+          }}
+        >
           <GroupsSvg width={"22px"} height={"22px"} />
         </button>
-        <button>
+        <button
+          className={location?.pathname?.includes("/stories") ? "active" : ""}
+          onClick={() => {
+            navigate("/stories");
+          }}
+        >
           <SmileySvg width={"22px"} height={"22px"} />
         </button>
         <button onClick={() => ChangeTheme(true)}>
           <ThemeSvg width={"22px"} height={"22px"} />
         </button>
-        <button>
-          <SettingsSvg
-            width={"22px"}
-            height={"22px"}
-          />
+        <button
+          className={
+            location?.pathname === "/account" ||
+            location?.pathname === "/account/"
+              ? "active"
+              : ""
+          }
+          onClick={() => {
+            navigate("/account");
+          }}
+        >
+          <SettingsSvg width={"22px"} height={"22px"} />
         </button>
-        <button className="logout">
+        <button className="logout" onClick={logout}>
           <LogoutSvg width={"22px"} height={"22px"} />
         </button>
       </div>

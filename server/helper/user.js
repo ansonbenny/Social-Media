@@ -120,6 +120,7 @@ export default {
 
             response = await db.collection(collections.USERS).insertOne({
               ...details,
+              about: "Be brave to live differently.",
               email: details.email.replace("_register", ""),
             });
           } else {
@@ -166,7 +167,9 @@ export default {
           .collection(collections.USERS)
           .createIndex({ number: 1 }, { unique: true });
 
-        response = await db.collection(collections.USERS).insertOne(details);
+        response = await db
+          .collection(collections.USERS)
+          .insertOne({ ...details, about: "Be brave to live differently." });
       } catch (err) {
         if (err?.code === 11000) {
           reject({

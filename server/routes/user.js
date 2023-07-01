@@ -367,4 +367,11 @@ router.post("/login-verify", CheckLogged, async (req, res) => {
   }
 });
 
+router.get("/logout", (req, res) => {
+  res.clearCookie("token").status(200).json({
+    status: 200,
+    message: "Logout",
+  });
+});
+
 export default router;

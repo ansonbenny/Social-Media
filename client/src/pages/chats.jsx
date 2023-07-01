@@ -11,20 +11,20 @@ const Chats = () => {
 
   const { id } = useParams();
 
-  const { user } = useSelector((state) => state);
+  const user = useSelector((state) => state?.user);
 
-  const [size, setSize] = useState({
-    lg: !window.matchMedia("(max-width:900px)")?.matches,
-    sm: window.matchMedia("(max-width:680px)")?.matches,
-  });
-
-  const [modal, setModal] = useState({
-    details: false,
+  const [state, setState] = useState({
+    size: {
+      lg: window.matchMedia("(min-width:901px)")?.matches,
+      sm: window.matchMedia("(max-width:680px)")?.matches,
+    },
+    modal: {
+      details: false,
+    },
   });
 
   useEffect(() => {
     document.title = "Soft Chat - Chats";
-   // console.log(location)
 
     if (user) {
       setTimeout(() => {
@@ -35,10 +35,13 @@ const Chats = () => {
     }
 
     const onResize = () => {
-      setSize({
-        lg: !window.matchMedia("(max-width:900px)")?.matches,
-        sm: window.matchMedia("(max-width:680px)")?.matches,
-      });
+      setState((state) => ({
+        ...state,
+        size: {
+          lg: window.matchMedia("(min-width:901px)")?.matches,
+          sm: window.matchMedia("(max-width:680px)")?.matches,
+        },
+      }));
     };
 
     window.addEventListener("resize", onResize);
@@ -52,21 +55,42 @@ const Chats = () => {
     <section className="chats">
       {id ? (
         <>
-          {!size?.sm && <AllChats />}
+          {!state?.size?.sm && <AllChats />}
 
-          <ChatLive setModal={!size?.lg ? setModal : null} />
+          <ChatLive
+            setModal={
+              !state?.size?.lg
+                ? () => {
+                    setState((state) => ({
+                      ...state,
+                      modal: { ...state?.modal, details: true },
+                    }));
+                  }
+                : null
+            }
+          />
 
-          {size?.lg ? (
+          {state?.size?.lg ? (
             <ChatDetails />
           ) : (
-            modal?.details && <ChatDetails isModal setModal={setModal} />
+            state?.modal?.details && (
+              <ChatDetails
+                isModal
+                setModal={() => {
+                  setState((state) => ({
+                    ...state,
+                    modal: { ...state, details: false },
+                  }));
+                }}
+              />
+            )
           )}
         </>
       ) : (
         <>
           <AllChats />
 
-          {!size?.sm && (
+          {!state?.size?.sm && (
             <div className="mesg_empty">
               <h1>Select a chat to start messaging</h1>
             </div>

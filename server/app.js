@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import path from "path";
 
 // routes
 import userRoute from "./routes/user.js";
@@ -18,6 +19,8 @@ app.use(express.json({ limit: "50mb" }));
 app.use(cors({ credentials: true, origin: "*" }));
 
 app.use(cookieParser());
+
+app.use("/files", express.static("files"));
 
 app.use("/api/user", userRoute);
 

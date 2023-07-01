@@ -17,10 +17,7 @@ const ChatLive = ({ setModal }) => {
         <div
           className="cover"
           onClick={() => {
-            setModal?.((state) => ({
-              ...state,
-              details: true,
-            }));
+            setModal?.();
           }}
         >
           <img
@@ -44,23 +41,14 @@ const ChatLive = ({ setModal }) => {
           {
             // for groups
             <button>
-              <PlusSvg
-                width={"19px"}
-                height={"19px"}
-              />
+              <PlusSvg width={"19px"} height={"19px"} />
             </button>
           }
           <button>
-            <PhoneSvg
-              width={"18px"}
-              height={"18px"}
-            />
+            <PhoneSvg width={"18px"} height={"18px"} />
           </button>
           <button>
-            <VideoSvg
-              width={"25px"}
-              height={"25px"}
-            />
+            <VideoSvg width={"25px"} height={"25px"} />
           </button>
         </div>
       </div>

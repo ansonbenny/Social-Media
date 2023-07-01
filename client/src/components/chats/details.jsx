@@ -20,10 +20,7 @@ const ChatDetails = ({ isModal, setModal }) => {
         <div className="exit">
           <button
             onClick={() => {
-              setModal?.((state) => ({
-                ...state,
-                details: false,
-              }));
+              setModal?.();
             }}
           >
             <Xsvg />
