@@ -27,11 +27,13 @@ const ProtectedRoute = ({ isAuth }) => {
           dispatch(setMenu(true));
           setComponent(<Outlet />);
         } else {
+          dispatch(setMenu(false));
           navigate("/login");
         }
       } else if (res?.error && res?.error?.code !== "ERR_CANCELED") {
+        dispatch(setMenu(false));
+
         if (isAuth) {
-          dispatch(setMenu(false));
           navigate("/login");
         } else if (!isAuth) {
           setComponent(<Outlet />);

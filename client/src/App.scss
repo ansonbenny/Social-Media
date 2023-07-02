@@ -172,11 +172,15 @@
                         }
 
                         .uploading {
-                            background: linear-gradient(to right, $bg-violet 10%, var(--bg-grey) 0%);
                             height: 5px;
                             width: 3.5rem;
                             border-radius: 9999px;
                             position: absolute;
+                            display: none;
+
+                            &:is(.active) {
+                                display: block;
+                            }
                         }
 
                         input[type="file"] {
@@ -189,6 +193,39 @@
                             background: transparent;
                             border-radius: 9999px;
                             opacity: 0;
+                        }
+
+                        .actions_cover {
+                            position: absolute;
+                            width: auto;
+                            height: auto;
+                            display: none;
+
+                            .list {
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                justify-content: center;
+                                gap: .2rem;
+
+                                button {
+                                    position: relative;
+                                    border: 1px solid $bg-violet;
+                                    color: var(--text-primary);
+                                    background: var(--bg-primary);
+                                    padding: .2rem .5rem;
+                                    border-radius: 5px;
+                                    cursor: pointer;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+
+                                    input {
+                                        width: 100%;
+                                        height: auto;
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -223,10 +260,11 @@
                             border: none;
                             background: transparent;
                             color: $Text-Secondary;
+                            cursor: pointer;
                         }
                     }
 
-                    button[type="submit"] {
+                    button[data-for="submit"] {
                         width: 100%;
                         padding: .7rem .5rem;
                         margin: .5rem 0;

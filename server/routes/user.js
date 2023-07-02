@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { sendMail } from "../mail/index.js";
 import { FiveDigit } from "../utils/index.js";
+import multer from "../multer/index.js";
 import axios from "axios";
 import jwt from "jsonwebtoken";
 import user from "../helper/user.js";
@@ -16,24 +17,51 @@ const CheckLogged = (req, res, next) => {
         let userData = await user.get_user(decode?._id);
 
         if (userData) {
-          res.status(208).json({
-            status: 208,
-            message: "Already Logged",
-            data: userData,
-          });
+          if (req?.query?.next) {
+            req.query.userId = userData?._id?.toString?.();
+            req.query.email = userData?.email?.toLowerCase?.();
+            next();
+          } else {
+            res.status(208).json({
+              status: 208,
+              message: "Already Logged",
+              data: userData,
+            });
+          }
         }
       } catch (err) {
         console.log(err);
-        res.clearCookie("token");
-        next();
+        if (req?.query?.next) {
+          res.clearCookie("token").status(405).json({
+            status: 405,
+            message: "User Not Logged",
+          });
+        } else {
+          res.clearCookie("token");
+          next();
+        }
       }
     } else if (err) {
       console.log(`Error : ${err?.name}`);
-      res.clearCookie("token");
-      next();
+      if (req?.query?.next) {
+        res.clearCookie("token").status(405).json({
+          status: 405,
+          message: "User Not Logged",
+        });
+      } else {
+        res.clearCookie("token");
+        next();
+      }
     } else {
-      res.clearCookie("token");
-      next();
+      if (req?.query?.next) {
+        res.clearCookie("token").status(405).json({
+          status: 405,
+          message: "User Not Logged",
+        });
+      } else {
+        res.clearCookie("token");
+        next();
+      }
     }
   });
 };
@@ -65,7 +93,7 @@ router.post("/register", CheckLogged, async (req, res) => {
         ) {
           response = await user.register_direct({
             name,
-            email: email?.toLowerCase(),
+            email: email?.toLowerCase?.(),
             number,
           });
         } else {
@@ -99,7 +127,7 @@ router.post("/register", CheckLogged, async (req, res) => {
         /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 
       if (email?.match(validRegex)) {
-        email = email.toLowerCase();
+        email = email?.toLowerCase?.();
 
         let secret = FiveDigit?.();
 
@@ -162,7 +190,9 @@ router.post("/register", CheckLogged, async (req, res) => {
 });
 
 router.post("/register-verify", CheckLogged, async (req, res) => {
-  const { email, name, number, OTP } = req.body;
+  let { email, name, number, OTP } = req.body;
+
+  email = email?.toLowerCase?.();
 
   if (number?.length === 10) {
     if (email && OTP) {
@@ -222,7 +252,7 @@ router.get("/login-google", CheckLogged, async (req, res) => {
 
     if (googleCheck?.data?.email) {
       response = await user.getUserByEmail(
-        googleCheck.data.email?.toLowerCase()
+        googleCheck.data.email?.toLowerCase?.()
       );
     } else {
       res.status(500).json({
@@ -267,7 +297,9 @@ router.get("/login-google", CheckLogged, async (req, res) => {
 });
 
 router.post("/login-otp", CheckLogged, async (req, res) => {
-  const { email } = req?.body;
+  let { email } = req?.body;
+
+  email = email?.toLowerCase?.();
 
   if (email) {
     let secret = FiveDigit?.();
@@ -319,7 +351,9 @@ router.post("/login-otp", CheckLogged, async (req, res) => {
 });
 
 router.post("/login-verify", CheckLogged, async (req, res) => {
-  const { email, OTP } = req?.body;
+  let { email, OTP } = req?.body;
+
+  email = email?.toLowerCase?.();
 
   if (email && OTP) {
     let response;
@@ -366,6 +400,109 @@ router.post("/login-verify", CheckLogged, async (req, res) => {
     });
   }
 });
+
+router.post(
+  "/edit-profile-otp",
+  (req, res, next) => {
+    req.query.next = true;
+    next();
+  },
+  CheckLogged,
+  async (req, res) => {
+    let secret = FiveDigit?.();
+
+    let response;
+    try {
+      response = await user.edit_request(secret, req?.query?.userId, req?.body);
+    } catch (err) {
+      if (err?.status) {
+        res.status(err.status).json(err);
+      } else {
+        res.status(500).json({
+          status: 500,
+          message: err,
+        });
+      }
+    } finally {
+      if (response) {
+        sendMail(
+          {
+            to: req?.query?.email,
+            subject: `Soft Chat Profile Edit Verification Code`,
+            text: secret,
+          },
+          (err, done) => {
+            if (err) {
+              console.log(err);
+            } else {
+              console.log(`Email sent: ${done.response}`);
+            }
+          }
+        );
+
+        res.status(200).json({
+          status: 200,
+          message: "Profile Edit Otp Sented",
+          data: {
+            otp: true,
+          },
+        });
+      }
+    }
+  }
+);
+
+router.put(
+  "/edit-profile-verify",
+  (req, res, next) => {
+    req.query.next = true;
+
+    CheckLogged(req, res, async () => {
+      try {
+        let response = await user.edit_profile_verify(req?.query);
+
+        if (response) {
+          next();
+        }
+      } catch (err) {
+        if (err?.status) {
+          res.status(err.status).json(err);
+        } else {
+          res.status(500).json({
+            status: 500,
+            message: err,
+          });
+        }
+      }
+    });
+  },
+  multer.profile.single("avatar"),
+  async (req, res) => {
+    if (req?.file?.originalname) {
+      req.body.img = req.file.originalname;
+    }
+
+    try {
+      let response = await user.edit_profile(req?.body, req?.query?.userId);
+
+      if (response) {
+        res.status(200).json({
+          status: 200,
+          message: "Success",
+        });
+      }
+    } catch (err) {
+      if (err?.status) {
+        res.status(err.status).json(err);
+      } else {
+        res.status(500).json({
+          status: 500,
+          message: err,
+        });
+      }
+    }
+  }
+);
 
 router.get("/logout", (req, res) => {
   res.clearCookie("token").status(200).json({
