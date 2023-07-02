@@ -3,13 +3,15 @@ import { Input } from "../components";
 import { AvatarSvg, LogoutSvg } from "../assets";
 import { setLoading } from "../redux/additional";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "../lib/axios";
 
 const Account = () => {
   const dispatch = useDispatch();
 
   const location = useLocation();
+
+  const navigate = useNavigate();
 
   const ref = useRef({});
 
@@ -19,7 +21,7 @@ const Account = () => {
     otp: undefined,
     form: {
       ...user,
-      img: user?.img && `/files/profiles/${user?._id}/${user?.img}`,
+      img: user?.img && `/files/profiles/${user?.img}`,
     },
     size_sm: window.matchMedia("(max-width:680px)")?.matches,
     uploading: {
@@ -28,7 +30,7 @@ const Account = () => {
     },
   });
 
-  const InputHandle = (e) => {
+  const InputHandle = async (e) => {
     e?.preventDefault?.();
 
     if (e?.target?.name === "avatar") {
@@ -37,9 +39,25 @@ const Account = () => {
         form: {
           ...state?.form,
           img: URL.createObjectURL(e?.target?.files?.[0]),
-          avatar: e?.target?.files?.[0],
         },
       }));
+
+      const formData = new FormData();
+
+      formData.append("avatar", e?.target?.files?.[0]);
+
+      try {
+        await axios.put("/user/change-avatar", formData, {
+          onUploadProgress,
+        });
+      } catch (err) {
+        if (err?.response?.data?.status === 405) {
+          alert("Please Login");
+          navigate("/login");
+        } else {
+          alert("Something Went Wrong");
+        }
+      }
 
       if (ref?.current?.div) {
         ref.current.div.style.display = "none";
@@ -93,17 +111,14 @@ const Account = () => {
   const FormHandle = async (e, resend) => {
     e?.preventDefault?.();
 
-    const formData = new FormData();
-
-    Object?.keys(state?.form)?.map((key) => {
-      if (key !== "_id" && key !== "img") {
-        formData.append(key, state?.form?.[key]);
-      }
-    });
-
     try {
       if (resend) {
-        let res = await axios.post(`/user/edit-profile-otp`, state?.form);
+        let res = await axios.post(`/user/edit-profile-otp`, {
+          name: state?.form?.name,
+          about: state?.form?.about,
+          number: state?.form?.number,
+          email: state?.form?.email,
+        });
 
         if (res?.["data"]?.data?.otp) {
           setState((state) => ({
@@ -112,16 +127,13 @@ const Account = () => {
           }));
         }
       } else if (state?.otp) {
-        let res = await axios.put(
-          `/user/edit-profile-verify?OTP=${state?.form?.OTP}`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-            onUploadProgress,
-          }
-        );
+        let res = await axios.put(`/user/edit-profile-verify`, {
+          name: state?.form?.name,
+          about: state?.form?.about,
+          number: state?.form?.number,
+          email: state?.form?.email,
+          OTP: state?.form?.OTP,
+        });
 
         if (res?.["data"]) {
           setState((state) => ({
@@ -130,12 +142,16 @@ const Account = () => {
             form: {
               ...state.form,
               OTP: "",
-              avatar: null,
             },
           }));
         }
       } else {
-        let res = await axios.post(`/user/edit-profile-otp`, state?.form);
+        let res = await axios.post(`/user/edit-profile-otp`, {
+          name: state?.form?.name,
+          about: state?.form?.about,
+          number: state?.form?.number,
+          email: state?.form?.email,
+        });
 
         if (res?.["data"]?.data?.otp) {
           setState((state) => ({
@@ -145,11 +161,16 @@ const Account = () => {
         }
       }
     } catch (err) {
-      alert(
-        typeof err?.response?.data?.message === "string"
-          ? err?.response?.data?.message
-          : "Something Went Wrong"
-      );
+      if (err?.response?.data?.status === 405) {
+        alert("Please Login");
+        navigate("/login");
+      } else {
+        alert(
+          typeof err?.response?.data?.message === "string"
+            ? err?.response?.data?.message
+            : "Something Went Wrong"
+        );
+      }
     }
   };
 
@@ -236,6 +257,35 @@ const Account = () => {
                       >
                         Show Image
                       </button>
+
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            let res = await axios.get("/user/remove-avatar");
+
+                            if (res?.["data"]) {
+                              setState((stat) => ({
+                                ...state,
+                                form: {
+                                  ...state?.form,
+                                  img: null,
+                                },
+                              }));
+                            }
+                          } catch (err) {
+                            if (err?.response?.data?.status === 405) {
+                              alert("Please Login");
+                              navigate("/login");
+                            } else {
+                              alert("Something Went Wrong");
+                            }
+                          }
+                        }}
+                      >
+                        Remove Image
+                      </button>
+
                       <button type="button" data-for="input">
                         <Input
                           name="avatar"
@@ -243,7 +293,7 @@ const Account = () => {
                           accept="image/*"
                           onChange={InputHandle}
                         />
-                        Edit Image
+                        Change Image
                       </button>
                     </div>
                   </div>

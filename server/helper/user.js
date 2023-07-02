@@ -321,9 +321,6 @@ export default {
   },
   edit_profile: ({ email, number, ...details }, userId) => {
     return new Promise(async (resolve, reject) => {
-      delete details?.OTP;
-      delete details?.avatar;
-
       try {
         await db
           .collection(collections.USERS)
@@ -332,50 +329,67 @@ export default {
           .collection(collections.USERS)
           .createIndex({ number: 1 }, { unique: true });
 
-        await db.collection(collections.USERS).updateOne(
-          {
+        let match = await db.collection(collections.TEMP).findOne({
+          _id: new ObjectId(userId),
+          secret: details?.OTP,
+        });
+
+        if (match) {
+          delete details?.OTP;
+
+          await db.collection(collections.TEMP).deleteOne({
             _id: new ObjectId(userId),
-          },
-          {
-            $set: {
-              ...details,
+          });
+
+          await db.collection(collections.USERS).updateOne(
+            {
+              _id: new ObjectId(userId),
             },
+            {
+              $set: {
+                ...details,
+              },
+            }
+          );
+
+          if (email) {
+            await db.collection(collections.USERS).updateOne(
+              {
+                _id: new ObjectId(userId),
+              },
+              {
+                $set: {
+                  email: email?.toLowerCase?.(),
+                },
+              }
+            );
           }
-        );
 
-        if (email) {
-          await db.collection(collections.USERS).updateOne(
-            {
-              _id: new ObjectId(userId),
-            },
-            {
-              $set: {
-                email: email?.toLowerCase?.(),
+          if (number) {
+            await db.collection(collections.USERS).updateOne(
+              {
+                _id: new ObjectId(userId),
               },
-            }
-          );
-        }
+              {
+                $set: {
+                  number,
+                },
+              }
+            );
+          }
 
-        if (number) {
-          await db.collection(collections.USERS).updateOne(
-            {
-              _id: new ObjectId(userId),
-            },
-            {
-              $set: {
-                number,
-              },
-            }
-          );
+          resolve(true);
+        } else {
+          reject({ status: 422, message: "Wrong Verification Details" });
         }
-
-        resolve(true);
       } catch (err) {
         if (err?.code === 11000) {
           reject({
             status: 422,
             message: "Email or Number SomeOne Already Used",
           });
+        } else {
+          reject(err);
         }
       }
     });
@@ -451,22 +465,41 @@ export default {
       }
     });
   },
-  edit_profile_verify: ({ userId, OTP }) => {
+  remove_avatar: (userId) => {
     return new Promise(async (resolve, reject) => {
       try {
-        let res = await db.collection(collections.TEMP).findOne({
-          _id: new ObjectId(userId),
-          secret: OTP,
-        });
-
-        if (res) {
-          await db.collection(collections.TEMP).deleteOne({
+        let res = await db.collection(collections.USERS).updateOne(
+          {
             _id: new ObjectId(userId),
-          });
-          resolve(res);
-        } else {
-          reject({ status: 422, message: "Wrong Verification Details" });
-        }
+          },
+          {
+            $unset: {
+              img: 1,
+            },
+          }
+        );
+
+        resolve(res);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  },
+  change_avatar: (img, userId) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await db.collection(collections.USERS).updateOne(
+          {
+            _id: new ObjectId(userId),
+          },
+          {
+            $set: {
+              img,
+            },
+          }
+        );
+
+        resolve(true);
       } catch (err) {
         reject(err);
       }

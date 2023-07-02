@@ -5,6 +5,7 @@ import multer from "../multer/index.js";
 import axios from "axios";
 import jwt from "jsonwebtoken";
 import user from "../helper/user.js";
+import fs from "fs";
 
 const router = Router();
 
@@ -456,32 +457,10 @@ router.put(
   "/edit-profile-verify",
   (req, res, next) => {
     req.query.next = true;
-
-    CheckLogged(req, res, async () => {
-      try {
-        let response = await user.edit_profile_verify(req?.query);
-
-        if (response) {
-          next();
-        }
-      } catch (err) {
-        if (err?.status) {
-          res.status(err.status).json(err);
-        } else {
-          res.status(500).json({
-            status: 500,
-            message: err,
-          });
-        }
-      }
-    });
+    next();
   },
-  multer.profile.single("avatar"),
+  CheckLogged,
   async (req, res) => {
-    if (req?.file?.originalname) {
-      req.body.img = req.file.originalname;
-    }
-
     try {
       let response = await user.edit_profile(req?.body, req?.query?.userId);
 
@@ -500,6 +479,66 @@ router.put(
           message: err,
         });
       }
+    }
+  }
+);
+
+router.get(
+  "/remove-avatar",
+  (req, res, next) => {
+    req.query.next = true;
+    next();
+  },
+  CheckLogged,
+  async (req, res) => {
+    try {
+      let response = await user.remove_avatar(req?.query?.userId);
+
+      if (response?.modifiedCount) {
+        fs.unlink(`./files/profiles/${req?.query?.userId}.png`, (err) => {
+          console.log(`Error When Delete Avatar : ${err}`);
+        });
+
+        res.status(200).json({
+          status: 200,
+          message: "Success",
+        });
+      }
+    } catch (err) {
+      res.status(500).json({
+        status: 500,
+        message: "Failed",
+      });
+    }
+  }
+);
+
+router.put(
+  "/change-avatar",
+  (req, res, next) => {
+    req.query.next = true;
+    next();
+  },
+  CheckLogged,
+  multer.profile.single("avatar"),
+  async (req, res) => {
+    try {
+      let response = await user.change_avatar(
+        req?.file?.filename,
+        req?.query?.userId
+      );
+
+      if (response) {
+        res.status(200).json({
+          status: 200,
+          message: "Success",
+        });
+      }
+    } catch (err) {
+      res.status(500).json({
+        status: 500,
+        message: err,
+      });
     }
   }
 );
