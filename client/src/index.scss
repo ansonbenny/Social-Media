@@ -33,6 +33,7 @@ body {
   height: 100%;
   width: 100%;
   overflow: hidden;
+  scroll-behavior: smooth;
   transition: all .3s ease-in-out;
   -moz-transition: all .3s ease-in-out;
 }

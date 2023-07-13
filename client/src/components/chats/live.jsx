@@ -1,4 +1,10 @@
-import React, { useEffect, useRef } from "react";
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import {
   ClipSvg,
   CopySvg,
@@ -10,7 +16,28 @@ import {
 } from "../../assets";
 import "./style.scss";
 
-const ChatLive = ({ setModal }) => {
+const ChatLive = forwardRef(({ setModal, onChat }, ref) => {
+  const messagesRef = useRef();
+
+  const [messages, setMessages] = useState([]);
+
+  useImperativeHandle(ref, () => ({
+    myMSg: async (data) => {
+      if (!messages?.find((obj) => obj.id === data?.id)) {
+        setMessages((state) => [...state, { me: true, ...data }]);
+      }
+    },
+    othersMsg: async (data) => {
+      if (!messages?.find((obj) => obj.id === data?.id)) {
+        setMessages((state) => [...state, data]);
+      }
+    },
+  }));
+
+  useEffect(() => {
+    messagesRef?.current?.scroll?.(0, messagesRef?.current?.scrollHeight);
+  }, [messages]);
+
   return (
     <section className="live">
       <div className="head">
@@ -54,8 +81,8 @@ const ChatLive = ({ setModal }) => {
       </div>
 
       <div className="body">
-        <div className="messages">
-          <div className="others">
+        <div className="messages" ref={messagesRef}>
+          {/* <div className="others">
             <div className="cover">
               <img
                 src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
@@ -246,27 +273,86 @@ const ChatLive = ({ setModal }) => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
+
+          {messages?.map((obj, key) => {
+            if (obj?.me) {
+              return (
+                <div className="me" key={key}>
+                  <div className="card">
+                    <div className="inner">
+                      <div className="from">
+                        <p className="author">You</p>
+                        <p className="time">08:30</p>
+                      </div>
+
+                      <div className="msg">{obj?.msg}</div>
+                    </div>
+
+                    <div className="actions-msg">
+                      <button onClick={() => window.alert("click")}>
+                        <TrashSvg />
+                      </button>
+                      <button onClick={() => window.alert("click")}>
+                        <CopySvg class_name={"path_fill"} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="cover">
+                    <img
+                      src="https://yt3.googleusercontent.com/ytc/AGIKgqPh9kVptaKpovayOfZGjfyZV7DExqpIUitIiTlKuQ=s900-c-k-c0x00ffffff-no-rj"
+                      alt="profile"
+                    />
+                  </div>
+                </div>
+              );
+            } else {
+              return (
+                <div className="others" key={key}>
+                  <div className="cover">
+                    <img
+                      src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
+                      alt="profile"
+                    />
+                  </div>
+                  <div className="card">
+                    <div className="inner">
+                      <div className="from">
+                        <p className="author">Anson</p>
+                        <p className="time">08:35</p>
+                      </div>
+
+                      <div className="msg">
+                        {/* <img src="https://images.mktw.net/im-764473?width=1280&size=1" /> */}
+                        {obj?.msg}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+          })}
         </div>
 
         <div className="textarea">
-          <div className="border">
-            <button>
+          <form className="border" onSubmit={onChat}>
+            <button type="button">
               <ClipSvg width={"18px"} height={"18px"} class_name={"svg_fill"} />
             </button>
             <input placeholder="Type Something..." />
-            <button>
+            <button type="submit">
               <SendSvg
                 width={"18px"}
                 height={"18px"}
                 class_name={"svg_path_stroke"}
               />
             </button>
-          </div>
+          </form>
         </div>
       </div>
     </section>
   );
-};
+});
 
 export default ChatLive;

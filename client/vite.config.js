@@ -17,6 +17,10 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/files/, ""),
       },
+      "/socket.io": {
+        target: "ws://localhost:5000",
+        ws: true,
+      },
     },
   },
 });

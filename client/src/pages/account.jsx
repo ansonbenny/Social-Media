@@ -4,7 +4,7 @@ import { AvatarSvg, LogoutSvg } from "../assets";
 import { setLoading } from "../redux/additional";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "../lib/axios";
+import { axios } from "../lib";
 
 const Account = () => {
   const dispatch = useDispatch();
@@ -43,11 +43,14 @@ const Account = () => {
       }));
 
       const formData = new FormData();
-
+      // appending file to formData
       formData.append("avatar", e?.target?.files?.[0]);
 
       try {
         await axios.put("/user/change-avatar", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
           onUploadProgress,
         });
       } catch (err) {
@@ -112,21 +115,7 @@ const Account = () => {
     e?.preventDefault?.();
 
     try {
-      if (resend) {
-        let res = await axios.post(`/user/edit-profile-otp`, {
-          name: state?.form?.name,
-          about: state?.form?.about,
-          number: state?.form?.number,
-          email: state?.form?.email,
-        });
-
-        if (res?.["data"]?.data?.otp) {
-          setState((state) => ({
-            ...state,
-            otp: true,
-          }));
-        }
-      } else if (state?.otp) {
+      if (state?.otp && !resend) {
         let res = await axios.put(`/user/edit-profile-verify`, {
           name: state?.form?.name,
           about: state?.form?.about,
@@ -262,7 +251,7 @@ const Account = () => {
                         type="button"
                         onClick={async () => {
                           try {
-                            let res = await axios.get("/user/remove-avatar");
+                            let res = await axios.delete("/user/remove-avatar");
 
                             if (res?.["data"]) {
                               setState((stat) => ({
@@ -393,15 +382,9 @@ const Account = () => {
           )}
 
           {state?.otp ? (
-            state?.uploading?.status ? (
-              <button data-for="submit" type="button">
-                Updating
-              </button>
-            ) : (
-              <button data-for="submit" type="submit">
-                Submit
-              </button>
-            )
+            <button data-for="submit" type="submit">
+              Submit
+            </button>
           ) : (
             <button data-for="submit" type="submit">
               Sent Otp

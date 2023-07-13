@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { GoogleSvg } from "../../../assets";
-import { Input } from "../../../components";
+import { GoogleSvg } from "../../assets";
+import { Input } from "../../components";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setLoading } from "../../../redux/additional";
+import { setLoading } from "../../redux/additional";
 import { useGoogleLogin } from "@react-oauth/google";
-import axios from "../../../lib/axios";
-import "../style.scss";
+import { axios } from "../../lib";
+import "./style.scss";
 
 const Login = () => {
   const location = useLocation();
@@ -31,7 +31,6 @@ const Login = () => {
         });
 
         if (res?.["data"]) {
-          console.log(res?.data);
           navigate("/");
         }
       } catch (err) {
@@ -82,16 +81,7 @@ const Login = () => {
     }));
 
     try {
-      if (resend) {
-        let res = await axios.post("/user/login-otp", state?.form);
-
-        if (res?.["data"]) {
-          setState((state) => ({
-            ...state,
-            otp: true,
-          }));
-        }
-      } else if (state?.otp) {
+      if (state?.otp && !resend) {
         let res = await axios.post("/user/login-verify", state?.form);
 
         if (res?.["data"]) {

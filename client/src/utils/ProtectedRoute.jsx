@@ -28,7 +28,7 @@ const ProtectedRoute = ({ isAuth }) => {
           setComponent(<Outlet />);
         } else {
           dispatch(setMenu(false));
-          navigate("/login");
+          navigate("/");
         }
       } else if (res?.error && res?.error?.code !== "ERR_CANCELED") {
         dispatch(setMenu(false));

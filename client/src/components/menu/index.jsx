@@ -8,7 +8,7 @@ import {
   SmileySvg,
   ThemeSvg,
 } from "../../assets";
-import axios from "../../lib/axios";
+import { axios } from "../../lib";
 import "./style.scss";
 
 const Menu = () => {

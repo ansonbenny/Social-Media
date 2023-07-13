@@ -1,8 +1,11 @@
 import React from "react";
 import { SearchSvg } from "../../assets";
 import "./style.scss";
+import { useNavigate } from "react-router-dom";
 
 const AllChats = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="all-chats">
       <div className="stories-recent">
@@ -33,7 +36,12 @@ const AllChats = () => {
       </div>
 
       <div className="list">
-        <div className="card active">
+        <div
+          className="card active"
+          onClick={() =>
+            navigate("/chat/64a294a80b84eff7403a8929")
+          }
+        >
           <div className="cover">
             <img
               src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"

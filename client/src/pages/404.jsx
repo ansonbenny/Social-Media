@@ -1,9 +1,21 @@
-import React from 'react'
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { setLoading } from "../redux/additional";
 
 const FourNotFour = () => {
-  return (
-    <div>404</div>
-  )
-}
+  const dispatch = useDispatch();
 
-export default FourNotFour
+  useEffect(() => {
+    setTimeout(() => {
+      dispatch(setLoading(false));
+    }, 1000);
+  }, []);
+  return (
+    <div className="error_404">
+      <h1>404</h1>
+      <p>Sorry this page doesn't exist.</p>
+    </div>
+  );
+};
+
+export default FourNotFour;

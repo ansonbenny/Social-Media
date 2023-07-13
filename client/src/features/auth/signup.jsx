@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Input } from "../../../components";
-import { GoogleSvg } from "../../../assets";
+import { Input } from "../../components";
+import { GoogleSvg } from "../../assets";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setLoading } from "../../../redux/additional";
+import { setLoading } from "../../redux/additional";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
-import instance from "../../../lib/axios";
-import "../style.scss";
+import { axios as instance } from "../../lib";
+import "./style.scss";
 
 const SignUp = () => {
   const location = useLocation();
@@ -71,15 +71,7 @@ const SignUp = () => {
     }));
 
     try {
-      if (resend) {
-        let res = await instance.post("/user/register", state?.form);
-        if (res?.["data"]?.data?.otp) {
-          setState((state) => ({
-            ...state,
-            otp: true,
-          }));
-        }
-      } else if (state?.otp) {
+      if (state?.otp && !resend) {
         // verifying
 
         let res = await instance.post("/user/register-verify", state?.form);

@@ -483,7 +483,7 @@ router.put(
   }
 );
 
-router.get(
+router.delete(
   "/remove-avatar",
   (req, res, next) => {
     req.query.next = true;

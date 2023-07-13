@@ -6,6 +6,7 @@ import { Login, SignUp } from "./features";
 import { useSelector } from "react-redux";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import "./App.scss";
+import FourNotFour from "./pages/404";
 
 function App() {
   const { loading, menu } = useSelector((state) => state?.additional);
@@ -31,7 +32,7 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
           </Route>
 
-          <Route path="*" element={<h1>Error</h1>} />
+          <Route path="*" element={<FourNotFour />} />
         </Routes>
       </section>
     </Fragment>

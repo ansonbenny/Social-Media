@@ -1,6 +1,6 @@
 import { db } from "../db/config.js";
-import collections from "../db/collections.js";
 import { ObjectId } from "mongodb";
+import collections from "../db/collections.js";
 
 export default {
   register_request: (details) => {
