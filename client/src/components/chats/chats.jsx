@@ -38,9 +38,7 @@ const AllChats = () => {
       <div className="list">
         <div
           className="card active"
-          onClick={() =>
-            navigate("/chat/64a294a80b84eff7403a8929")
-          }
+          onClick={() => navigate("/chat/64a13272e41b711841b83928")}
         >
           <div className="cover">
             <img
@@ -57,7 +55,12 @@ const AllChats = () => {
           </div>
         </div>
 
-        <div className="card">
+        <div
+          className="card"
+          onClick={() => {
+            navigate("/chat/64ac033a1668d20be2008f80");
+          }}
+        >
           <div className="cover">
             <img
               src="https://img.i-scmp.com/cdn-cgi/image/fit=contain,width=425,format=auto/sites/default/files/styles/768x768/public/d8/images/methode/2021/01/11/d5ed0832-5001-11eb-ad83-255e1243236c_image_hires_113755.jpg?itok=6PsAhoy2&v=1610336282"

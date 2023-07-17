@@ -200,28 +200,25 @@
                             width: auto;
                             height: auto;
                             display: none;
+                            background: var(--bg-secondary);
+                            padding: 1rem;
+                            border-radius: 5px;
 
                             .list {
                                 display: flex;
                                 flex-direction: column;
                                 align-items: center;
                                 justify-content: center;
-                                gap: .2rem;
+                                gap: .4rem;
 
                                 button {
                                     position: relative;
-                                    border: 1px solid $bg-violet;
+                                    border: none;
                                     color: var(--text-primary);
-                                    background: var(--bg-primary);
-                                    padding: .2rem .5rem;
-                                    border-radius: 5px;
+                                    background: transparent;
                                     cursor: pointer;
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                    text-transform: uppercase;
-                                    font-size: x-small;
-                                    font-weight: bold;
+                                    text-transform: capitalize;
+                                    font-size: small;
 
                                     input {
                                         width: 100%;

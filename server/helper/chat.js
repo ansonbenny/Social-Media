@@ -6,33 +6,57 @@ export default {
   newMsg: (details) => {
     return new Promise(async (resolve, reject) => {
       try {
-        let res = await db.collection(collections.CHAT).updateOne(
-          {
-            $and: [
-              {
-                users: details?.users[0],
-              },
-              {
-                users: details?.users[1],
-              },
-            ],
-          },
-          {
-            $push: {
-              chat: details?.chat,
+        if (Array.isArray(details?.users)) {
+          let res = await db.collection(collections.CHAT).updateOne(
+            {
+              $and: [
+                {
+                  users: details?.users[0],
+                },
+                {
+                  users: details?.users[1],
+                },
+              ],
             },
+            {
+              $push: {
+                chat: details?.chat,
+              },
+            }
+          );
+
+          if (res?.matchedCount <= 0) {
+            let res = await db.collection(collections.CHAT).insertOne({
+              ...details,
+              chat: [details?.chat],
+            });
+
+            resolve(res);
+          } else {
+            resolve(res);
           }
-        );
-
-        if (res?.matchedCount <= 0) {
-          let res = await db.collection(collections.CHAT).insertOne({
-            ...details,
-            chat: [details?.chat],
-          });
-
-          resolve(res);
         } else {
-          resolve(res);
+          let res = await db.collection(collections.CHAT).updateOne(
+            {
+              user: details?.users,
+            },
+            {
+              $push: {
+                chat: details?.chat,
+              },
+            }
+          );
+
+          if (res?.matchedCount <= 0) {
+            let res = await db.collection(collections.CHAT).insertOne({
+              user: details?.users,
+              chat: [details?.chat],
+            });
+
+            resolve(res);
+          } else {
+            resolve(res);
+          }
         }
       } catch (err) {
         reject(err);
@@ -67,6 +91,26 @@ export default {
         });
 
         resolve(res);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  },
+  removeSocketId: (socketId) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await db.collection(collections.USERS).updateOne(
+          {
+            socketId: socketId,
+          },
+          {
+            $unset: {
+              socketId: 1,
+            },
+          }
+        );
+
+        resolve();
       } catch (err) {
         reject(err);
       }

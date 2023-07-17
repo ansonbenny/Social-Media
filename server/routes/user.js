@@ -42,18 +42,9 @@ const CheckLogged = (req, res, next) => {
           next();
         }
       }
-    } else if (err) {
-      console.log(`Error : ${err?.name}`);
-      if (req?.query?.next) {
-        res.clearCookie("token").status(405).json({
-          status: 405,
-          message: "User Not Logged",
-        });
-      } else {
-        res.clearCookie("token");
-        next();
-      }
     } else {
+      console.log(err ? `Error : ${err?.name}` : "Something Went Wrong");
+
       if (req?.query?.next) {
         res.clearCookie("token").status(405).json({
           status: 405,

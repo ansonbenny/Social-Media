@@ -1,26 +1,34 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
 
 const useSocket = () => {
-  const Socket = io();
+  const SocketRef = useRef(null);
+
+  const user = useSelector((state) => state?.user);
+
+  const { id } = useParams();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
-    Socket.on("connect", () => {
-      console.log("connected");
-    });
+    SocketRef.current = io();
 
-    Socket.on("disconnect", () => {
-      console.log("disconnect");
+    SocketRef?.current?.on("connect_error", (err) => {
+      if (err?.data?.status == 405) {
+        navigate("/");
+      }
     });
 
     return () => {
-      Socket.off("connect");
+      SocketRef?.current?.off("connect_error");
 
-      Socket.off("disconnect");
+      SocketRef?.current?.off("disconnect");
     };
-  }, []);
+  }, [id]);
 
-  return Socket;
+  return SocketRef.current;
 };
 
 export default useSocket;
