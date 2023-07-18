@@ -2,20 +2,18 @@ import React, { useEffect, useRef, useState } from "react";
 import { Input } from "../components";
 import { AvatarSvg, LogoutSvg } from "../assets";
 import { setLoading } from "../redux/additional";
-import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { axios } from "../lib";
 
 const Account = () => {
   const dispatch = useDispatch();
 
-  const location = useLocation();
-
   const navigate = useNavigate();
 
   const ref = useRef({});
 
-  const user = useSelector((state) => state?.user);
+  const { location, user } = useOutletContext();
 
   const [state, setState] = useState({
     otp: undefined,
@@ -166,8 +164,10 @@ const Account = () => {
   useEffect(() => {
     document.title = "Soft Chat - Account";
 
+    let timer;
+
     if (user) {
-      setTimeout(() => {
+      timer = setTimeout(() => {
         dispatch(setLoading(false));
       }, 1000);
     } else {
@@ -199,6 +199,8 @@ const Account = () => {
     return () => {
       window.removeEventListener("resize", onResize);
       window.removeEventListener("click", onClick);
+
+      clearTimeout(timer);
     };
   }, [user, location]);
 

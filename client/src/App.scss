@@ -337,6 +337,17 @@
                 color: $bg-violet;
                 font-size: medium;
             }
+
+            button {
+                padding: .3rem 1rem;
+                margin: .5rem 0;
+                border: 2px solid $bg-violet;
+                background: $bg-primary;
+                color: $Text-primary;
+                text-transform: capitalize;
+                border-radius: 5px;
+                cursor: pointer;
+            }
         }
     }
 }

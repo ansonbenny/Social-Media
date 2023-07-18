@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Input } from "../../components";
 import { GoogleSvg } from "../../assets";
-import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useOutletContext } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setLoading } from "../../redux/additional";
 import { useGoogleLogin } from "@react-oauth/google";
@@ -10,11 +10,11 @@ import { axios as instance } from "../../lib";
 import "./style.scss";
 
 const SignUp = () => {
-  const location = useLocation();
-
   const dispatch = useDispatch();
 
   const navigate = useNavigate();
+
+  const { location } = useOutletContext();
 
   const [state, setState] = useState({
     form: {},
@@ -121,9 +121,13 @@ const SignUp = () => {
   useEffect(() => {
     document.title = "Soft Chat - Sign Up";
 
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       dispatch(setLoading(false));
     }, 1000);
+
+    return () => {
+      clearTimeout(timer);
+    };
   }, [location]);
   return (
     <section className="auth">

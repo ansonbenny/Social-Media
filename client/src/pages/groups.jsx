@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { AllChats, ChatDetails, ChatLive } from "../components";
-import { useLocation, useParams } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useOutletContext, useParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { setLoading } from "../redux/additional";
 
 const Groups = () => {
   const dispatch = useDispatch();
 
-  const location = useLocation();
-
   const { id } = useParams();
 
-  const user = useSelector((state) => state?.user);
+  const { location, user } = useOutletContext();
 
   const [state, setState] = useState({
     size: {
@@ -26,8 +24,10 @@ const Groups = () => {
   useEffect(() => {
     document.title = "Soft Chat - Groups";
 
+    let timer;
+
     if (user) {
-      setTimeout(() => {
+      timer = setTimeout(() => {
         dispatch(setLoading(false));
       }, 1000);
     } else {
@@ -48,6 +48,8 @@ const Groups = () => {
 
     return () => {
       window.removeEventListener("resize", onResize);
+
+      clearTimeout(timer);
     };
   }, [id, user, location]);
 

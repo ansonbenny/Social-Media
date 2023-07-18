@@ -7,7 +7,7 @@ import { Server } from "socket.io";
 
 // routes
 import userRoute from "./routes/user.js";
-import socketRoute from "./routes/socket.js";
+import chatRoute from "./routes/chat.js";
 
 import { connectDB } from "./db/config.js";
 
@@ -47,7 +47,7 @@ app.get("/api", (req, res) => {
   res.send("Api V1");
 });
 
-socketRoute(app, io);
+chatRoute(app, io); // express route with socket io
 
 server.listen(port, () => {
   connectDB((done, err) => {

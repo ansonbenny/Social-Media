@@ -1,26 +1,26 @@
 import React, { useEffect, useState } from "react";
 import UsersStories from "../components/stories/users";
-import { useLocation, useParams } from "react-router-dom";
+import { useOutletContext, useParams } from "react-router-dom";
 import { StoriesUser } from "../components";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { setLoading } from "../redux/additional";
 
 const Stories = () => {
   const dispatch = useDispatch();
 
-  const location = useLocation();
-
   const { id } = useParams();
 
-  const user = useSelector((state) => state?.user);
+  const { location, user } = useOutletContext();
 
   const [size, setSize] = useState({
     sm: window.matchMedia("(max-width:680px)")?.matches,
   });
 
   useEffect(() => {
+    let timer;
+
     if (user) {
-      setTimeout(() => {
+      timer = setTimeout(() => {
         dispatch(setLoading(false));
       }, 1000);
     } else {
@@ -37,6 +37,8 @@ const Stories = () => {
 
     return () => {
       window.removeEventListener("resize", onResize);
+
+      clearTimeout(timer);
     };
   }, [id, user, location]);
 

@@ -22,15 +22,18 @@ const ChatLive = forwardRef(({ setModal, onChat }, ref) => {
   const [messages, setMessages] = useState([]);
 
   useImperativeHandle(ref, () => ({
-    myMSg: async (data) => {
+    myMSg: (data) => {
       if (!messages?.find((obj) => obj.id === data?.id)) {
         setMessages((state) => [...state, { me: true, ...data }]);
       }
     },
-    othersMsg: async (data) => {
+    othersMsg: (data) => {
       if (!messages?.find((obj) => obj.id === data?.id)) {
         setMessages((state) => [...state, data]);
       }
+    },
+    insertOldMsgs: () => {
+      
     },
   }));
 

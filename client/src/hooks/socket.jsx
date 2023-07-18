@@ -1,12 +1,9 @@
-import { useCallback, useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
 
 const useSocket = () => {
   const SocketRef = useRef(null);
-
-  const user = useSelector((state) => state?.user);
 
   const { id } = useParams();
 

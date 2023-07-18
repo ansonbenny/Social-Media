@@ -6,57 +6,33 @@ export default {
   newMsg: (details) => {
     return new Promise(async (resolve, reject) => {
       try {
-        if (Array.isArray(details?.users)) {
-          let res = await db.collection(collections.CHAT).updateOne(
-            {
-              $and: [
-                {
-                  users: details?.users[0],
-                },
-                {
-                  users: details?.users[1],
-                },
-              ],
-            },
-            {
-              $push: {
-                chat: details?.chat,
+        let res = await db.collection(collections.CHAT).updateOne(
+          {
+            $or: [
+              {
+                users: details?.users,
               },
-            }
-          );
-
-          if (res?.matchedCount <= 0) {
-            let res = await db.collection(collections.CHAT).insertOne({
-              ...details,
-              chat: [details?.chat],
-            });
-
-            resolve(res);
-          } else {
-            resolve(res);
+              {
+                users: [details?.users[1], details?.users[0]],
+              },
+            ],
+          },
+          {
+            $push: {
+              chat: details?.chat,
+            },
           }
+        );
+
+        if (res?.matchedCount <= 0) {
+          let res = await db.collection(collections.CHAT).insertOne({
+            ...details,
+            chat: [details?.chat],
+          });
+
+          resolve(res);
         } else {
-          let res = await db.collection(collections.CHAT).updateOne(
-            {
-              user: details?.users,
-            },
-            {
-              $push: {
-                chat: details?.chat,
-              },
-            }
-          );
-
-          if (res?.matchedCount <= 0) {
-            let res = await db.collection(collections.CHAT).insertOne({
-              user: details?.users,
-              chat: [details?.chat],
-            });
-
-            resolve(res);
-          } else {
-            resolve(res);
-          }
+          resolve(res);
         }
       } catch (err) {
         reject(err);
@@ -111,6 +87,73 @@ export default {
         );
 
         resolve();
+      } catch (err) {
+        reject(err);
+      }
+    });
+  },
+  getUserChats: (to, me) => {
+    // add limit and skip for pagination
+    return new Promise(async (resolve, reject) => {
+      try {
+        let chats = await db
+          .collection(collections.USERS)
+          .aggregate([
+            {
+              $match: {
+                _id: new ObjectId(to),
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                user: {
+                  _id: "$_id",
+                  name: "$name",
+                  number: "$number",
+                  about: "$about",
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: collections.CHAT,
+                pipeline: [
+                  {
+                    $match: {
+                      $or: [
+                        {
+                          users: [to, me],
+                        },
+                        {
+                          users: [me, to],
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    $unwind: "$chat",
+                  },
+                  {
+                    $project: {
+                      _id: 0,
+                      id: "$chat.id",
+                      msg: "$chat.msg",
+                      from: "$chat.from",
+                    },
+                  },
+                ],
+                as: "chats",
+              },
+            },
+          ])
+          .toArray();
+
+        if (chats?.[0]) {
+          resolve(chats?.[0]);
+        } else if (chats) {
+          reject({ status: 404, message: "User Not Found" });
+        }
       } catch (err) {
         reject(err);
       }

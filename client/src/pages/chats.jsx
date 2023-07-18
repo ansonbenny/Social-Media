@@ -1,22 +1,21 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { AllChats, ChatDetails, ChatLive } from "../components";
-import { useLocation, useParams } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useOutletContext, useParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { setLoading } from "../redux/additional";
 import { useSocket } from "../hooks";
+import { axios } from "../lib";
 
 const Chats = () => {
   const dispatch = useDispatch();
 
   const Socket = useSocket();
 
-  const location = useLocation();
-
   const ref = useRef();
 
   const { id } = useParams();
 
-  const user = useSelector((state) => state?.user);
+  const { location, user } = useOutletContext();
 
   const [state, setState] = useState({
     size: {
@@ -69,7 +68,13 @@ const Chats = () => {
   useEffect(() => {
     document.title = "Soft Chat - Chats";
 
+    let timer;
+
+    let abortControl = new AbortController();
+
     if (user) {
+      // socket io
+
       emitUser();
 
       Socket?.on("chat message", (msg) => {
@@ -77,12 +82,33 @@ const Chats = () => {
         ref?.current?.othersMsg?.(msg);
       });
 
-      setTimeout(() => {
+      if (id) {
         dispatch(setLoading(false));
-      }, 1000);
+        (async () => {
+          try {
+            let res = await axios.get(`/chat/userChat/${id}`, {
+              signal: abortControl?.signal,
+            });
+
+            console.log(res?.['data'])
+
+            timer = setTimeout(() => {
+              dispatch(setLoading(false));
+            }, 1000);
+          } catch (err) {
+            console.log(err);
+          }
+        })();
+      } else {
+        timer = setTimeout(() => {
+          dispatch(setLoading(false));
+        }, 1000);
+      }
     } else {
       dispatch(setLoading(true));
     }
+
+    // resize
 
     const onResize = () => {
       setState((state) => ({
@@ -100,8 +126,12 @@ const Chats = () => {
       window.removeEventListener("resize", onResize);
 
       Socket?.off("chat message");
+
+      clearTimeout(timer);
+
+      abortControl?.abort?.();
     };
-  }, [id, location, user, emitUser]);
+  }, [id, location, emitUser]);
 
   return (
     <section className="chats">

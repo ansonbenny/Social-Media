@@ -1,16 +1,13 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import instance from "../lib/axios";
 
-export const fetchUser = createAsyncThunk(
-  "user/fetchUser",
-  async (cancelToken) => {
-    let response = await instance.get("/user/checkLogged", {
-      cancelToken: cancelToken.token,
-    });
+export const fetchUser = createAsyncThunk("user/fetchUser", async (signal) => {
+  let response = await instance.get("/user/checkLogged", {
+    signal,
+  });
 
-    return response?.data?.data;
-  }
-);
+  return response?.data?.data;
+});
 
 let userSlice = createSlice({
   name: "user",
