@@ -224,11 +224,24 @@
                     object-fit: cover;
                     border-radius: 9999px; //15px
                 }
+
+                svg {
+                    width: 2.6rem;
+                    height: 2.6rem;
+                    aspect-ratio: 1/1;
+                    object-position: center;
+                    object-fit: cover;
+                    border-radius: 9999px;
+                    border: 2px solid $bg-violet;
+                    padding: .2rem;
+                    fill: var(--text-primary);
+                }
             }
 
             .details {
                 display: flex;
                 flex-direction: column;
+                justify-content: center;
                 align-items: center;
                 margin-right: auto;
 

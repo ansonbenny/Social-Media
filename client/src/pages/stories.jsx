@@ -44,21 +44,18 @@ const Stories = () => {
 
   return (
     <section className="stories">
-      {id ? (
-        <>
-          {!size?.sm && <UsersStories />}
-          <StoriesUser />
-        </>
-      ) : (
-        <>
-          <UsersStories notSelected />
+      {!id || !size?.sm ? (
+        <UsersStories notSelected={id ? undefined : true} />
+      ) : null}
 
-          {!size?.sm && (
-            <div className="mesg_empty">
-              <h1>Select a user to see stories</h1>
-            </div>
-          )}
-        </>
+      {id ? (
+        <StoriesUser />
+      ) : (
+        !size?.sm && (
+          <div className="mesg_empty">
+            <h1>Select a user to see stories</h1>
+          </div>
+        )
       )}
     </section>
   );

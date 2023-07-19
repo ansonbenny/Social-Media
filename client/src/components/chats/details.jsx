@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   AvatarSvg,
   ChatsSvg,
@@ -12,6 +12,7 @@ import {
 import "./style.scss";
 
 const ChatDetails = ({ isModal, setModal }) => {
+
   return (
     <section
       className={`details-chat ${isModal ? "modal-details-chat" : null}`}
@@ -35,7 +36,7 @@ const ChatDetails = ({ isModal, setModal }) => {
               alt="profile"
             />
           </div>
-          <h1>Anson Benny</h1>
+          <h1>Anson</h1>
           <p className="status">online</p>
 
           <div className="more_actions">

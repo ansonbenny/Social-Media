@@ -107,11 +107,14 @@ export default {
             {
               $project: {
                 _id: 0,
-                user: {
-                  _id: "$_id",
+                details: {
+                  _id: {
+                    $toString: "$_id",
+                  },
                   name: "$name",
                   number: "$number",
                   about: "$about",
+                  img: "$img",
                 },
               },
             },
@@ -136,7 +139,7 @@ export default {
                   },
                   {
                     $project: {
-                      _id: 0,
+                      _id: "$_id",
                       id: "$chat.id",
                       msg: "$chat.msg",
                       from: "$chat.from",

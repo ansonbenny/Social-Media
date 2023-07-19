@@ -6,6 +6,7 @@ import React, {
   useState,
 } from "react";
 import {
+  AvatarSvg,
   ClipSvg,
   CopySvg,
   PhoneSvg,
@@ -16,8 +17,14 @@ import {
 } from "../../assets";
 import "./style.scss";
 
-const ChatLive = forwardRef(({ setModal, onChat }, ref) => {
+const ChatLive = forwardRef(({ setModal, onChat, data }, ref) => {
   const messagesRef = useRef();
+
+  const [state, setState] = useState({
+    messages: [],
+    details: null,
+    status: "offline",
+  });
 
   const [messages, setMessages] = useState([]);
 
@@ -32,8 +39,16 @@ const ChatLive = forwardRef(({ setModal, onChat }, ref) => {
         setMessages((state) => [...state, data]);
       }
     },
-    insertOldMsgs: () => {
-      
+    insertOldMsgs: () => {},
+    getDetails: () => {
+      return state?.details;
+    },
+    insertInitial: (data) => {
+      setState({
+        messages: data?.chats,
+        details: data?.user,
+        status: "offline",
+      });
     },
   }));
 
@@ -50,10 +65,11 @@ const ChatLive = forwardRef(({ setModal, onChat }, ref) => {
             setModal?.();
           }}
         >
-          <img
-            src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
-            alt="profile"
-          />
+          {data?.details?.img ? (
+            <img src={`/files/profiles/${data?.details?.img}`} />
+          ) : (
+            <AvatarSvg />
+          )}
         </div>
         <div
           className="details"
@@ -64,8 +80,8 @@ const ChatLive = forwardRef(({ setModal, onChat }, ref) => {
             }));
           }}
         >
-          <h1>Anson Benny</h1>
-          <p>Online</p>
+          <h1>{data?.details?.name}</h1>
+          <p>{data?.details?.status || "offline"}</p>
         </div>
         <div className="actions">
           {

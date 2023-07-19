@@ -80,6 +80,12 @@ export default (app, io) => {
     });
 
     socket.on("chat message", async (data, callback) => {
+      let date = new Date(data?.chat?.date || "");
+
+      data.chat.date = `${date.getDate()}-${
+        date.getMonth() + 1
+      }-${date.getFullYear()} | ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+
       if (data?.chatId?.length === 24) {
         try {
           let user_socket = await chat?.getSocketId?.(data?.chatId);

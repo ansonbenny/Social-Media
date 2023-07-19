@@ -1,8 +1,29 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useReducer } from "react";
 import { AllChats, ChatDetails, ChatLive } from "../components";
 import { useOutletContext, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setLoading } from "../redux/additional";
+
+const reducer = (value, { type, ...actions }) => {
+  switch (type) {
+    case "size":
+      return {
+        ...value,
+        size: {
+          lg: window.matchMedia("(min-width:901px)")?.matches,
+          sm: window.matchMedia("(max-width:680px)")?.matches,
+        },
+      };
+    case "modal":
+      return {
+        ...value,
+        modal: { ...value?.modal, ...actions },
+      };
+
+    default:
+      return value;
+  }
+};
 
 const Groups = () => {
   const dispatch = useDispatch();
@@ -11,7 +32,7 @@ const Groups = () => {
 
   const { location, user } = useOutletContext();
 
-  const [state, setState] = useState({
+  const [state, action] = useReducer(reducer, {
     size: {
       lg: window.matchMedia("(min-width:901px)")?.matches,
       sm: window.matchMedia("(max-width:680px)")?.matches,
@@ -35,13 +56,7 @@ const Groups = () => {
     }
 
     const onResize = () => {
-      setState((state) => ({
-        ...state,
-        size: {
-          lg: window.matchMedia("(min-width:901px)")?.matches,
-          sm: window.matchMedia("(max-width:680px)")?.matches,
-        },
-      }));
+      action({ type: "size" });
     };
 
     window.addEventListener("resize", onResize);
@@ -55,49 +70,41 @@ const Groups = () => {
 
   return (
     <section className="chats">
-      {id ? (
-        <>
-          {!state?.size?.sm && <AllChats />}
+      {!id || !state?.size?.sm ? <AllChats /> : null}
 
+      {id ? (
+        <Fragment>
           <ChatLive
             setModal={
               !state?.size?.lg
                 ? () => {
-                    setState((state) => ({
-                      ...state,
-                      modal: { ...state?.modal, details: true },
-                    }));
+                    action({ type: "modal", details: true });
                   }
-                : null
+                : undefined
             }
           />
 
-          {state?.size?.lg ? (
-            <ChatDetails />
-          ) : (
-            state?.modal?.details && (
-              <ChatDetails
-                isModal
-                setModal={() => {
-                  setState((state) => ({
-                    ...state,
-                    modal: { ...state, details: false },
-                  }));
-                }}
-              />
-            )
-          )}
-        </>
+          {state?.modal?.details || state?.size?.lg ? (
+            <ChatDetails
+              isModal={
+                state?.modal?.details && !state?.size?.lg ? true : undefined
+              }
+              setModal={
+                state?.modal?.details && !state?.size?.lg
+                  ? () => {
+                      action({ type: "modal", details: false });
+                    }
+                  : undefined
+              }
+            />
+          ) : null}
+        </Fragment>
       ) : (
-        <>
-          <AllChats />
-
-          {!state?.size?.sm && (
-            <div className="mesg_empty">
-              <h1>Select a chat to start messaging</h1>
-            </div>
-          )}
-        </>
+        !state?.size?.sm && (
+          <div className="mesg_empty">
+            <h1>Select a chat to start messaging</h1>
+          </div>
+        )
       )}
     </section>
   );

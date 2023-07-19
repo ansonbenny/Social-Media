@@ -1,13 +1,44 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+} from "react";
 import { AllChats, ChatDetails, ChatLive } from "../components";
-import { useOutletContext, useParams } from "react-router-dom";
+import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setLoading } from "../redux/additional";
 import { useSocket } from "../hooks";
 import { axios } from "../lib";
 
+const reducer = (value, { type, ...actions }) => {
+  switch (type) {
+    case "size":
+      return {
+        ...value,
+        size: {
+          lg: window.matchMedia("(min-width:901px)")?.matches,
+          sm: window.matchMedia("(max-width:680px)")?.matches,
+        },
+      };
+    case "modal":
+      return {
+        ...value,
+        modal: { ...value?.modal, ...actions },
+      };
+    case "data":
+      return { ...value, data: actions?.data };
+
+    default:
+      return value;
+  }
+};
+
 const Chats = () => {
   const dispatch = useDispatch();
+
+  const navigate = useNavigate();
 
   const Socket = useSocket();
 
@@ -17,7 +48,7 @@ const Chats = () => {
 
   const { location, user } = useOutletContext();
 
-  const [state, setState] = useState({
+  const [state, action] = useReducer(reducer, {
     size: {
       lg: window.matchMedia("(min-width:901px)")?.matches,
       sm: window.matchMedia("(max-width:680px)")?.matches,
@@ -25,6 +56,7 @@ const Chats = () => {
     modal: {
       details: false,
     },
+    data: {},
   });
 
   const onChat = (e) => {
@@ -34,6 +66,7 @@ const Chats = () => {
       const chat = {
         id: Date?.now()?.toString(16),
         msg: e?.target?.querySelector?.("input")?.value,
+        date: new Date(),
       };
 
       Socket?.emit(
@@ -83,20 +116,24 @@ const Chats = () => {
       });
 
       if (id) {
-        dispatch(setLoading(false));
         (async () => {
           try {
             let res = await axios.get(`/chat/userChat/${id}`, {
               signal: abortControl?.signal,
             });
 
-            console.log(res?.['data'])
+            ref?.current?.insertInitial?.(res?.["data"]?.data);
+
+            action({ type: "data", data: res?.["data"]?.data });
 
             timer = setTimeout(() => {
               dispatch(setLoading(false));
             }, 1000);
           } catch (err) {
-            console.log(err);
+            if (err?.code !== "ERR_CANCELED") {
+              alert(err?.response?.data?.message || "Something Went Wrong");
+              navigate("/");
+            }
           }
         })();
       } else {
@@ -111,13 +148,7 @@ const Chats = () => {
     // resize
 
     const onResize = () => {
-      setState((state) => ({
-        ...state,
-        size: {
-          lg: window.matchMedia("(min-width:901px)")?.matches,
-          sm: window.matchMedia("(max-width:680px)")?.matches,
-        },
-      }));
+      action({ type: "size" });
     };
 
     window.addEventListener("resize", onResize);
@@ -135,51 +166,45 @@ const Chats = () => {
 
   return (
     <section className="chats">
-      {id ? (
-        <>
-          {!state?.size?.sm && <AllChats />}
+      {!id || !state?.size?.sm ? <AllChats /> : null}
 
+      {id ? (
+        <Fragment>
           <ChatLive
             ref={ref}
             onChat={onChat}
+            data={state?.data}
             setModal={
               !state?.size?.lg
                 ? () => {
-                    setState((state) => ({
-                      ...state,
-                      modal: { ...state?.modal, details: true },
-                    }));
+                    action({ type: "modal", details: true });
                   }
-                : null
+                : undefined
             }
           />
 
-          {state?.size?.lg ? (
-            <ChatDetails />
-          ) : (
-            state?.modal?.details && (
-              <ChatDetails
-                isModal
-                setModal={() => {
-                  setState((state) => ({
-                    ...state,
-                    modal: { ...state, details: false },
-                  }));
-                }}
-              />
-            )
-          )}
-        </>
+          {state?.modal?.details || state?.size?.lg ? (
+            <ChatDetails
+              chatRef={ref}
+              isModal={
+                state?.modal?.details && !state?.size?.lg ? true : undefined
+              }
+              setModal={
+                state?.modal?.details && !state?.size?.lg
+                  ? () => {
+                      action({ type: "modal", details: false });
+                    }
+                  : undefined
+              }
+            />
+          ) : null}
+        </Fragment>
       ) : (
-        <>
-          <AllChats />
-
-          {!state?.size?.sm && (
-            <div className="mesg_empty">
-              <h1>Select a chat to start messaging</h1>
-            </div>
-          )}
-        </>
+        !state?.size?.sm && (
+          <div className="mesg_empty">
+            <h1>Select a chat to start messaging</h1>
+          </div>
+        )
       )}
     </section>
   );
