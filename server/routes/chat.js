@@ -96,6 +96,7 @@ export default (app, io) => {
             io.to(sockets?.ids).emit("chat message", {
               ...data?.chat,
               from: data?.userId,
+              user: sockets?.name || "",
               match:
                 data?.chatId == data?.userId
                   ? data?.userId

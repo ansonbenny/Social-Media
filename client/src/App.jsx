@@ -9,16 +9,16 @@ import FourNotFour from "./pages/404";
 import "./App.scss";
 
 function App() {
-  const { loading, menu } = useSelector((state) => state?.additional);
+  const { loading, menu, notification } = useSelector(
+    (state) => state?.additional
+  );
   return (
     <Fragment>
       {menu && <Menu />}
       {loading && <Loading />}
 
       <section data-for={menu ? "contents" : "fit-content"}>
-        {
-          // menu && <Notification />
-        }
+        {menu && notification ? <Notification /> : null}
 
         <Routes>
           <Route element={<ProtectedRoute isAuth />}>

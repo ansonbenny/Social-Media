@@ -1,0 +1,87 @@
+@import '../../index.scss';
+
+.notification-modal {
+    position: fixed;
+    right: .5rem;
+    bottom: 4rem;
+    min-height: 5rem;
+    height: auto;
+    width: calc(300px - 2rem); // - padding 
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: 5px;
+    z-index: 1200;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    transition: all .3s ease-in-out;
+    -moz-transition: all .3s ease-in-out;
+
+    @media screen and (max-width:310px) {
+        width: calc(80% - 2rem); // - padding 
+    }
+
+    .inner {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: .5rem;
+
+        .head {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+
+            h1 {
+                font-size: small;
+                color: var(--text-primary);
+                text-transform: uppercase;
+            }
+
+            button {
+                width: auto;
+                height: auto;
+                border: none;
+                background: none;
+                margin-left: auto;
+                cursor: pointer;
+
+                svg {
+                    width: 20px;
+                    height: 20px;
+                    fill: var(--text-primary);
+                    transition: all .3s ease-in-out;
+                    -moz-transition: all .3s ease-in-out;
+
+                    &:hover {
+                        fill: red;
+                    }
+                }
+            }
+        }
+
+        p {
+            font-size: smaller;
+            color: var(--text-primary);
+            text-transform: capitalize;
+        }
+
+        button {
+            font-size: small;
+            border: 2px solid $bg-violet;
+            border-radius: 9999px;
+            text-transform: lowercase;
+            font-weight: normal;
+            width: auto;
+            height: auto;
+            padding: .2rem .5rem;
+            color: var(--text-primary);
+            transition: all .3s ease-in-out;
+            -moz-transition: all .3s ease-in-out;
+
+            &:hover {
+                cursor: pointer;
+                color: $bg-violet;
+            }
+        }
+    }
+}

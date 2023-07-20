@@ -8,7 +8,7 @@ import React, {
 import { AllChats, ChatDetails, ChatLive } from "../components";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setLoading } from "../redux/additional";
+import { setLoading, setNotification } from "../redux/additional";
 import { useSocket } from "../hooks";
 import { axios } from "../lib";
 
@@ -121,11 +121,13 @@ const Chats = () => {
         ) {
           ref?.current?.insertMsg?.(msg);
         } else if (msg?.match == user?._id) {
-          if (id) {
+          if (id == user?._id) {
             ref?.current?.insertMsg?.(msg);
           }
         } else {
-          alert("New msg notification");
+          dispatch(
+            setNotification({ name: msg?.user, url: `/chat/${msg?.from}` })
+          );
         }
       });
 

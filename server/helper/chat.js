@@ -88,6 +88,7 @@ export default {
                     $project: {
                       _id: 0,
                       socketId: "$socketId",
+                      name: "$name",
                     },
                   },
                 ],
@@ -97,6 +98,9 @@ export default {
             {
               $project: {
                 _id: 1,
+                name: {
+                  $arrayElemAt: ["$from.name", 0],
+                },
                 ids: {
                   $concatArrays: [
                     "$ids",
