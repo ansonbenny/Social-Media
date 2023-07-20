@@ -75,13 +75,13 @@ const Groups = () => {
       {id ? (
         <Fragment>
           <ChatLive
-            setModal={
-              !state?.size?.lg
+            {...{
+              setModal: !state?.size?.lg
                 ? () => {
                     action({ type: "modal", details: true });
                   }
-                : undefined
-            }
+                : undefined,
+            }}
           />
 
           {state?.modal?.details || state?.size?.lg ? (

@@ -2,8 +2,8 @@ import React, {
   forwardRef,
   useEffect,
   useImperativeHandle,
+  useReducer,
   useRef,
-  useState,
 } from "react";
 import {
   AvatarSvg,
@@ -15,40 +15,37 @@ import {
   TrashSvg,
   VideoSvg,
 } from "../../assets";
+import { useSelector } from "react-redux";
 import "./style.scss";
 
-const ChatLive = forwardRef(({ setModal, onChat, data }, ref) => {
+const reducer = (state, { type, data }) => {
+  switch (type) {
+    case "initial":
+      return data;
+    case "new":
+      if (!state?.find?.((obj) => obj?.id == data?.id)) {
+        return [...state, data];
+      } else {
+        return state;
+      }
+    default:
+      return state;
+  }
+};
+
+const ChatLive = forwardRef(({ setModal, onChat, details }, ref) => {
   const messagesRef = useRef();
 
-  const [state, setState] = useState({
-    messages: [],
-    details: null,
-    status: "offline",
-  });
+  const user = useSelector((state) => state?.user);
 
-  const [messages, setMessages] = useState([]);
+  const [messages, action] = useReducer(reducer, []);
 
   useImperativeHandle(ref, () => ({
-    myMSg: (data) => {
-      if (!messages?.find((obj) => obj.id === data?.id)) {
-        setMessages((state) => [...state, { me: true, ...data }]);
-      }
-    },
-    othersMsg: (data) => {
-      if (!messages?.find((obj) => obj.id === data?.id)) {
-        setMessages((state) => [...state, data]);
-      }
-    },
-    insertOldMsgs: () => {},
-    getDetails: () => {
-      return state?.details;
+    insertMsg: (data) => {
+      action({ type: "new", data });
     },
     insertInitial: (data) => {
-      setState({
-        messages: data?.chats,
-        details: data?.user,
-        status: "offline",
-      });
+      action({ type: "initial", data });
     },
   }));
 
@@ -65,8 +62,8 @@ const ChatLive = forwardRef(({ setModal, onChat, data }, ref) => {
             setModal?.();
           }}
         >
-          {data?.details?.img ? (
-            <img src={`/files/profiles/${data?.details?.img}`} />
+          {details?.img ? (
+            <img src={`/files/profiles/${details?.img}`} alt="profile" />
           ) : (
             <AvatarSvg />
           )}
@@ -80,8 +77,8 @@ const ChatLive = forwardRef(({ setModal, onChat, data }, ref) => {
             }));
           }}
         >
-          <h1>{data?.details?.name}</h1>
-          <p>{data?.details?.status || "offline"}</p>
+          <h1>{details?.name}</h1>
+          <p>{details?.status || "offline"}</p>
         </div>
         <div className="actions">
           {
@@ -295,14 +292,14 @@ const ChatLive = forwardRef(({ setModal, onChat, data }, ref) => {
           </div> */}
 
           {messages?.map((obj, key) => {
-            if (obj?.me) {
+            if (obj?.from == user?._id) {
               return (
                 <div className="me" key={key}>
                   <div className="card">
                     <div className="inner">
                       <div className="from">
                         <p className="author">You</p>
-                        <p className="time">08:30</p>
+                        <p className="time">{obj?.date}</p>
                       </div>
 
                       <div className="msg">{obj?.msg}</div>
@@ -312,17 +309,23 @@ const ChatLive = forwardRef(({ setModal, onChat, data }, ref) => {
                       <button onClick={() => window.alert("click")}>
                         <TrashSvg />
                       </button>
-                      <button onClick={() => window.alert("click")}>
+                      <button
+                        onClick={() => {
+                          window?.navigator?.clipboard?.writeText?.(obj?.msg);
+                          window?.alert?.("Text Copied");
+                        }}
+                      >
                         <CopySvg class_name={"path_fill"} />
                       </button>
                     </div>
                   </div>
 
                   <div className="cover">
-                    <img
-                      src="https://yt3.googleusercontent.com/ytc/AGIKgqPh9kVptaKpovayOfZGjfyZV7DExqpIUitIiTlKuQ=s900-c-k-c0x00ffffff-no-rj"
-                      alt="profile"
-                    />
+                    {user?.img ? (
+                      <img src={`/files/profiles/${user?.img}`} alt="profile" />
+                    ) : (
+                      <AvatarSvg />
+                    )}
                   </div>
                 </div>
               );
@@ -330,22 +333,37 @@ const ChatLive = forwardRef(({ setModal, onChat, data }, ref) => {
               return (
                 <div className="others" key={key}>
                   <div className="cover">
-                    <img
-                      src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
-                      alt="profile"
-                    />
+                    {details?.img ? (
+                      <img
+                        src={`/files/profiles/${details?.img}`}
+                        alt="profile"
+                      />
+                    ) : (
+                      <AvatarSvg />
+                    )}
                   </div>
-                  <div className="card">
+                  <div className="card actionable">
                     <div className="inner">
                       <div className="from">
-                        <p className="author">Anson</p>
-                        <p className="time">08:35</p>
+                        <p className="author">{details?.name}</p>
+                        <p className="time">{obj?.date}</p>
                       </div>
 
                       <div className="msg">
                         {/* <img src="https://images.mktw.net/im-764473?width=1280&size=1" /> */}
                         {obj?.msg}
                       </div>
+                    </div>
+
+                    <div className="actions-msg">
+                      <button
+                        onClick={() => {
+                          window?.navigator?.clipboard?.writeText?.(obj?.msg);
+                          window?.alert?.("Text Copied");
+                        }}
+                      >
+                        <CopySvg class_name={"path_fill"} />
+                      </button>
                     </div>
                   </div>
                 </div>

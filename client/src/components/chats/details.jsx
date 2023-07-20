@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   AvatarSvg,
   ChatsSvg,
@@ -11,8 +11,7 @@ import {
 } from "../../assets";
 import "./style.scss";
 
-const ChatDetails = ({ isModal, setModal }) => {
-
+const ChatDetails = ({ isModal, setModal, details }) => {
   return (
     <section
       className={`details-chat ${isModal ? "modal-details-chat" : null}`}
@@ -31,13 +30,20 @@ const ChatDetails = ({ isModal, setModal }) => {
       <div className="scrollable">
         <div className="basic">
           <div className="cover">
-            <img
-              src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
-              alt="profile"
-            />
+            {details?.img ? (
+              <img
+                onClick={() => {
+                  window.open(`/files/profiles/${details?.img}`, "_blank");
+                }}
+                src={`/files/profiles/${details?.img}`}
+                alt="profile"
+              />
+            ) : (
+              <AvatarSvg />
+            )}
           </div>
-          <h1>Anson</h1>
-          <p className="status">online</p>
+          <h1>{details?.name}</h1>
+          <p className="status">{details?.status || "offline"}</p>
 
           <div className="more_actions">
             <button
@@ -63,12 +69,7 @@ const ChatDetails = ({ isModal, setModal }) => {
 
           <div className="description">
             <h1>Description</h1>
-            <p>
-              is simply dummy text of the printing and typesetting industry.
-              Lorem Ipsum has been the industry's standard dummy text ever since
-              the 1500s, when an unknown printer took a galley of type and
-              scrambled it to make a type specimen book.
-            </p>
+            <p>{details?.about}</p>
           </div>
         </div>
 
@@ -108,54 +109,56 @@ const ChatDetails = ({ isModal, setModal }) => {
           <button>View More</button>
         </div>
 
-        <div className="members">
-          <div className="top">
-            <h1>
-              <AvatarSvg width={"20px"} height={"20px"} />
-              Members
-              <span>(22)</span>
-            </h1>
-            <button>
-              <PlusSvg />
-            </button>
-          </div>
-
-          <div className="list">
-            <div className="member">
-              <div className="cover">
-                <img
-                  src="https://yt3.googleusercontent.com/ytc/AGIKgqPh9kVptaKpovayOfZGjfyZV7DExqpIUitIiTlKuQ=s900-c-k-c0x00ffffff-no-rj"
-                  alt="profile"
-                />
-              </div>
-              <div className="content">
-                <h1>Ajith George</h1>
-              </div>
-              <div className="role">Owner</div>
+        {!details?.user && (
+          <div className="members">
+            <div className="top">
+              <h1>
+                <AvatarSvg width={"20px"} height={"20px"} />
+                Members
+                <span>(22)</span>
+              </h1>
+              <button>
+                <PlusSvg />
+              </button>
             </div>
 
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]?.map(
-              (obj, key) => {
-                return (
-                  <div className="member user" key={key}>
-                    <div className="cover">
-                      <img
-                        src="https://yt3.googleusercontent.com/ytc/AGIKgqPh9kVptaKpovayOfZGjfyZV7DExqpIUitIiTlKuQ=s900-c-k-c0x00ffffff-no-rj"
-                        alt="profile"
-                      />
-                    </div>
-                    <div className="content">
-                      <h1>Ajith George {obj}</h1>
-                    </div>
-                    <div className="role">User</div>
+            <div className="list">
+              <div className="member">
+                <div className="cover">
+                  <img
+                    src="https://yt3.googleusercontent.com/ytc/AGIKgqPh9kVptaKpovayOfZGjfyZV7DExqpIUitIiTlKuQ=s900-c-k-c0x00ffffff-no-rj"
+                    alt="profile"
+                  />
+                </div>
+                <div className="content">
+                  <h1>Ajith George</h1>
+                </div>
+                <div className="role">Owner</div>
+              </div>
 
-                    <button>Remove</button>
-                  </div>
-                );
-              }
-            )}
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]?.map(
+                (obj, key) => {
+                  return (
+                    <div className="member user" key={key}>
+                      <div className="cover">
+                        <img
+                          src="https://yt3.googleusercontent.com/ytc/AGIKgqPh9kVptaKpovayOfZGjfyZV7DExqpIUitIiTlKuQ=s900-c-k-c0x00ffffff-no-rj"
+                          alt="profile"
+                        />
+                      </div>
+                      <div className="content">
+                        <h1>Ajith George {obj}</h1>
+                      </div>
+                      <div className="role">User</div>
+
+                      <button>Remove</button>
+                    </div>
+                  );
+                }
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

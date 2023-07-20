@@ -21,7 +21,7 @@ const useSocket = () => {
     return () => {
       SocketRef?.current?.off("connect_error");
 
-      SocketRef?.current?.off("disconnect");
+      SocketRef?.current?.disconnect?.();
     };
   }, [id]);
 

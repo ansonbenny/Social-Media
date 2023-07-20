@@ -27,8 +27,8 @@ const reducer = (value, { type, ...actions }) => {
         ...value,
         modal: { ...value?.modal, ...actions },
       };
-    case "data":
-      return { ...value, data: actions?.data };
+    case "details":
+      return { ...value, details: actions?.data };
 
     default:
       return value;
@@ -63,10 +63,14 @@ const Chats = () => {
     e?.preventDefault?.();
 
     if (e?.target?.querySelector?.("input")?.value) {
+      const date = new Date();
+
       const chat = {
         id: Date?.now()?.toString(16),
         msg: e?.target?.querySelector?.("input")?.value,
-        date: new Date(),
+        date: `${date.getDate()}-${
+          date.getMonth() + 1
+        }-${date.getFullYear()} | ${date.getHours()}:${date.getMinutes()}`,
       };
 
       Socket?.emit(
@@ -78,7 +82,7 @@ const Chats = () => {
         },
         (err, res) => {
           if (res) {
-            ref?.current?.myMSg?.({
+            ref?.current?.insertMsg?.({
               from: user?._id,
               ...chat,
             });
@@ -111,20 +115,32 @@ const Chats = () => {
       emitUser();
 
       Socket?.on("chat message", (msg) => {
-        console.log(msg);
-        ref?.current?.othersMsg?.(msg);
+        if (
+          msg?.match == `${user?._id}${id}` ||
+          msg?.match == `${id}${user?._id}`
+        ) {
+          ref?.current?.insertMsg?.(msg);
+        } else if (msg?.match == user?._id) {
+          if (id) {
+            ref?.current?.insertMsg?.(msg);
+          }
+        } else {
+          alert("New msg notification");
+        }
       });
 
       if (id) {
+        // fetching user details and latest chat
+
         (async () => {
           try {
             let res = await axios.get(`/chat/userChat/${id}`, {
               signal: abortControl?.signal,
             });
 
-            ref?.current?.insertInitial?.(res?.["data"]?.data);
+            ref?.current?.insertInitial?.(res?.["data"]?.data?.chats);
 
-            action({ type: "data", data: res?.["data"]?.data });
+            action({ type: "details", data: res?.["data"]?.data?.details });
 
             timer = setTimeout(() => {
               dispatch(setLoading(false));
@@ -171,21 +187,21 @@ const Chats = () => {
       {id ? (
         <Fragment>
           <ChatLive
-            ref={ref}
-            onChat={onChat}
-            data={state?.data}
-            setModal={
-              !state?.size?.lg
+            {...{
+              ref,
+              details: state?.details,
+              onChat,
+              setModal: !state?.size?.lg
                 ? () => {
                     action({ type: "modal", details: true });
                   }
-                : undefined
-            }
+                : undefined,
+            }}
           />
 
           {state?.modal?.details || state?.size?.lg ? (
             <ChatDetails
-              chatRef={ref}
+              details={state?.details}
               isModal={
                 state?.modal?.details && !state?.size?.lg ? true : undefined
               }

@@ -119,6 +119,7 @@ const Login = () => {
       clearTimeout(timer);
     };
   }, [location]);
+  
   return (
     <section className="auth">
       <div className="content">

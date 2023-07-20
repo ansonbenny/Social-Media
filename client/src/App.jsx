@@ -2,11 +2,11 @@ import React, { Fragment } from "react";
 import { Route, Routes } from "react-router-dom";
 import { Account, Chats, Groups, Stories } from "./pages";
 import { Loading, Menu } from "./components";
-import { Login, SignUp } from "./features";
+import { Login, SignUp, Notification } from "./features";
 import { useSelector } from "react-redux";
 import ProtectedRoute from "./utils/ProtectedRoute";
-import "./App.scss";
 import FourNotFour from "./pages/404";
+import "./App.scss";
 
 function App() {
   const { loading, menu } = useSelector((state) => state?.additional);
@@ -16,6 +16,10 @@ function App() {
       {loading && <Loading />}
 
       <section data-for={menu ? "contents" : "fit-content"}>
+        {
+          // menu && <Notification />
+        }
+
         <Routes>
           <Route element={<ProtectedRoute isAuth />}>
             <Route path="/" exact element={<Chats />} />

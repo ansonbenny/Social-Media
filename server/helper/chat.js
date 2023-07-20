@@ -47,8 +47,8 @@ export default {
             _id: new ObjectId(userId),
           },
           {
-            $set: {
-              socketId,
+            $addToSet: {
+              socketId: socketId,
             },
           }
         );
@@ -59,14 +59,62 @@ export default {
       }
     });
   },
-  getSocketId: (userId) => {
+  getSocketId: (to, from) => {
     return new Promise(async (resolve, reject) => {
       try {
-        let res = await db.collection(collections.USERS).findOne({
-          _id: new ObjectId(userId),
-        });
+        let res = await db
+          .collection(collections.USERS)
+          .aggregate([
+            {
+              $match: {
+                _id: new ObjectId(to),
+              },
+            },
+            {
+              $project: {
+                ids: "$socketId",
+              },
+            },
+            {
+              $lookup: {
+                from: collections.USERS,
+                pipeline: [
+                  {
+                    $match: {
+                      _id: new ObjectId(from),
+                    },
+                  },
+                  {
+                    $project: {
+                      _id: 0,
+                      socketId: "$socketId",
+                    },
+                  },
+                ],
+                as: "from",
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                ids: {
+                  $concatArrays: [
+                    "$ids",
+                    {
+                      $arrayElemAt: ["$from.socketId", 0],
+                    },
+                  ],
+                },
+              },
+            },
+          ])
+          .toArray();
 
-        resolve(res);
+        if (res?.[0]) {
+          resolve(res?.[0]);
+        } else if (res) {
+          reject("Something Went Wrong");
+        }
       } catch (err) {
         reject(err);
       }
@@ -75,13 +123,13 @@ export default {
   removeSocketId: (socketId) => {
     return new Promise(async (resolve, reject) => {
       try {
-        await db.collection(collections.USERS).updateOne(
+        await db.collection(collections.USERS).updateMany(
           {
             socketId: socketId,
           },
           {
-            $unset: {
-              socketId: 1,
+            $pull: {
+              socketId: socketId,
             },
           }
         );
@@ -115,6 +163,9 @@ export default {
                   number: "$number",
                   about: "$about",
                   img: "$img",
+                  user: {
+                    $toBool: true,
+                  },
                 },
               },
             },
@@ -143,6 +194,7 @@ export default {
                       id: "$chat.id",
                       msg: "$chat.msg",
                       from: "$chat.from",
+                      date: "$chat.date",
                     },
                   },
                 ],
