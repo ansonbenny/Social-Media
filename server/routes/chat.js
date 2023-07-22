@@ -130,10 +130,7 @@ export default (app, io) => {
   router.get("/userChat/:id", CheckLogged, async (req, res) => {
     if (req?.params?.id?.length == 24) {
       try {
-        let response = await chat.getUserChats(
-          req?.params?.id,
-          req?.query?.userId
-        );
+        let response = await chat.getUserChats(req?.params?.id, req?.query);
 
         res.status(200).json({
           status: 200,

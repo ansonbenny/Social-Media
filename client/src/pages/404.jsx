@@ -19,7 +19,7 @@ const FourNotFour = () => {
   }, []);
 
   return (
-    <div className="error_404">
+    <section className="error_404">
       <h1>404</h1>
       <p>Sorry this page doesn't exist.</p>
       <button
@@ -29,7 +29,7 @@ const FourNotFour = () => {
       >
         Home
       </button>
-    </div>
+    </section>
   );
 };
 

@@ -4,7 +4,7 @@ import "./style.scss";
 
 const StoriesUser = () => {
   return (
-    <div className="stories-user">
+    <section className="stories-user">
       <div className="stories-recent">
         <div className="item">
           <img
@@ -119,7 +119,7 @@ const StoriesUser = () => {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

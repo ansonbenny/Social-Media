@@ -1,0 +1,194 @@
+@import '../../index.scss';
+
+#all-users {
+    padding-top: 1.5rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: calc(100% - 1.5rem);
+    overflow: hidden;
+
+    .search {
+        margin-left: .5rem;
+        margin-right: .5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        position: relative;
+
+        .svg_path {
+            padding-left: .5rem;
+            position: absolute;
+
+            path {
+                fill: $Text-Secondary;
+            }
+        }
+
+        input {
+            width: 100%;
+            padding: .8rem;
+            padding-left: 2.5rem;
+            background: var(--bg-grey);
+            border: none;
+            border-radius: 15px;
+            outline: none;
+            color: $Text-Secondary;
+        }
+
+        input::placeholder {
+            color: $Text-Secondary;
+        }
+
+        @media screen and (max-height:600px) {
+            margin-bottom: 1rem;
+        }
+    }
+
+    .title {
+        margin: 0 .5rem;
+        margin-bottom: 1rem;
+
+        h1 {
+            color: var(--text-primary);
+            font-size: x-large;
+            font-weight: 500;
+
+            span {
+                color: $bg-violet;
+            }
+        }
+
+        @media screen and (max-height:600px) {
+            margin-bottom: .5rem;
+        }
+    }
+
+    .stories-recent {
+        margin-left: .5rem;
+        margin-bottom: .5rem;
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+
+        @media screen and (max-height:600px) {
+            margin-bottom: 0;
+        }
+
+        .item {
+            cursor: pointer;
+
+            img {
+                width: 3rem;
+                height: 3rem;
+                aspect-ratio: 1/1;
+                object-position: center;
+                object-fit: cover;
+                border-radius: 9999px; //15px
+                border: 2px solid $bg-violet;
+            }
+        }
+    }
+
+    .list {
+        width: 100%;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        gap: .5rem;
+        margin-bottom: .5rem;
+        overflow-y: auto;
+        overflow-x: hidden;
+        scroll-behavior: smooth;
+        scrollbar-color: transparent transparent;
+        scrollbar-width: 0px;
+
+        &::-webkit-scrollbar {
+            width: 0px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: transparent;
+        }
+
+        .card {
+            position: relative;
+            background: transparent;
+            border-radius: 15px;
+            padding: .5rem;
+            width: calc(100% - 1rem);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: .8rem;
+            transition: all .5s ease-in-out;
+            -moz-transition: all .5s ease-in-out;
+            cursor: pointer;
+
+            &:is(.active) {
+                background: var(--bg-grey);
+            }
+
+            &:hover {
+                background: var(--bg-grey);
+            }
+
+            .count {
+                position: absolute;
+                right: .7rem;
+                z-index: 500;
+                border: none;
+                background: $bg-violet;
+                width: 1.3rem;
+                height: 1.3rem;
+                border-radius: 9999px;
+                font-size: 11px;
+                color: #ffffff;
+                cursor: pointer;
+            }
+
+            .cover {
+                display: flex;
+                align-items: center;
+
+                img {
+                    width: 3rem;
+                    height: 3rem;
+                    aspect-ratio: 1/1;
+                    object-position: center;
+                    object-fit: cover;
+                    border-radius: 9999px; //15px
+                }
+            }
+
+            .content {
+                h1 {
+                    width: 8rem;
+                    font-size: small;
+                    font-weight: 500;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    color: var(--text-primary);
+                }
+
+                p {
+                    width: 8rem;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    font-size: x-small;
+                    color: $Text-Secondary;
+                    font-weight: normal;
+                    line-height: 1.5rem;
+                }
+            }
+        }
+    }
+}

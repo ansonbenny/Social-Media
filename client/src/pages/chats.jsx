@@ -5,7 +5,7 @@ import React, {
   useReducer,
   useRef,
 } from "react";
-import { AllChats, ChatDetails, ChatLive } from "../components";
+import { ChatDetails, ChatLive, Users } from "../components";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setLoading, setNotification } from "../redux/additional";
@@ -140,7 +140,7 @@ const Chats = () => {
               signal: abortControl?.signal,
             });
 
-            ref?.current?.insertInitial?.(res?.["data"]?.data?.chats);
+            ref?.current?.insertInitial?.(res?.["data"]?.data?.chat?.msgs);
 
             action({ type: "details", data: res?.["data"]?.data?.details });
 
@@ -184,7 +184,7 @@ const Chats = () => {
 
   return (
     <section className="chats">
-      {!id || !state?.size?.sm ? <AllChats /> : null}
+      {!id || !state?.size?.sm ? <Users /> : null}
 
       {id ? (
         <Fragment>

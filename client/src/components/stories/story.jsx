@@ -1,10 +1,8 @@
-import React from 'react'
+import React from "react";
 import "./style.scss";
 
 const StoryComponent = () => {
-  return (
-    <div>Story</div>
-  )
-}
+  return <section>Story</section>;
+};
 
-export default StoryComponent
+export default StoryComponent;

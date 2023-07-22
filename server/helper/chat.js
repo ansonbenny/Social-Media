@@ -144,9 +144,9 @@ export default {
       }
     });
   },
-  getUserChats: (to, me) => {
-    // add limit and skip for pagination
+  getUserChats: (to, { userId, skip = 0 }) => {
     return new Promise(async (resolve, reject) => {
+      //add client matchable id or skip details
       try {
         let chats = await db
           .collection(collections.USERS)
@@ -181,10 +181,10 @@ export default {
                     $match: {
                       $or: [
                         {
-                          users: [to, me],
+                          users: [to, userId],
                         },
                         {
-                          users: [me, to],
+                          users: [userId, to],
                         },
                       ],
                     },
@@ -193,16 +193,59 @@ export default {
                     $unwind: "$chat",
                   },
                   {
-                    $project: {
-                      _id: "$_id",
-                      id: "$chat.id",
-                      msg: "$chat.msg",
-                      from: "$chat.from",
-                      date: "$chat.date",
+                    $group: {
+                      _id: 1,
+                      total: {
+                        $sum: 1,
+                      },
+                      msgs: {
+                        $push: "$chat",
+                      },
+                    },
+                  },
+                  {
+                    $set: {
+                      msgs: {
+                        $reverseArray: "$msgs",
+                      },
+                    },
+                  },
+                  {
+                    $unwind: "$msgs",
+                  },
+                  {
+                    $skip: parseInt(skip),
+                  },
+                  {
+                    $limit: 10,
+                  },
+                  {
+                    $group: {
+                      _id: 1,
+                      total: {
+                        $first: "$total",
+                      },
+                      msgs: {
+                        $push: "$msgs",
+                      },
+                    },
+                  },
+                  {
+                    $set: {
+                      msgs: {
+                        $reverseArray: "$msgs",
+                      },
                     },
                   },
                 ],
-                as: "chats",
+                as: "chat",
+              },
+            },
+            {
+              $set: {
+                chat: {
+                  $arrayElemAt: ["$chat", 0],
+                },
               },
             },
           ])

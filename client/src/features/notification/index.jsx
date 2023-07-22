@@ -15,7 +15,7 @@ const Notification = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       dispatch(setNotification());
-    }, 5000);
+    }, 10000);
 
     return () => {
       clearTimeout(timer);
@@ -23,7 +23,7 @@ const Notification = () => {
   }, []);
 
   return (
-    <div className="notification-modal">
+    <section className="notification-modal">
       <div className="inner">
         <div className="head">
           <h1>Notification</h1>
@@ -49,7 +49,7 @@ const Notification = () => {
           </button>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

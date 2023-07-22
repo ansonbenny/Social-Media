@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useReducer } from "react";
-import { AllChats, ChatDetails, ChatLive } from "../components";
+import { ChatDetails, ChatLive, Users } from "../components";
 import { useOutletContext, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setLoading } from "../redux/additional";
@@ -70,7 +70,7 @@ const Groups = () => {
 
   return (
     <section className="chats">
-      {!id || !state?.size?.sm ? <AllChats /> : null}
+      {!id || !state?.size?.sm ? <Users /> : null}
 
       {id ? (
         <Fragment>

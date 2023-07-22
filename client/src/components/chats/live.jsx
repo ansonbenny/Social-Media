@@ -16,7 +16,10 @@ import {
   VideoSvg,
 } from "../../assets";
 import { useSelector } from "react-redux";
+import { LoadingCircle } from "../";
+import { axios } from "../../lib";
 import "./style.scss";
+import { useNavigate } from "react-router-dom";
 
 const reducer = (state, { type, data }) => {
   switch (type) {
@@ -28,13 +31,27 @@ const reducer = (state, { type, data }) => {
       } else {
         return state;
       }
+    case "old":
+      //  client matchable id or skip details
+      if (data?.length > 0) {
+        const old = state;
+
+        return [...data, ...old];
+      } else {
+        return state;
+      }
     default:
       return state;
   }
 };
 
 const ChatLive = forwardRef(({ setModal, onChat, details }, ref) => {
-  const messagesRef = useRef();
+  const refs = useRef({
+    msgs: null,
+    loading: undefined,
+  });
+
+  const navigate = useNavigate();
 
   const user = useSelector((state) => state?.user);
 
@@ -50,7 +67,81 @@ const ChatLive = forwardRef(({ setModal, onChat, details }, ref) => {
   }));
 
   useEffect(() => {
-    messagesRef?.current?.scroll?.(0, messagesRef?.current?.scrollHeight);
+    const abortControl = new AbortController();
+    
+    const LoadMoreMsgs = async () => {
+      try {
+        if (details?.user) {
+          let res = await axios.get(`/chat/userChat/${details?._id}`, {
+            params: {
+              skip: messages?.length,
+            },
+            signal: abortControl?.signal,
+          });
+
+          if (res?.["data"]?.data) {
+            console.log(res?.["data"]?.data?.chat?.msgs);
+            refs?.current?.loading?.classList?.remove?.("add");
+            action({ type: "old", data: res?.["data"]?.data?.chat?.msgs });
+          }
+        }
+      } catch (err) {
+        if (err?.code !== "ERR_CANCELED") {
+          refs?.current?.loading?.classList?.remove?.("add");
+
+          if (err?.response?.data?.status == 405) {
+            navigate("/");
+          } else {
+            alert(err?.response?.data?.message || "Something Went Wrong");
+          }
+        }
+      }
+    };
+
+    const onScroll = (e) => {
+      e?.preventDefault?.();
+
+      if (
+        refs?.current?.msgs?.scrollHeight > refs?.current?.msgs?.clientHeight
+      ) {
+        if (refs?.current?.msgs?.scrollTop <= 100) {
+          refs?.current?.loading?.classList?.remove?.("hide");
+          LoadMoreMsgs?.();
+        }
+      }
+    };
+
+    const onWheelTouch = () => {
+      if (messages?.length > 0) {
+        if (
+          refs?.current?.msgs?.scrollHeight <= refs?.current?.msgs?.clientHeight
+        ) {
+          refs?.current?.loading?.classList?.remove?.("hide");
+          LoadMoreMsgs?.();
+        }
+      }
+    };
+
+    refs?.current?.msgs?.scroll?.(0, refs?.current?.msgs?.scrollHeight);
+
+    refs?.current?.loading?.classList?.add?.("hide");
+
+    refs?.current?.msgs?.addEventListener?.("wheel", onWheelTouch);
+
+    refs?.current?.msgs?.addEventListener?.("touchmove", onWheelTouch);
+
+    refs?.current?.msgs?.addEventListener?.("scroll", onScroll);
+
+    return () => {
+      refs?.current?.msgs?.removeEventListener?.("wheel", onWheelTouch);
+
+      refs?.current?.msgs?.removeEventListener?.("touchmove", onWheelTouch);
+
+      refs?.current?.msgs?.removeEventListener?.("scroll", onScroll);
+
+      abortControl?.abort?.();
+    };
+    
   }, [messages]);
 
   return (
@@ -97,61 +188,16 @@ const ChatLive = forwardRef(({ setModal, onChat, details }, ref) => {
       </div>
 
       <div className="body">
-        <div className="messages" ref={messagesRef}>
-          {/* <div className="others">
-            <div className="cover">
-              <img
-                src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
-                alt="profile"
-              />
-            </div>
-            <div className="card actionable">
-              <div className="inner">
-                <div className="from">
-                  <p className="author">Anson</p>
-                  <p className="time">09/03/2023 08:30</p>
-                </div>
-
-                <div className="msg">Hello Ajith.</div>
-              </div>
-
-              <div className="actions-msg">
-                <button onClick={() => window.alert("click")}>
-                  <CopySvg class_name={"path_fill"} />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="me">
-            <div className="card">
-              <div className="inner">
-                <div className="from">
-                  <p className="author">You</p>
-                  <p className="time">08:30</p>
-                </div>
-
-                <div className="msg">Hello How Are You</div>
-              </div>
-
-              <div className="actions-msg">
-                <button onClick={() => window.alert("click")}>
-                  <TrashSvg />
-                </button>
-                <button onClick={() => window.alert("click")}>
-                  <CopySvg class_name={"path_fill"} />
-                </button>
-              </div>
-            </div>
-
-            <div className="cover">
-              <img
-                src="https://yt3.googleusercontent.com/ytc/AGIKgqPh9kVptaKpovayOfZGjfyZV7DExqpIUitIiTlKuQ=s900-c-k-c0x00ffffff-no-rj"
-                alt="profile"
-              />
-            </div>
-          </div>
-
+        <div
+          className="messages"
+          ref={(elm) => {
+            if (refs?.current) {
+              refs.current.msgs = elm;
+            }
+          }}
+        >
+          <LoadingCircle ref={refs} />
+          {/*
           <div className="me">
             <div className="card">
               <div className="inner">
@@ -179,7 +225,7 @@ const ChatLive = forwardRef(({ setModal, onChat, details }, ref) => {
               />
             </div>
           </div>
-
+           
           <div className="others">
             <div className="cover">
               <img
@@ -289,7 +335,7 @@ const ChatLive = forwardRef(({ setModal, onChat, details }, ref) => {
                 </div>
               </div>
             </div>
-          </div> */}
+          </div>  */}
 
           {messages?.map((obj, key) => {
             if (obj?.from == user?._id) {

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import UsersStories from "../components/stories/users";
 import { useOutletContext, useParams } from "react-router-dom";
-import { StoriesUser } from "../components";
+import { StoriesUser, Users } from "../components";
 import { useDispatch } from "react-redux";
 import { setLoading } from "../redux/additional";
 
@@ -45,7 +44,7 @@ const Stories = () => {
   return (
     <section className="stories">
       {!id || !size?.sm ? (
-        <UsersStories notSelected={id ? undefined : true} />
+        <Users stories selected={id ? true : undefined} />
       ) : null}
 
       {id ? (
