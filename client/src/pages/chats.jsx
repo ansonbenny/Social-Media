@@ -29,7 +29,6 @@ const reducer = (value, { type, ...actions }) => {
       };
     case "details":
       return { ...value, details: actions?.data };
-
     default:
       return value;
   }
@@ -62,15 +61,16 @@ const Chats = () => {
   const onChat = (e) => {
     e?.preventDefault?.();
 
-    if (e?.target?.querySelector?.("input")?.value) {
+    const input = e?.target?.querySelector?.("input")
+
+    if (input?.value) {
       const date = new Date();
 
       const chat = {
         id: Date?.now()?.toString(16),
-        msg: e?.target?.querySelector?.("input")?.value,
-        date: `${date.getDate()}-${
-          date.getMonth() + 1
-        }-${date.getFullYear()} | ${date.getHours()}:${date.getMinutes()}`,
+        msg: input?.value,
+        date: `${date.getDate()}-${date.getMonth() + 1
+          }-${date.getFullYear()} | ${date.getHours()}:${date.getMinutes()}`,
       };
 
       Socket?.emit(
@@ -82,6 +82,8 @@ const Chats = () => {
         },
         (err, res) => {
           if (res) {
+            input.value = ''
+
             ref?.current?.insertMsg?.({
               from: user?._id,
               ...chat,
@@ -195,8 +197,8 @@ const Chats = () => {
               onChat,
               setModal: !state?.size?.lg
                 ? () => {
-                    action({ type: "modal", details: true });
-                  }
+                  action({ type: "modal", details: true });
+                }
                 : undefined,
             }}
           />
@@ -210,8 +212,8 @@ const Chats = () => {
               setModal={
                 state?.modal?.details && !state?.size?.lg
                   ? () => {
-                      action({ type: "modal", details: false });
-                    }
+                    action({ type: "modal", details: false });
+                  }
                   : undefined
               }
             />

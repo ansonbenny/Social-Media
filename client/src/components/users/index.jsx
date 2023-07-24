@@ -45,7 +45,7 @@ const Users = ({ selected, stories }) => {
       <div className="list">
         <div
           className="card active"
-          onClick={() => navigate("/chat/64a13272e41b711841b83928")}
+          onClick={() => navigate("/chat/64bce8d941b7afe16973bd9d")}
         >
           <div className="cover">
             <img
@@ -65,7 +65,7 @@ const Users = ({ selected, stories }) => {
         <div
           className="card"
           onClick={() => {
-            navigate("/chat/64ac033a1668d20be2008f80");
+            navigate("/chat/64bce93941b7afe16973bd9f");
           }}
         >
           <div className="cover">

@@ -1,27 +1,130 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useReducer, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { axios } from "../lib";
 
-const useScroll = () => {
+const reducer = (state, { type, data }) => {
+  switch (type) {
+    case "initial":
+      return { ...state, msgs: data, new: true };
+
+    case "new":
+      if (!state?.msgs?.find?.((obj) => obj?.id == data?.id)) {
+        if (state?.msgs?.length > 0) {
+          return { ...state, msgs: [...state?.msgs, data], new: true };
+        } else {
+          return { ...state, msgs: [data], new: true }
+        }
+      } else {
+        return state;
+      }
+
+    case "old":
+      if (data?.length > 0 && state?.msgs?.length > 0) {
+        if (!state?.msgs?.find((obj) => obj?.id == data?.[data?.length - 1]?.id)) {
+          const old = state?.msgs;
+
+          return { ...state, msgs: [...data, ...old], new: false };
+        } else {
+          return state
+        }
+      } else if (data?.length > 0) {
+        return { ...state, msg: data, new: false }
+      } else {
+        return state;
+      }
+
+    default:
+      return state;
+  }
+};
+
+const useScroll = ({ url, details }) => {
   const ref = useRef({
     main: null,
+    loading: null
   });
 
-  useEffect(() => {
-    ref?.current?.msgs?.addEventListener?.("wheel", (e) => {});
+  const navigate = useNavigate()
 
-    ref?.current?.msgs?.addEventListener?.("touchmove", (e) => {
-      console.log(e?.touches?.[0]?.clientY);
-    });
+  const [state, action] = useReducer(reducer, {})
+
+  useEffect(() => {
+    let abortControl;
+
+    const LoadMoreMsgs = async () => {
+      if (abortControl) {
+        abortControl?.abort?.()
+      }
+
+      abortControl = new AbortController();
+
+      try {
+        if (details?.user) {
+          let res = await axios.get(url, {
+            params: {
+              skip: state?.msgs?.length,
+            },
+            signal: abortControl?.signal,
+          });
+
+          if (res?.["data"]?.data) {
+            ref?.current?.loading?.classList?.add?.("hide");
+            action({ type: "old", data: res?.["data"]?.data?.chat?.msgs });
+          }
+        }
+      } catch (err) {
+        if (err?.code !== "ERR_CANCELED") {
+          ref?.current?.loading?.classList?.add?.("hide");
+
+          if (err?.response?.data?.status == 405) {
+            navigate("/");
+          } else {
+            alert(err?.response?.data?.message || "Something Went Wrong");
+          }
+        }
+      }
+    };
+
+    const onScroll = (e) => {
+      e?.preventDefault?.();
+
+      if (
+        ref?.current?.main?.scrollHeight > ref?.current?.main?.clientHeight
+      ) {
+        if (ref?.current?.main?.scrollTop <= 0) {
+          ref?.current?.loading?.classList?.remove?.("hide");
+          LoadMoreMsgs?.();
+        }
+      }
+    };
+
+    const onWheelTouch = () => {
+      if (state?.length > 0) {
+        if (
+          ref?.current?.main?.scrollHeight <= ref?.current?.main?.clientHeight
+        ) {
+          ref?.current?.loading?.classList?.remove?.("hide");
+          LoadMoreMsgs?.();
+        }
+      }
+    };
+
+    ref?.current?.main?.addEventListener?.("wheel", onWheelTouch);
+
+    ref?.current?.main?.addEventListener?.("touchmove", onWheelTouch);
+
+    ref?.current?.main?.addEventListener?.("scroll", onScroll);
 
     return () => {
-      ref?.current?.msgs?.removeEventListener?.("wheel", (e) => {});
+      ref?.current?.main?.removeEventListener?.("wheel", onWheelTouch);
 
-      ref?.current?.msgs?.removeEventListener?.("touchmove", (e) => {
-        console.log(e?.touches?.[0]?.clientY);
-      });
+      ref?.current?.main?.removeEventListener?.("touchmove", onWheelTouch);
+
+      ref?.current?.main?.removeEventListener?.("scroll", onScroll);
     };
-  }, []);
+  }, [state?.msgs]);
 
-  return ref;
+  return [ref, state, action];
 };
 
 export default useScroll;

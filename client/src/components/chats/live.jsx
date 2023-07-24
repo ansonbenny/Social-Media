@@ -2,8 +2,6 @@ import React, {
   forwardRef,
   useEffect,
   useImperativeHandle,
-  useReducer,
-  useRef,
 } from "react";
 import {
   AvatarSvg,
@@ -17,45 +15,17 @@ import {
 } from "../../assets";
 import { useSelector } from "react-redux";
 import { LoadingCircle } from "../";
-import { axios } from "../../lib";
+import useScroll from "../../hooks/scroll";
 import "./style.scss";
-import { useNavigate } from "react-router-dom";
-
-const reducer = (state, { type, data }) => {
-  switch (type) {
-    case "initial":
-      return data;
-    case "new":
-      if (!state?.find?.((obj) => obj?.id == data?.id)) {
-        return [...state, data];
-      } else {
-        return state;
-      }
-    case "old":
-      //  client matchable id or skip details
-      if (data?.length > 0) {
-        const old = state;
-
-        return [...data, ...old];
-      } else {
-        return state;
-      }
-    default:
-      return state;
-  }
-};
 
 const ChatLive = forwardRef(({ setModal, onChat, details }, ref) => {
-  const refs = useRef({
-    msgs: null,
-    loading: undefined,
-  });
 
-  const navigate = useNavigate();
+  const [refs, state, action] = useScroll({
+    url: `/chat/userChat/${details?._id}`,
+    details
+  })
 
   const user = useSelector((state) => state?.user);
-
-  const [messages, action] = useReducer(reducer, []);
 
   useImperativeHandle(ref, () => ({
     insertMsg: (data) => {
@@ -67,82 +37,12 @@ const ChatLive = forwardRef(({ setModal, onChat, details }, ref) => {
   }));
 
   useEffect(() => {
-    const abortControl = new AbortController();
-    
-    const LoadMoreMsgs = async () => {
-      try {
-        if (details?.user) {
-          let res = await axios.get(`/chat/userChat/${details?._id}`, {
-            params: {
-              skip: messages?.length,
-            },
-            signal: abortControl?.signal,
-          });
-
-          if (res?.["data"]?.data) {
-            console.log(res?.["data"]?.data?.chat?.msgs);
-            refs?.current?.loading?.classList?.remove?.("add");
-            action({ type: "old", data: res?.["data"]?.data?.chat?.msgs });
-          }
-        }
-      } catch (err) {
-        if (err?.code !== "ERR_CANCELED") {
-          refs?.current?.loading?.classList?.remove?.("add");
-
-          if (err?.response?.data?.status == 405) {
-            navigate("/");
-          } else {
-            alert(err?.response?.data?.message || "Something Went Wrong");
-          }
-        }
-      }
-    };
-
-    const onScroll = (e) => {
-      e?.preventDefault?.();
-
-      if (
-        refs?.current?.msgs?.scrollHeight > refs?.current?.msgs?.clientHeight
-      ) {
-        if (refs?.current?.msgs?.scrollTop <= 100) {
-          refs?.current?.loading?.classList?.remove?.("hide");
-          LoadMoreMsgs?.();
-        }
-      }
-    };
-
-    const onWheelTouch = () => {
-      if (messages?.length > 0) {
-        if (
-          refs?.current?.msgs?.scrollHeight <= refs?.current?.msgs?.clientHeight
-        ) {
-          refs?.current?.loading?.classList?.remove?.("hide");
-          LoadMoreMsgs?.();
-        }
-      }
-    };
-
-    refs?.current?.msgs?.scroll?.(0, refs?.current?.msgs?.scrollHeight);
-
-    refs?.current?.loading?.classList?.add?.("hide");
-
-    refs?.current?.msgs?.addEventListener?.("wheel", onWheelTouch);
-
-    refs?.current?.msgs?.addEventListener?.("touchmove", onWheelTouch);
-
-    refs?.current?.msgs?.addEventListener?.("scroll", onScroll);
-
-    return () => {
-      refs?.current?.msgs?.removeEventListener?.("wheel", onWheelTouch);
-
-      refs?.current?.msgs?.removeEventListener?.("touchmove", onWheelTouch);
-
-      refs?.current?.msgs?.removeEventListener?.("scroll", onScroll);
-
-      abortControl?.abort?.();
-    };
-    
-  }, [messages]);
+    if (state?.new) {
+      refs?.current?.main?.scroll?.(0, refs?.current?.main?.scrollHeight);
+    } else {
+      refs?.current?.main?.scroll?.(0, 30);
+    }
+  }, [state?.msgs]);
 
   return (
     <section className="live">
@@ -192,152 +92,155 @@ const ChatLive = forwardRef(({ setModal, onChat, details }, ref) => {
           className="messages"
           ref={(elm) => {
             if (refs?.current) {
-              refs.current.msgs = elm;
+              refs.current.main = elm;
             }
           }}
         >
           <LoadingCircle ref={refs} />
-          {/*
-          <div className="me">
-            <div className="card">
-              <div className="inner">
-                <div className="from">
-                  <p className="author">You</p>
-                  <p className="time">08:30</p>
+
+          {
+            /*
+            <div className="me">
+              <div className="card">
+                <div className="inner">
+                  <div className="from">
+                    <p className="author">You</p>
+                    <p className="time">08:30</p>
+                  </div>
+  
+                  <div className="msg">
+                    <img src="https://images.mktw.net/im-764473?width=1280&size=1" />
+                  </div>
                 </div>
-
-                <div className="msg">
-                  <img src="https://images.mktw.net/im-764473?width=1280&size=1" />
-                </div>
-              </div>
-
-              <div className="actions-msg">
-                <button onClick={() => window.alert("click")}>
-                  <TrashSvg />
-                </button>
-              </div>
-            </div>
-
-            <div className="cover">
-              <img
-                src="https://yt3.googleusercontent.com/ytc/AGIKgqPh9kVptaKpovayOfZGjfyZV7DExqpIUitIiTlKuQ=s900-c-k-c0x00ffffff-no-rj"
-                alt="profile"
-              />
-            </div>
-          </div>
-           
-          <div className="others">
-            <div className="cover">
-              <img
-                src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
-                alt="profile"
-              />
-            </div>
-            <div className="card actionable">
-              <div className="inner">
-                <div className="from">
-                  <p className="author">Anson</p>
-                  <p className="time">08:30</p>
-                </div>
-
-                <div className="msg">Iam Fine, How is today going</div>
-              </div>
-
-              <div className="actions-msg">
-                <button onClick={() => window.alert("click")}>
-                  <CopySvg class_name={"path_fill"} />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="me">
-            <div className="card">
-              <div className="inner">
-                <div className="from">
-                  <p className="author">You</p>
-                  <p className="time">08:30</p>
-                </div>
-
-                <div className="msg">Today is good not bad.</div>
-              </div>
-
-              <div className="actions-msg">
-                <button onClick={() => window.alert("click")}>
-                  <TrashSvg />
-                </button>
-                <button onClick={() => window.alert("click")}>
-                  <CopySvg class_name={"path_fill"} />
-                </button>
-              </div>
-            </div>
-
-            <div className="cover">
-              <img
-                src="https://yt3.googleusercontent.com/ytc/AGIKgqPh9kVptaKpovayOfZGjfyZV7DExqpIUitIiTlKuQ=s900-c-k-c0x00ffffff-no-rj"
-                alt="profile"
-              />
-            </div>
-          </div>
-
-          <div className="others">
-            <div className="cover">
-              <img
-                src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
-                alt="profile"
-              />
-            </div>
-            <div className="card actionable">
-              <div className="inner">
-                <div className="from">
-                  <p className="author">Anson</p>
-                  <p className="time">08:35</p>
-                </div>
-
-                <div className="msg">
-                  How is my articles, Lorem Ipsum is simply dummy text of the
-                  printing and typesetting industry. Lorem Ipsum has been the
-                  industry's standard dummy text ever since the 1500s, when an
-                  unknown printer took a galley of type and scrambled it to make
-                  a type specimen book. It has survived not only five centuries,
-                  but also the leap into electronic typesetting, remaining
-                  essentially unchanged. It was popularised in the 1960s with
-                  the release of Letraset sheets containing Lorem Ipsum
-                  passages, and more recently with desktop publishing software
-                  like Aldus PageMaker including versions of Lorem Ipsum
+  
+                <div className="actions-msg">
+                  <button onClick={() => window.alert("click")}>
+                    <TrashSvg />
+                  </button>
                 </div>
               </div>
-
-              <div className="actions-msg">
-                <button onClick={() => window.alert("click")}>
-                  <CopySvg class_name={"path_fill"} />
-                </button>
+  
+              <div className="cover">
+                <img
+                  src="https://yt3.googleusercontent.com/ytc/AGIKgqPh9kVptaKpovayOfZGjfyZV7DExqpIUitIiTlKuQ=s900-c-k-c0x00ffffff-no-rj"
+                  alt="profile"
+                />
               </div>
             </div>
-          </div>
-
-          <div className="others">
-            <div className="cover">
-              <img
-                src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
-                alt="profile"
-              />
-            </div>
-            <div className="card">
-              <div className="inner">
-                <div className="from">
-                  <p className="author">Anson</p>
-                  <p className="time">08:35</p>
+             
+            <div className="others">
+              <div className="cover">
+                <img
+                  src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
+                  alt="profile"
+                />
+              </div>
+              <div className="card actionable">
+                <div className="inner">
+                  <div className="from">
+                    <p className="author">Anson</p>
+                    <p className="time">08:30</p>
+                  </div>
+  
+                  <div className="msg">Iam Fine, How is today going</div>
                 </div>
-
-                <div className="msg">
-                  <img src="https://images.mktw.net/im-764473?width=1280&size=1" />
+  
+                <div className="actions-msg">
+                  <button onClick={() => window.alert("click")}>
+                    <CopySvg class_name={"path_fill"} />
+                  </button>
                 </div>
               </div>
             </div>
-          </div>  */}
+  
+            <div className="me">
+              <div className="card">
+                <div className="inner">
+                  <div className="from">
+                    <p className="author">You</p>
+                    <p className="time">08:30</p>
+                  </div>
+  
+                  <div className="msg">Today is good not bad.</div>
+                </div>
+  
+                <div className="actions-msg">
+                  <button onClick={() => window.alert("click")}>
+                    <TrashSvg />
+                  </button>
+                  <button onClick={() => window.alert("click")}>
+                    <CopySvg class_name={"path_fill"} />
+                  </button>
+                </div>
+              </div>
+  
+              <div className="cover">
+                <img
+                  src="https://yt3.googleusercontent.com/ytc/AGIKgqPh9kVptaKpovayOfZGjfyZV7DExqpIUitIiTlKuQ=s900-c-k-c0x00ffffff-no-rj"
+                  alt="profile"
+                />
+              </div>
+            </div>
+  
+            <div className="others">
+              <div className="cover">
+                <img
+                  src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
+                  alt="profile"
+                />
+              </div>
+              <div className="card actionable">
+                <div className="inner">
+                  <div className="from">
+                    <p className="author">Anson</p>
+                    <p className="time">08:35</p>
+                  </div>
+  
+                  <div className="msg">
+                    How is my articles, Lorem Ipsum is simply dummy text of the
+                    printing and typesetting industry. Lorem Ipsum has been the
+                    industry's standard dummy text ever since the 1500s, when an
+                    unknown printer took a galley of type and scrambled it to make
+                    a type specimen book. It has survived not only five centuries,
+                    but also the leap into electronic typesetting, remaining
+                    essentially unchanged. It was popularised in the 1960s with
+                    the release of Letraset sheets containing Lorem Ipsum
+                    passages, and more recently with desktop publishing software
+                    like Aldus PageMaker including versions of Lorem Ipsum
+                  </div>
+                </div>
+  
+                <div className="actions-msg">
+                  <button onClick={() => window.alert("click")}>
+                    <CopySvg class_name={"path_fill"} />
+                  </button>
+                </div>
+              </div>
+            </div>
+  
+            <div className="others">
+              <div className="cover">
+                <img
+                  src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
+                  alt="profile"
+                />
+              </div>
+              <div className="card">
+                <div className="inner">
+                  <div className="from">
+                    <p className="author">Anson</p>
+                    <p className="time">08:35</p>
+                  </div>
+  
+                  <div className="msg">
+                    <img src="https://images.mktw.net/im-764473?width=1280&size=1" />
+                  </div>
+                </div>
+              </div>
+            </div>  */
+          }
 
-          {messages?.map((obj, key) => {
+          {state?.msgs?.map((obj, key) => {
             if (obj?.from == user?._id) {
               return (
                 <div className="me" key={key}>

@@ -146,7 +146,6 @@ export default {
   },
   getUserChats: (to, { userId, skip = 0 }) => {
     return new Promise(async (resolve, reject) => {
-      //add client matchable id or skip details
       try {
         let chats = await db
           .collection(collections.USERS)
@@ -190,23 +189,9 @@ export default {
                     },
                   },
                   {
-                    $unwind: "$chat",
-                  },
-                  {
-                    $group: {
-                      _id: 1,
-                      total: {
-                        $sum: 1,
-                      },
+                    $project: {
                       msgs: {
-                        $push: "$chat",
-                      },
-                    },
-                  },
-                  {
-                    $set: {
-                      msgs: {
-                        $reverseArray: "$msgs",
+                        $reverseArray: "$chat",
                       },
                     },
                   },
@@ -222,9 +207,6 @@ export default {
                   {
                     $group: {
                       _id: 1,
-                      total: {
-                        $first: "$total",
-                      },
                       msgs: {
                         $push: "$msgs",
                       },
