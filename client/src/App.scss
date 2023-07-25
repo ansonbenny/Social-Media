@@ -159,10 +159,8 @@
                         img {
                             width: 4.5rem;
                             height: 4.5rem;
-                            object-fit: cover;
-                            object-position: center;
-                            border-radius: 9999px;
                             border: 2px solid $bg-violet;
+                            @include coverImg;
                         }
 
                         svg {

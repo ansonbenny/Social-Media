@@ -22,11 +22,8 @@
                 img {
                     width: 3rem;
                     height: 3rem;
-                    aspect-ratio: 1/1;
-                    object-position: center;
-                    object-fit: cover;
-                    border-radius: 9999px; //15px
                     border: 2px solid $bg-violet;
+                    @include coverImg;
                 }
             }
         }
@@ -92,11 +89,8 @@
                     .cover-user {
                         max-width: 2.5rem;
                         max-height: 2.5rem;
-                        object-position: center;
-                        object-fit: cover;
-                        aspect-ratio: 1/1;
-                        border-radius: 9999px;
                         border: 2px solid $bg-violet;
+                        @include coverImg;
 
                         @media screen and (max-width:500px) {
                             max-width: 2rem;

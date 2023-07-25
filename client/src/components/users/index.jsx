@@ -1,11 +1,13 @@
 import React, { Fragment } from "react";
-import { SearchSvg } from "../../assets";
+import { AvatarSvg, SearchSvg } from "../../assets";
 import { useNavigate } from "react-router-dom";
 import { LoadingCircle } from "..";
 import "./style.scss";
 
 const Users = ({ selected, stories }) => {
   const navigate = useNavigate();
+
+  //add green color circle in image to show user is online
 
   return (
     <section id="all-users">
@@ -48,10 +50,8 @@ const Users = ({ selected, stories }) => {
           onClick={() => navigate("/chat/64bce8d941b7afe16973bd9d")}
         >
           <div className="cover">
-            <img
-              src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
-              alt="profile"
-            />
+            <AvatarSvg />
+            <div data-for="status" />
           </div>
           <div className="content">
             <h1>Anson Benny</h1>
@@ -73,6 +73,7 @@ const Users = ({ selected, stories }) => {
               src="https://img.i-scmp.com/cdn-cgi/image/fit=contain,width=425,format=auto/sites/default/files/styles/768x768/public/d8/images/methode/2021/01/11/d5ed0832-5001-11eb-ad83-255e1243236c_image_hires_113755.jpg?itok=6PsAhoy2&v=1610336282"
               alt="profile"
             />
+            <div data-for="status" />
           </div>
           <div className="content">
             <h1>Sidharth Vijayan</h1>

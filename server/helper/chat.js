@@ -242,5 +242,5 @@ export default {
         reject(err);
       }
     });
-  },
+  }
 };

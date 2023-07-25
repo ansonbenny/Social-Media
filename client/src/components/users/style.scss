@@ -83,11 +83,8 @@
             img {
                 width: 3rem;
                 height: 3rem;
-                aspect-ratio: 1/1;
-                object-position: center;
-                object-fit: cover;
-                border-radius: 9999px; //15px
                 border: 2px solid $bg-violet;
+                @include coverImg;
             }
         }
     }
@@ -156,14 +153,31 @@
             .cover {
                 display: flex;
                 align-items: center;
+                position: relative;
 
                 img {
                     width: 3rem;
                     height: 3rem;
-                    aspect-ratio: 1/1;
-                    object-position: center;
-                    object-fit: cover;
-                    border-radius: 9999px; //15px
+                    @include coverImg;
+                }
+
+                svg {
+                    width: 2.6rem;
+                    height: 2.6rem;
+                    padding: .2rem;
+                    border: 1px solid $bg-violet;
+                    fill: var(--text-primary);
+                    @include coverImg;
+                }
+
+                div[data-for="status"] {
+                    height: 10px;
+                    width: 10px;
+                    border-radius: 9999px;
+                    background: #50C878;
+                    position: absolute;
+                    right: 0;
+                    bottom: .2rem;
                 }
             }
 

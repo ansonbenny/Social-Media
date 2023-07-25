@@ -21,6 +21,13 @@ $bg-grey: #f3f4f6;
   }
 }
 
+@mixin coverImg {
+  aspect-ratio: 1/1;
+  object-position: center;
+  object-fit: cover;
+  border-radius: 9999px; //15px
+}
+
 * {
   margin: 0;
   padding: 0;

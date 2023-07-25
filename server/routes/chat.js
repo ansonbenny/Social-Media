@@ -39,6 +39,9 @@ export default (app, io) => {
   // config for express route
   app.use("/api/chat", router);
 
+  // variable for save online users
+  let onlineUsers = []
+
   // socket io
   io.use((socket, next) => {
     const { token = null } = socket?.request?.cookies;
@@ -76,7 +79,31 @@ export default (app, io) => {
 
   io.on("connection", (socket) => {
     socket.on("user", async (_id) => {
-      await chat?.addSocketId?.(_id, socket.id)?.catch?.(() => {});
+      await chat?.addSocketId?.(_id, socket.id)?.catch?.(() => { });
+
+      // adding to onlineUsers
+      if (_id) {
+        let user = onlineUsers?.find((obj) => obj?.userId == _id)
+
+        if (user) {
+          onlineUsers?.forEach((obj) => {
+            if (obj?.userId == _id) {
+              if (obj?.socketId?.length > 0) {
+                if (!obj?.socketId?.includes?.(socket?.id)) {
+                  obj.socketId = [...obj?.socketId, socket?.id]
+                }
+              } else {
+                obj.socketId = [socket.id]
+              }
+            }
+          })
+        } else {
+          onlineUsers.push({ userId: _id, socketId: [socket?.id] })
+        }
+      }
+
+      // senting to users
+      io.emit("user status", onlineUsers)
     });
 
     socket.on("chat message", async (data, callback) => {
@@ -122,7 +149,25 @@ export default (app, io) => {
     });
 
     socket.on("disconnect", async () => {
-      await chat?.removeSocketId?.(socket.id)?.catch?.(() => {});
+      await chat?.removeSocketId?.(socket.id)?.catch?.(() => { });
+
+      // removeing from onlineUsers
+      let user = onlineUsers?.find((obj) => {
+        return obj?.socketId?.includes(socket?.id)
+      })
+
+      if (user?.socketId?.length > 1) {
+        onlineUsers?.forEach((obj) => {
+          if (obj?.userId == user?.userId) {
+            obj.socketId = obj?.socketId?.filter?.((ids) => ids !== socket?.id)
+          }
+        })
+      } else {
+        onlineUsers = onlineUsers?.filter((obj) => obj?.userId !== user?.userId)
+      }
+
+      // senting to users
+      io.emit("user status", onlineUsers)
     });
   });
 

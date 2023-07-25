@@ -28,7 +28,9 @@ const reducer = (value, { type, ...actions }) => {
         modal: { ...value?.modal, ...actions },
       };
     case "details":
-      return { ...value, details: actions?.data };
+      return { ...value, details: { status: value?.details?.status, ...actions?.data } };
+    case "status":
+      return { ...value, details: { ...value?.details, status: actions?.data } }
     default:
       return value;
   }
@@ -55,7 +57,7 @@ const Chats = () => {
     modal: {
       details: false,
     },
-    data: {},
+    details: {},
   });
 
   const onChat = (e) => {
@@ -102,7 +104,7 @@ const Chats = () => {
 
   const emitUser = useCallback(() => {
     Socket?.emit("user", user?._id);
-  }, [Socket]);
+  }, [Socket, user]);
 
   useEffect(() => {
     document.title = "Soft Chat - Chats";
@@ -132,6 +134,19 @@ const Chats = () => {
           );
         }
       });
+
+      Socket?.on("user status", (data) => {
+        if (id) {
+          // for chat
+          const value = data?.find((obj) => obj?.userId == id)
+
+          if (value) {
+            action({ type: "status", data: "online" })
+          } else {
+            action({ type: "status", data: "offline" })
+          }
+        }
+      })
 
       if (id) {
         // fetching user details and latest chat
