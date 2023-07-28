@@ -231,7 +231,7 @@ const Chats = () => {
 
   return (
     <section className="chats">
-      {!id || !state?.size?.sm ? <Users isUsers /> : null}
+      {!id || !state?.size?.sm ? <Users Socket={Socket} isUsers /> : null}
 
       {id ? (
         <Fragment>

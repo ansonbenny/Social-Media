@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useState } from "react";
 import { AvatarSvg, SearchSvg } from "../../assets";
 import { useNavigate, useParams } from "react-router-dom";
 import { LoadingCircle } from "..";
@@ -6,7 +6,7 @@ import { axios } from "../../lib";
 import "./style.scss";
 import { useSelector } from "react-redux";
 
-const Users = ({ selected, stories, isUsers }) => {
+const Users = ({ selected, stories, isUsers, Socket }) => {
   const navigate = useNavigate();
 
   const user = useSelector((state) => state?.user)
@@ -16,6 +16,21 @@ const Users = ({ selected, stories, isUsers }) => {
   const [state, setState] = useState([])
 
   //add green color circle in image to show user is online
+  const SocketCall = useCallback(() => {
+    Socket?.on("all user status", (data) => {
+      setState((state) => {
+        return state.map((users) => {
+          if (data?.find((obj) => obj?.userId == users?._id)) {
+            users.status = true
+            return users
+          } else {
+            users.status = undefined
+            return users
+          }
+        })
+      })
+    })
+  }, [Socket])
 
   useEffect(() => {
     let abortControl = new AbortController();
@@ -40,6 +55,10 @@ const Users = ({ selected, stories, isUsers }) => {
       abortControl?.abort?.()
     }
   }, [])
+
+  useEffect(() => {
+    SocketCall()
+  }, [SocketCall])
 
   return (
     <section id="all-users">
@@ -118,6 +137,10 @@ const Users = ({ selected, stories, isUsers }) => {
                       alt="profile"
                     />
                       : <AvatarSvg />
+                  }
+
+                  {
+                    obj?.status && <div data-for="status" />
                   }
                 </div>
                 <div className="content">
