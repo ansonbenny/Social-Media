@@ -75,7 +75,7 @@ const Menu = () => {
   return (
     <section className="menu-global">
       <div className="main">
-        <h1>AB</h1>
+        <h1>SC</h1>
         <button
           className={
             location?.pathname === "/"

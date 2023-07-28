@@ -31,6 +31,8 @@ const reducer = (value, { type, ...actions }) => {
       return { ...value, details: { status: value?.details?.status, ...actions?.data } };
     case "status":
       return { ...value, details: { ...value?.details, status: actions?.data } }
+    case "timeout":
+      return { ...value, timeout: actions?.data }
     default:
       return value;
   }
@@ -102,6 +104,28 @@ const Chats = () => {
     }
   };
 
+  const onInput = (e) => {
+    if (e?.target?.value) {
+      Socket.emit("user status", {
+        from: user?._id,
+        to: id,
+        status: 'typing'
+      })
+    }
+
+    clearTimeout(state?.timeout)
+
+    action({
+      type: "timeout", data: setTimeout(() => {
+        Socket.emit("user status", {
+          from: user?._id,
+          to: id,
+          status: 'online'
+        })
+      }, 1000)
+    })
+  }
+
   const emitUser = useCallback(() => {
     Socket?.emit("user", user?._id);
   }, [Socket, user]);
@@ -135,7 +159,7 @@ const Chats = () => {
         }
       });
 
-      Socket?.on("user status", (data) => {
+      Socket?.on("all user status", (data) => {
         if (id) {
           // for chat
           const value = data?.find((obj) => obj?.userId == id)
@@ -145,6 +169,12 @@ const Chats = () => {
           } else {
             action({ type: "status", data: "offline" })
           }
+        }
+      })
+
+      Socket?.on("user status", (data) => {
+        if (data?.from == id) {
+          action({ type: 'status', data: data?.status })
         }
       })
 
@@ -201,7 +231,7 @@ const Chats = () => {
 
   return (
     <section className="chats">
-      {!id || !state?.size?.sm ? <Users /> : null}
+      {!id || !state?.size?.sm ? <Users isUsers /> : null}
 
       {id ? (
         <Fragment>
@@ -210,6 +240,7 @@ const Chats = () => {
               ref,
               details: state?.details,
               onChat,
+              onInput,
               setModal: !state?.size?.lg
                 ? () => {
                   action({ type: "modal", details: true });

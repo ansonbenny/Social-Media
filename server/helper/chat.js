@@ -59,6 +59,35 @@ export default {
       }
     });
   },
+  getSocketIdTo: (to) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let res = await db
+          .collection(collections.USERS)
+          .aggregate([
+            {
+              $match: {
+                _id: new ObjectId(to),
+              },
+            },
+            {
+              $project: {
+                ids: "$socketId",
+              },
+            }
+          ])
+          .toArray();
+
+        if (res?.[0]) {
+          resolve(res?.[0]);
+        } else if (res) {
+          reject("Something Went Wrong");
+        }
+      } catch (err) {
+        reject(err);
+      }
+    })
+  },
   getSocketId: (to, from) => {
     return new Promise(async (resolve, reject) => {
       try {
@@ -242,5 +271,48 @@ export default {
         reject(err);
       }
     });
+  },
+  get_users_chat: (userId) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const chats = await db.collection(collections.CHAT).aggregate([{
+          $match: {
+            users: {
+              $ne: [userId, userId]
+            }
+          }
+        }, {
+          $unwind: "$users"
+        }, {
+          $group: {
+            _id: 1,
+            users: {
+              $addToSet: {
+                $toObjectId: "$users"
+              }
+            }
+          }
+        }, {
+          $lookup: {
+            from: collections.USERS,
+            localField: "users",
+            foreignField: "_id",
+            as: "user"
+          }
+        }, {
+          $unwind: "$user"
+        }, {
+          $project: {
+            _id: "$user._id",
+            name: "$user.name",
+            img: "$user.img",
+            about: "$user.about"
+          }
+        }]).toArray()
+        resolve(chats || [])
+      } catch (err) {
+        reject(err)
+      }
+    })
   }
 };

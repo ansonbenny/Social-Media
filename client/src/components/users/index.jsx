@@ -1,13 +1,45 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { AvatarSvg, SearchSvg } from "../../assets";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { LoadingCircle } from "..";
+import { axios } from "../../lib";
 import "./style.scss";
+import { useSelector } from "react-redux";
 
-const Users = ({ selected, stories }) => {
+const Users = ({ selected, stories, isUsers }) => {
   const navigate = useNavigate();
 
+  const user = useSelector((state) => state?.user)
+
+  const { id } = useParams()
+
+  const [state, setState] = useState([])
+
   //add green color circle in image to show user is online
+
+  useEffect(() => {
+    let abortControl = new AbortController();
+
+    if (isUsers) {
+      (async () => {
+        try {
+          let res = await axios.get("/chat/users_chat", {
+            signal: abortControl?.signal
+          })
+
+          setState(res?.['data']?.data)
+        } catch (err) {
+          if (err?.code !== "ERR_CANCELED") {
+            alert(err?.response?.data?.message || "Something Went Wrong to Fetch Chats");
+          }
+        }
+      })();
+    }
+
+    return () => {
+      abortControl?.abort?.()
+    }
+  }, [])
 
   return (
     <section id="all-users">
@@ -33,7 +65,7 @@ const Users = ({ selected, stories }) => {
         <Fragment>
           <div className="title">
             <h1>
-              Messages <span>(29)</span>
+              Messages <span>(0)</span>
             </h1>
           </div>
 
@@ -46,67 +78,57 @@ const Users = ({ selected, stories }) => {
 
       <div className="list">
         <div
-          className="card active"
-          onClick={() => navigate("/chat/64bce8d941b7afe16973bd9d")}
+          className={`card ${id && id == user?._id ? "active" : ""}`}
+          onClick={() => navigate(`/chat/${user?._id}`)}
         >
           <div className="cover">
-            <AvatarSvg />
+            {
+              user?.img ? <img
+                src={`/files/profiles/${user?.img}`}
+                alt="profile"
+              />
+                : <AvatarSvg />
+            }
             <div data-for="status" />
           </div>
           <div className="content">
-            <h1>Anson Benny</h1>
+            <h1>(You) {user?.name}</h1>
             <p>
-              is simply dummy text of the printing and typesetting industry.
-              Lorem Ipsum has been the industry's
+              {user?.about}
             </p>
           </div>
-        </div>
 
-        <div
-          className="card"
-          onClick={() => {
-            navigate("/chat/64bce93941b7afe16973bd9f");
-          }}
-        >
-          <div className="cover">
-            <img
-              src="https://img.i-scmp.com/cdn-cgi/image/fit=contain,width=425,format=auto/sites/default/files/styles/768x768/public/d8/images/methode/2021/01/11/d5ed0832-5001-11eb-ad83-255e1243236c_image_hires_113755.jpg?itok=6PsAhoy2&v=1610336282"
-              alt="profile"
-            />
-            <div data-for="status" />
-          </div>
-          <div className="content">
-            <h1>Sidharth Vijayan</h1>
-            <p>
-              is simply dummy text of the printing and typesetting industry.
-              Lorem Ipsum has been the industry's
-            </p>
-          </div>
-          {!stories && (
+          {!stories && false && (
             <button className="count" type="button">
               12
             </button>
           )}
+
         </div>
 
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]?.map((obj, key) => {
-          return (
-            <div className="card" key={key}>
-              <div className="cover">
-                <img
-                  src="https://yt3.googleusercontent.com/ytc/AGIKgqPh9kVptaKpovayOfZGjfyZV7DExqpIUitIiTlKuQ=s900-c-k-c0x00ffffff-no-rj"
-                  alt="profile"
-                />
+        {state?.map((obj, key) => {
+          if (obj?._id !== user?._id) {
+            return (
+              <div className={`card ${id && id == obj?._id ? "active" : ""}`} key={key}
+                onClick={() => navigate(`/chat/${obj?._id}`)}>
+                <div className="cover">
+                  {
+                    obj?.img ? <img
+                      src={`/files/profiles/${obj?.img}`}
+                      alt="profile"
+                    />
+                      : <AvatarSvg />
+                  }
+                </div>
+                <div className="content">
+                  <h1>{obj?.name}</h1>
+                  <p>
+                    {obj?.about}
+                  </p>
+                </div>
               </div>
-              <div className="content">
-                <h1>Ajith George {obj}</h1>
-                <p>
-                  is simply dummy text of the printing and typesetting industry.
-                  Lorem Ipsum has been the industry's
-                </p>
-              </div>
-            </div>
-          );
+            );
+          }
         })}
 
         <LoadingCircle />

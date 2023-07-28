@@ -103,8 +103,23 @@ export default (app, io) => {
       }
 
       // senting to users
-      io.emit("user status", onlineUsers)
+      io.emit("all user status", onlineUsers)
     });
+
+    socket.on("user status", async ({ from, to, status }) => {
+      try {
+        let sockets = await chat?.getSocketIdTo?.(to)
+
+        if (sockets?.ids?.length > 0) {
+          io.to(sockets.ids).emit("user status", {
+            from,
+            status
+          })
+        }
+      } catch (err) {
+        console.log("something went wrong")
+      }
+    })
 
     socket.on("chat message", async (data, callback) => {
       if (data?.chatId?.length === 24) {
@@ -167,7 +182,7 @@ export default (app, io) => {
       }
 
       // senting to users
-      io.emit("user status", onlineUsers)
+      io.emit("all user status", onlineUsers)
     });
   });
 
@@ -202,4 +217,23 @@ export default (app, io) => {
       });
     }
   });
+
+  router.get("/users_chat", CheckLogged, async (req, res) => {
+    const { userId = null } = req?.query
+
+    try {
+      const chats = await chat.get_users_chat(userId)
+
+      res.status(200).json({
+        status: 200,
+        message: "Success",
+        data: chats
+      })
+    } catch (err) {
+      res.status(500).json({
+        status: 200,
+        message: err
+      })
+    }
+  })
 };

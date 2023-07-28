@@ -18,7 +18,7 @@ import { LoadingCircle } from "../";
 import useScroll from "../../hooks/scroll";
 import "./style.scss";
 
-const ChatLive = forwardRef(({ setModal, onChat, details }, ref) => {
+const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
 
   const [refs, state, action] = useScroll({
     url: `/chat/userChat/${details?._id}`,
@@ -326,7 +326,7 @@ const ChatLive = forwardRef(({ setModal, onChat, details }, ref) => {
             <button type="button">
               <ClipSvg width={"18px"} height={"18px"} class_name={"svg_fill"} />
             </button>
-            <input placeholder="Type Something..." />
+            <input onInput={onInput} placeholder="Type Something..." />
             <button type="submit">
               <SendSvg
                 width={"18px"}
