@@ -45,6 +45,17 @@ body {
   -moz-transition: all .3s ease-in-out;
 }
 
+::selection {
+  color: #fff;
+  background: $bg-violet;
+}
+
+/* For Mozilla Firefox */
+::-moz-selection {
+  color: #fff;
+  background: $bg-violet;
+}
+
 button,
 input,
 textarea {

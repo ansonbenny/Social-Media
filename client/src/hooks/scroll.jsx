@@ -28,10 +28,22 @@ const reducer = (state, { type, data }) => {
           return state
         }
       } else if (data?.length > 0) {
-        return { ...state, msg: data, new: false }
+        return { ...state, msgs: data, new: false }
       } else {
         return state;
       }
+    case "read": {
+      if (data) {
+        return {
+          ...state, msgs: state?.msgs?.map((obj) => {
+            if (data?.to !== obj?.from) {
+              obj.read = true
+            }
+            return obj
+          })
+        }
+      }
+    }
 
     default:
       return state;
@@ -51,6 +63,8 @@ const useScroll = ({ url, details }) => {
   useEffect(() => {
     let abortControl;
 
+    let timeout;
+
     const LoadMoreMsgs = async () => {
       if (abortControl) {
         abortControl?.abort?.()
@@ -68,8 +82,10 @@ const useScroll = ({ url, details }) => {
           });
 
           if (res?.["data"]?.data) {
-            ref?.current?.loading?.classList?.add?.("hide");
-            action({ type: "old", data: res?.["data"]?.data?.chat?.msgs });
+            timeout = setTimeout(() => {
+              ref?.current?.loading?.classList?.add?.("hide");
+              action({ type: "old", data: res?.["data"]?.data?.chat?.msgs });
+            }, 1000)
           }
         }
       } catch (err) {
@@ -121,6 +137,8 @@ const useScroll = ({ url, details }) => {
       ref?.current?.main?.removeEventListener?.("touchmove", onWheelTouch);
 
       ref?.current?.main?.removeEventListener?.("scroll", onScroll);
+
+      clearTimeout(timeout)
     };
   }, [state?.msgs]);
 

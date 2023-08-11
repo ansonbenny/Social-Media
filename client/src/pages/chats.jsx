@@ -45,7 +45,10 @@ const Chats = () => {
 
   const Socket = useSocket();
 
-  const ref = useRef();
+  const ref = useRef({
+    live: null,
+    list: null
+  });
 
   const { id } = useParams();
 
@@ -88,7 +91,7 @@ const Chats = () => {
           if (res) {
             input.value = ''
 
-            ref?.current?.insertMsg?.({
+            ref?.current?.live?.insertMsg?.({
               from: user?._id,
               ...chat,
             });
@@ -142,15 +145,21 @@ const Chats = () => {
 
       emitUser();
 
+      // recieve messages
       Socket?.on("chat message", (msg) => {
         if (
           msg?.match == `${user?._id}${id}` ||
           msg?.match == `${id}${user?._id}`
         ) {
-          ref?.current?.insertMsg?.(msg);
+          ref?.current?.live?.insertMsg?.(msg);
+
+          Socket?.emit?.("read msg", {
+            chatId: id,
+            userId: user?._id,
+          })
         } else if (msg?.match == user?._id) {
           if (id == user?._id) {
-            ref?.current?.insertMsg?.(msg);
+            ref?.current?.live?.insertMsg?.({ ...msg, read: true });
           }
         } else {
           dispatch(
@@ -159,7 +168,18 @@ const Chats = () => {
         }
       });
 
+      // getting message read status
+      Socket?.on("read msg", (data) => {
+        if (data?.match == `${user?._id}${id}` ||
+          data?.match == `${id}${user?._id}`) {
+          ref?.current?.live?.readMsgs?.(data);
+        }
+      })
+
+      // getting users status [online / offline]
       Socket?.on("all user status", (data) => {
+        ref?.current?.list?.users_status?.(data);
+
         if (id) {
           // for chat
           const value = data?.find((obj) => obj?.userId == id)
@@ -172,10 +192,17 @@ const Chats = () => {
         }
       })
 
+      // getting single user status [online / offline]
       Socket?.on("user status", (data) => {
         if (data?.from == id) {
           action({ type: 'status', data: data?.status })
         }
+      })
+
+      // reading message when chat open
+      Socket?.emit?.("read msg", {
+        chatId: id,
+        userId: user?._id,
       })
 
       if (id) {
@@ -183,11 +210,11 @@ const Chats = () => {
 
         (async () => {
           try {
-            let res = await axios.get(`/chat/userChat/${id}`, {
+            let res = await axios.get(`/chat-single/userChat/${id}`, {
               signal: abortControl?.signal,
             });
 
-            ref?.current?.insertInitial?.(res?.["data"]?.data?.chat?.msgs);
+            ref?.current?.live?.insertInitial?.(res?.["data"]?.data?.chat?.msgs);
 
             action({ type: "details", data: res?.["data"]?.data?.details });
 
@@ -223,6 +250,12 @@ const Chats = () => {
 
       Socket?.off("chat message");
 
+      Socket?.off("read msg");
+
+      Socket?.off("all user status");
+
+      Socket?.off("user status");
+
       clearTimeout(timer);
 
       abortControl?.abort?.();
@@ -231,22 +264,28 @@ const Chats = () => {
 
   return (
     <section className="chats">
-      {!id || !state?.size?.sm ? <Users Socket={Socket} isUsers /> : null}
+      {!id || !state?.size?.sm ? <Users ref={(elm) => {
+        if (ref?.current) {
+          ref.current.list = elm
+        }
+      }} isUsers /> : null}
 
       {id ? (
         <Fragment>
           <ChatLive
-            {...{
-              ref,
-              details: state?.details,
-              onChat,
-              onInput,
-              setModal: !state?.size?.lg
-                ? () => {
-                  action({ type: "modal", details: true });
-                }
-                : undefined,
+            ref={(elm) => {
+              if (ref?.current) {
+                ref.current.live = elm
+              }
             }}
+            details={state?.details}
+            onChat={onChat}
+            onInput={onInput}
+            setModal={!state?.size?.lg
+              ? () => {
+                action({ type: "modal", details: true });
+              }
+              : undefined}
           />
 
           {state?.modal?.details || state?.size?.lg ? (

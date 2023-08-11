@@ -61,6 +61,9 @@
 
                 p {
                     font-size: x-small;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
 
                     @if $me {
                         color: #f5f5f7;
@@ -72,11 +75,27 @@
                 }
 
                 .author {
-                    margin-right: auto;
                     max-width: 5rem;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
+                }
+
+                .time {
+                    margin: 0 auto;
+                }
+
+                .status_msg {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+
+                    svg {
+                        margin-left: auto;
+                        width: .8rem;
+                        height: .8rem;
+
+                        @if $me {
+                            stroke: #f5f5f7;
+                        }
+                    }
                 }
             }
 

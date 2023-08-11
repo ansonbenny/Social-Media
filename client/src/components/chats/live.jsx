@@ -10,6 +10,7 @@ import {
   PhoneSvg,
   PlusSvg,
   SendSvg,
+  TickSvg,
   TrashSvg,
   VideoSvg,
 } from "../../assets";
@@ -21,7 +22,7 @@ import "./style.scss";
 const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
 
   const [refs, state, action] = useScroll({
-    url: `/chat/userChat/${details?._id}`,
+    url: `/chat-single/userChat/${details?._id}`,
     details
   })
 
@@ -34,6 +35,9 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
     insertInitial: (data) => {
       action({ type: "initial", data });
     },
+    readMsgs: (data) => {
+      action({ type: "read", data })
+    }
   }));
 
   useEffect(() => {
@@ -249,6 +253,12 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
                       <div className="from">
                         <p className="author">You</p>
                         <p className="time">{obj?.date}</p>
+                        <div className="status_msg">
+                          <TickSvg />
+                          {
+                            obj?.read && <TickSvg />
+                          }
+                        </div>
                       </div>
 
                       <div className="msg">{obj?.msg}</div>

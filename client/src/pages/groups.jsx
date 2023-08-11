@@ -75,13 +75,11 @@ const Groups = () => {
       {id ? (
         <Fragment>
           <ChatLive
-            {...{
-              setModal: !state?.size?.lg
-                ? () => {
-                    action({ type: "modal", details: true });
-                  }
-                : undefined,
-            }}
+            setModal={!state?.size?.lg
+              ? () => {
+                action({ type: "modal", details: true });
+              }
+              : undefined}
           />
 
           {state?.modal?.details || state?.size?.lg ? (
@@ -92,8 +90,8 @@ const Groups = () => {
               setModal={
                 state?.modal?.details && !state?.size?.lg
                   ? () => {
-                      action({ type: "modal", details: false });
-                    }
+                    action({ type: "modal", details: false });
+                  }
                   : undefined
               }
             />

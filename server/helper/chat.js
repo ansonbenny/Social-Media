@@ -176,6 +176,31 @@ export default {
   getUserChats: (to, { userId, skip = 0 }) => {
     return new Promise(async (resolve, reject) => {
       try {
+        await db.collection(collections.CHAT).updateOne({
+          $or: [
+            {
+              users: [to, userId],
+            },
+            {
+              users: [userId, to],
+            },
+          ],
+          "chat": {
+            $exists: true
+          }
+        }, {
+          $set: {
+            "chat.$[elm].read": true
+          }
+        }, {
+          arrayFilters: [{
+            "elm.from": { $eq: to },
+            "elm.read": {
+              $ne: true
+            }
+          }]
+        });
+
         let chats = await db
           .collection(collections.USERS)
           .aggregate([
@@ -227,6 +252,11 @@ export default {
                   {
                     $unwind: "$msgs",
                   },
+                  // {
+                  //   $set: {
+                  //     "msgs.read": true
+                  //   }
+                  // },
                   {
                     $skip: parseInt(skip),
                   },
@@ -271,6 +301,40 @@ export default {
         reject(err);
       }
     });
+  },
+  readMsgs: (from, to) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await db.collection(collections.CHAT).updateOne({
+          $or: [
+            {
+              users: [to, from],
+            },
+            {
+              users: [from, to],
+            },
+          ],
+          "chat": {
+            $exists: true
+          }
+        }, {
+          $set: {
+            "chat.$[elm].read": true
+          }
+        }, {
+          arrayFilters: [{
+            "elm.from": { $eq: to },
+            "elm.read": {
+              $ne: true
+            }
+          }]
+        });
+
+        resolve()
+      } catch (err) {
+        reject()
+      }
+    })
   },
   get_users_chat: (userId) => {
     return new Promise(async (resolve, reject) => {

@@ -1,36 +1,44 @@
-import React, { Fragment, useCallback, useEffect, useState } from "react";
+import React, { Fragment, forwardRef, useEffect, useImperativeHandle, useReducer } from "react";
 import { AvatarSvg, SearchSvg } from "../../assets";
 import { useNavigate, useParams } from "react-router-dom";
 import { LoadingCircle } from "..";
 import { axios } from "../../lib";
-import "./style.scss";
 import { useSelector } from "react-redux";
+import "./style.scss";
 
-const Users = ({ selected, stories, isUsers, Socket }) => {
+const reducer = (value, { type, data, ...actions }) => {
+  switch (type) {
+    case "initial":
+      return data
+    case "status":
+      return value?.map((users) => {
+        if (data?.find((obj) => obj?.userId == users?._id)) {
+          users.status = true
+          return users
+        } else {
+          users.status = undefined
+          return users
+        }
+      })
+    default:
+      return value
+  }
+}
+
+const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
+  const { id } = useParams()
+
   const navigate = useNavigate();
 
   const user = useSelector((state) => state?.user)
 
-  const { id } = useParams()
+  const [state, action] = useReducer(reducer, [])
 
-  const [state, setState] = useState([])
-
-  //add green color circle in image to show user is online
-  const SocketCall = useCallback(() => {
-    Socket?.on("all user status", (data) => {
-      setState((state) => {
-        return state.map((users) => {
-          if (data?.find((obj) => obj?.userId == users?._id)) {
-            users.status = true
-            return users
-          } else {
-            users.status = undefined
-            return users
-          }
-        })
-      })
-    })
-  }, [Socket])
+  useImperativeHandle(ref, () => ({
+    users_status: (data) => {
+      action({ type: "status", data })
+    }
+  }))
 
   useEffect(() => {
     let abortControl = new AbortController();
@@ -38,11 +46,11 @@ const Users = ({ selected, stories, isUsers, Socket }) => {
     if (isUsers) {
       (async () => {
         try {
-          let res = await axios.get("/chat/users_chat", {
+          let res = await axios.get("/chat-single/users_chat", {
             signal: abortControl?.signal
           })
 
-          setState(res?.['data']?.data)
+          action({ type: "initial", data: res?.['data']?.data })
         } catch (err) {
           if (err?.code !== "ERR_CANCELED") {
             alert(err?.response?.data?.message || "Something Went Wrong to Fetch Chats");
@@ -55,10 +63,6 @@ const Users = ({ selected, stories, isUsers, Socket }) => {
       abortControl?.abort?.()
     }
   }, [])
-
-  useEffect(() => {
-    SocketCall()
-  }, [SocketCall])
 
   return (
     <section id="all-users">
@@ -158,6 +162,6 @@ const Users = ({ selected, stories, isUsers, Socket }) => {
       </div>
     </section>
   );
-};
+});
 
 export default Users;
