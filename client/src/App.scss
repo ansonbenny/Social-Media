@@ -191,6 +191,11 @@
                             background: transparent;
                             border-radius: 9999px;
                             opacity: 0;
+                            cursor: pointer;
+
+                            &::-webkit-file-upload-button {
+                                cursor: pointer;
+                            }
                         }
 
                         .actions_cover {

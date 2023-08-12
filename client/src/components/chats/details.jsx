@@ -68,6 +68,9 @@ const ChatDetails = ({ isModal, setModal, details }) => {
           </div>
 
           <div className="description">
+            <h1>Id</h1>
+            <p>{details?._id}</p>
+
             <h1>Number</h1>
             <p>{details?.number}</p>
 
@@ -76,7 +79,7 @@ const ChatDetails = ({ isModal, setModal, details }) => {
           </div>
         </div>
 
-        {/* <div className="media">
+        {/*  <div className="media">
           <h1>
             <ParticleSvg />
             Shared Media
@@ -110,7 +113,7 @@ const ChatDetails = ({ isModal, setModal, details }) => {
           </div>
 
           <button>View More</button>
-        </div> */}
+        </div>  */}
 
         {!details?.user && (
           <div className="members">

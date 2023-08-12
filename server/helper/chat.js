@@ -252,11 +252,6 @@ export default {
                   {
                     $unwind: "$msgs",
                   },
-                  // {
-                  //   $set: {
-                  //     "msgs.read": true
-                  //   }
-                  // },
                   {
                     $skip: parseInt(skip),
                   },

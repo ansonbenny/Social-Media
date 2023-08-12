@@ -294,6 +294,7 @@
         }
 
         .body {
+            position: relative;
             display: flex;
             flex-direction: column;
             height: 100%;
@@ -389,6 +390,39 @@
                         }
                     }
 
+                    div[data-for="select_file_div"] {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+
+                        .svg_fill {
+                            width: 18px;
+                            height: 18px;
+                            fill: $Text-Secondary;
+                            transition: all .3s ease-in-out;
+                            -moz-transition: all .3s ease-in-out;
+                        }
+
+                        .file_input_box {
+                            width: 18px;
+                            height: 18px;
+                            padding: 0;
+                            margin: 0;
+                            position: absolute;
+                            opacity: 0;
+                            cursor: pointer;
+
+                            &::-webkit-file-upload-button {
+                                cursor: pointer;
+                            }
+                        }
+
+                        .file_input_box:hover+.svg_fill {
+                            fill: $bg-violet;
+                        }
+                    }
+
                     button {
                         cursor: pointer;
                         width: auto;
@@ -397,29 +431,150 @@
                         border: none;
                         border-radius: 10px;
 
-                        .svg_path_stroke path {
-                            stroke: $Text-Secondary;
-                            transition: all .3s ease-in-out;
-                            -moz-transition: all .3s ease-in-out;
-                        }
+                        .svg_path_stroke {
+                            width: 18px;
+                            height: 18px;
 
-                        .svg_fill {
-                            fill: $Text-Secondary;
-                            transition: all .3s ease-in-out;
-                            -moz-transition: all .3s ease-in-out;
+                            path {
+                                stroke: $Text-Secondary;
+                                transition: all .3s ease-in-out;
+                                -moz-transition: all .3s ease-in-out;
+                            }
                         }
 
                         &:hover {
                             .svg_path_stroke path {
                                 stroke: $bg-violet;
                             }
+                        }
+                    }
+                }
+            }
 
-                            .svg_fill {
-                                fill: $bg-violet;
+            div[data-for="modal_outer"] {
+                display: none;
+
+                &:is(.active) {
+                    display: block;
+                }
+
+                .fake_bg {
+                    position: absolute;
+                    z-index: 500;
+                    width: 100%;
+                    height: 100%;
+                    width: 100%;
+                    height: 100%;
+                    background: var(--bg-grey);
+                    opacity: .2;
+                }
+
+                div[data-for="modal"] {
+                    position: absolute;
+                    z-index: 500;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    .inner_modal {
+                        width: 350px;
+                        height: auto;
+                        max-height: 350px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        padding: .5rem;
+                        background: var(--bg-primary);
+                        border-radius: 10px;
+                        margin: .5rem;
+
+                        @media screen and (max-width: 350px) {
+                            height: auto;
+                            width: 100%;
+                        }
+
+                        .scroll_bar {
+                            width: 100%;
+                            height: auto;
+                            max-height: 350px;
+                            overflow: auto;
+                            scrollbar-width: 5px;
+
+                            &::-webkit-scrollbar {
+                                height: 5px;
+                                width: 5px;
+                            }
+
+                            &::-webkit-scrollbar-track {
+                                border-radius: 5px;
+                            }
+
+                            &::-webkit-scrollbar-track {
+                                background: var(--bg-grey);
+                            }
+
+                            &::-webkit-scrollbar-thumb {
+                                background: var(--text-primary);
+                                border-radius: 5px;
+                            }
+
+                            img {
+                                width: 100%;
+                                height: auto;
+
+                                &:is(.zoom) {
+                                    width: 200%;
+                                }
+                            }
+                        }
+
+                        form {
+                            display: flex;
+                            flex-direction: row;
+                            gap: 1rem;
+                            margin: .5rem 0;
+                            align-items: center;
+
+                            button {
+                                cursor: pointer;
+                                width: auto;
+                                height: auto;
+                                background: transparent;
+                                border: none;
+                                border-radius: 10px;
+
+                                svg {
+                                    width: 18px;
+                                    height: 18px;
+                                }
+
+                                .svg_path_fill path {
+                                    fill: $Text-Secondary;
+                                    transition: all .3s ease-in-out;
+                                    -moz-transition: all .3s ease-in-out;
+
+                                    &:hover {
+                                        fill: $bg-violet;
+                                    }
+                                }
+
+                                .svg_path_stroke path {
+                                    stroke: $Text-Secondary;
+                                    transition: all .3s ease-in-out;
+                                    -moz-transition: all .3s ease-in-out;
+
+                                    &:hover {
+                                        stroke: $bg-violet;
+                                    }
+                                }
                             }
                         }
                     }
                 }
+
             }
         }
     }
@@ -458,6 +613,7 @@
             }
 
             .basic {
+                margin-bottom: .5rem;
                 width: 100%;
                 text-align: center;
 
@@ -620,6 +776,8 @@
 
             .members {
                 margin-bottom: .5rem;
+                border-top: 1px solid var(--bg-grey);
+                padding-top: 1.5rem;
 
                 .top {
                     display: flex;
@@ -754,9 +912,10 @@
             position: fixed;
             z-index: 999;
             top: 0;
+            right: 0;
+            left: 4rem; // width of side menu
             background: var(--bg-primary);
             padding: 0 3rem;
-            padding-left: 2rem;
             padding-top: 1.5rem;
             height: calc(100% - 1.5rem);
             bottom: 0;
@@ -764,7 +923,6 @@
             @media screen and (max-width:680px) {
                 left: 0;
                 right: 0;
-                padding-left: 3rem;
             }
 
             .exit {

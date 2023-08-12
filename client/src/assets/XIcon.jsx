@@ -1,10 +1,11 @@
 import React from "react";
 
-const Xsvg = ({ width, height }) => {
+const Xsvg = ({ width, height, class_name }) => {
   return (
     <svg
       width={width}
       height={height}
+      className={class_name}
       viewBox="0 0 16 16"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"

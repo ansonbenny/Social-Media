@@ -1,7 +1,7 @@
 import React, {
   forwardRef,
   useEffect,
-  useImperativeHandle,
+  useImperativeHandle
 } from "react";
 import {
   AvatarSvg,
@@ -13,6 +13,7 @@ import {
   TickSvg,
   TrashSvg,
   VideoSvg,
+  Xsvg,
 } from "../../assets";
 import { useSelector } from "react-redux";
 import { LoadingCircle } from "../";
@@ -45,6 +46,19 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
       refs?.current?.main?.scroll?.(0, refs?.current?.main?.scrollHeight);
     } else {
       refs?.current?.main?.scroll?.(0, 30);
+    }
+
+    const ModalControl = (e) => {
+      const inner = refs?.current?.modal_msgs?.querySelector('.inner_modal')
+      if (!inner?.contains(e?.target) && !e?.target?.classList?.contains("img_for_modal")) {
+        refs?.current?.modal_msgs?.classList?.remove?.("active")
+      }
+    }
+
+    window.addEventListener('click', ModalControl)
+
+    return () => {
+      window.removeEventListener('click', ModalControl)
     }
   }, [state?.msgs]);
 
@@ -92,6 +106,43 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
       </div>
 
       <div className="body">
+
+        <div data-for="modal_outer" ref={(elm) => {
+          if (refs?.current) {
+            refs.current.modal_msgs = elm
+          }
+        }}>
+          <div className="fake_bg" />
+          <div data-for="modal">
+            <div className="inner_modal">
+              <div className="scroll_bar" >
+                <img src="https://images.mktw.net/im-764473?width=1280&size=1" ref={(elm) => {
+                  if (refs?.current) {
+                    refs.current.modal_scroll_img = elm
+                  }
+                }} onClick={() => {
+                  if (refs?.current?.modal_scroll_img?.classList?.contains?.('zoom')) {
+                    refs?.current?.modal_scroll_img?.classList?.remove?.('zoom')
+                  } else {
+                    refs?.current?.modal_scroll_img?.classList?.add?.('zoom')
+                  }
+                }} />
+              </div>
+
+              {false && <form>
+                <button type="button" onClick={() => refs?.current?.modal_msgs?.classList?.remove?.("active")}>
+                  <Xsvg class_name={"svg_path_fill"} />
+                </button>
+                <button type="submit">
+                  <SendSvg
+                    class_name={"svg_path_stroke"}
+                  />
+                </button>
+              </form>}
+            </div>
+          </div>
+        </div>
+
         <div
           className="messages"
           ref={(elm) => {
@@ -329,18 +380,44 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
               );
             }
           })}
+
+          <div className="others">
+            <div className="cover">
+              <img
+                src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
+                alt="profile"
+              />
+            </div>
+            <div className="card">
+              <div className="inner">
+                <div className="from">
+                  <p className="author">Anson</p>
+                  <p className="time">08:35</p>
+                </div>
+
+                <div className="msg">
+                  <img
+                    className="img_for_modal"
+                    onClick={() => refs?.current?.modal_msgs?.classList?.add?.("active")}
+                    src="https://images.mktw.net/im-764473?width=1280&size=1"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="textarea">
           <form className="border" onSubmit={onChat}>
-            <button type="button">
-              <ClipSvg width={"18px"} height={"18px"} class_name={"svg_fill"} />
-            </button>
+            <div data-for="select_file_div">
+              <input className="file_input_box" onInput={() => {
+                refs?.current?.modal_msgs?.classList?.add?.("active")
+              }} type="file" accept="image/* , video/* , audio/*" />
+              <ClipSvg class_name={"svg_fill"} />
+            </div>
             <input onInput={onInput} placeholder="Type Something..." />
             <button type="submit">
               <SendSvg
-                width={"18px"}
-                height={"18px"}
                 class_name={"svg_path_stroke"}
               />
             </button>
