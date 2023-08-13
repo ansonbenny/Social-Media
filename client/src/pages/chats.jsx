@@ -18,7 +18,7 @@ const reducer = (value, { type, ...actions }) => {
       return {
         ...value,
         size: {
-          lg: window.matchMedia("(min-width:901px)")?.matches,
+          lg: window.matchMedia("(min-width:951px)")?.matches,
           sm: window.matchMedia("(max-width:680px)")?.matches,
         },
       };
@@ -56,7 +56,7 @@ const Chats = () => {
 
   const [state, action] = useReducer(reducer, {
     size: {
-      lg: window.matchMedia("(min-width:901px)")?.matches,
+      lg: window.matchMedia("(min-width:951px)")?.matches,
       sm: window.matchMedia("(max-width:680px)")?.matches,
     },
     modal: {

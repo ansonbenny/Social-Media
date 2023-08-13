@@ -19,4 +19,5 @@ export { default as Xsvg } from "./XIcon";
 export { default as PlaySvg } from "./play";
 export { default as GoogleSvg } from "./google";
 export { default as TickSvg } from "./tick";
+export { default as PauseSvg } from "./pause";
 
