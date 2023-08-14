@@ -87,4 +87,8 @@ export default (app, io) => {
             })
         }
     })
+
+    router.post("/share_file", (req, res) => {
+
+    })
 }

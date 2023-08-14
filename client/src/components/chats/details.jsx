@@ -10,6 +10,7 @@ import {
   Xsvg,
 } from "../../assets";
 import "./style.scss";
+import Modal from "./modal";
 
 const ChatDetails = ({ isModal, setModal, details }) => {
   return (
@@ -28,6 +29,7 @@ const ChatDetails = ({ isModal, setModal, details }) => {
         </div>
       )}
       <div className="scrollable">
+        <Modal />
         <div className="basic">
           <div className="cover">
             {details?.img ? (

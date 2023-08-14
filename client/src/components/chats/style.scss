@@ -258,6 +258,7 @@
             svg {
                 width: 1.5rem;
                 height: 1.5rem;
+                pointer-events: none;
             }
 
             .svg_fill {
@@ -549,178 +550,6 @@
                     }
                 }
             }
-
-            div[data-for="modal_outer"] {
-                position: absolute;
-                z-index: 500;
-                width: 100%;
-                height: 100%;
-                display: none;
-                align-items: center;
-                justify-content: center;
-                backdrop-filter: blur(1px);
-
-                &:is(.active) {
-                    display: flex;
-                }
-
-                &:is(.form) {
-                    form {
-                        display: flex !important;
-                    }
-                }
-
-                .inner_modal {
-                    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
-                    width: 350px;
-                    height: auto;
-                    max-height: 350px;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    padding: .5rem;
-                    background: var(--bg-primary);
-                    border-radius: 10px;
-                    margin: .5rem;
-
-                    @media screen and (max-width: 350px) {
-                        height: auto;
-                        width: 100%;
-                    }
-
-                    .scroll_bar {
-                        width: 100%;
-                        height: auto;
-                        max-height: 350px;
-                        overflow: auto;
-                        scrollbar-width: 5px;
-
-                        &::-webkit-scrollbar {
-                            height: 5px;
-                            width: 5px;
-                        }
-
-                        &::-webkit-scrollbar-track {
-                            border-radius: 5px;
-                        }
-
-                        &::-webkit-scrollbar-track {
-                            background: var(--bg-grey);
-                        }
-
-                        &::-webkit-scrollbar-thumb {
-                            background: var(--text-primary);
-                            border-radius: 5px;
-                        }
-
-                        img {
-                            width: 100%;
-                            height: auto;
-
-                            &:is(.zoom) {
-                                width: 200%;
-                            }
-                        }
-                    }
-
-                    video {
-                        width: 100%;
-                        height: auto;
-                    }
-
-                    @include audio_controls($modal : true);
-
-                    form {
-                        width: 100%;
-                        display: none;
-                        flex-direction: row;
-                        gap: 1rem;
-                        margin: .5rem 0;
-                        align-items: center;
-
-                        .upload {
-                            width: 2rem;
-                            height: 2rem;
-                            position: relative;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            border: 2px solid $Text-Secondary;
-                            border-radius: 999px;
-                            cursor: pointer;
-                            margin-right: auto;
-                            transition: all .3s ease-in-out;
-                            -moz-transition: all .3s ease-in-out;
-
-                            svg {
-                                width: 1.5rem;
-                                height: 1.5rem;
-                                fill: $Text-Secondary;
-                                transition: all .3s ease-in-out;
-                                -moz-transition: all .3s ease-in-out;
-                            }
-
-                            &:hover {
-                                border-color: $bg-violet;
-
-                                svg {
-                                    fill: $bg-violet;
-                                }
-                            }
-
-                            input {
-                                cursor: pointer;
-                                position: absolute;
-                                width: 2rem;
-                                height: 2rem;
-                                border-radius: 999px;
-                                opacity: 0;
-
-                                &::-webkit-file-upload-button {
-                                    cursor: pointer;
-                                }
-                            }
-                        }
-
-                        button {
-                            cursor: pointer;
-                            width: auto;
-                            height: auto;
-                            background: transparent;
-                            border: none;
-                            border-radius: 10px;
-
-                            svg {
-                                width: 18px;
-                                height: 18px;
-                            }
-
-                            .svg_path_fill path {
-                                fill: $Text-Secondary;
-                                transition: all .3s ease-in-out;
-                                -moz-transition: all .3s ease-in-out;
-                            }
-
-                            .svg_path_stroke path {
-                                stroke: $Text-Secondary;
-                                transition: all .3s ease-in-out;
-                                -moz-transition: all .3s ease-in-out;
-                            }
-
-                            &:hover {
-                                .svg_path_stroke path {
-                                    stroke: $bg-violet;
-                                }
-
-                                .svg_path_fill path {
-                                    fill: $bg-violet;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -734,6 +563,7 @@
         -moz-transition: all .3s ease-in-out;
 
         .scrollable {
+            position: relative;
             display: flex;
             flex-direction: column;
             gap: 1rem;
@@ -1086,6 +916,185 @@
                             fill: var(--text-primary);
                         }
                     }
+                }
+            }
+        }
+    }
+
+    section[data-for="modal_outer"] {
+        position: absolute;
+        z-index: 500;
+        width: 100%;
+        height: 100%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(1px);
+
+        &:is(.active) {
+            display: flex;
+        }
+
+        .inner_modal {
+            box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+            width: 350px;
+            height: auto;
+            max-height: 350px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: .5rem;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            margin: .5rem;
+
+            @media screen and (max-width: 350px) {
+                height: auto;
+                width: 100%;
+            }
+
+            .scroll_bar {
+                width: 100%;
+                height: auto;
+                max-height: 350px;
+                overflow: auto;
+                scrollbar-width: 5px;
+
+                &::-webkit-scrollbar {
+                    height: 5px;
+                    width: 5px;
+                }
+
+                &::-webkit-scrollbar-track {
+                    border-radius: 5px;
+                }
+
+                &::-webkit-scrollbar-track {
+                    background: var(--bg-grey);
+                }
+
+                &::-webkit-scrollbar-thumb {
+                    background: var(--text-primary);
+                    border-radius: 5px;
+                }
+
+                img {
+                    width: 100%;
+                    height: auto;
+
+                    &:is(.zoom) {
+                        width: 200%;
+                    }
+                }
+            }
+
+            video {
+                width: 100%;
+                height: auto;
+            }
+
+            @include audio_controls($modal : true);
+
+            form {
+                width: 100%;
+                display: flex;
+                flex-direction: row;
+                gap: 1rem;
+                margin: 1rem 0;
+                align-items: center;
+
+                .upload {
+                    width: 2rem;
+                    height: 2rem;
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: 2px solid $Text-Secondary;
+                    border-radius: 999px;
+                    cursor: pointer;
+                    margin-right: auto;
+                    transition: all .3s ease-in-out;
+                    -moz-transition: all .3s ease-in-out;
+
+                    svg {
+                        width: 1.5rem;
+                        height: 1.5rem;
+                        fill: $Text-Secondary;
+                        transition: all .3s ease-in-out;
+                        -moz-transition: all .3s ease-in-out;
+                    }
+
+                    &:hover {
+                        border-color: $bg-violet;
+
+                        svg {
+                            fill: $bg-violet;
+                        }
+                    }
+
+                    input {
+                        cursor: pointer;
+                        position: absolute;
+                        width: 2rem;
+                        height: 2rem;
+                        border-radius: 999px;
+                        opacity: 0;
+
+                        &::-webkit-file-upload-button {
+                            cursor: pointer;
+                        }
+                    }
+                }
+
+                button {
+                    cursor: pointer;
+                    width: auto;
+                    height: auto;
+                    background: transparent;
+                    border: none;
+                    border-radius: 10px;
+
+                    svg {
+                        width: 18px;
+                        height: 18px;
+                    }
+
+                    .svg_path_fill path {
+                        fill: $Text-Secondary;
+                        transition: all .3s ease-in-out;
+                        -moz-transition: all .3s ease-in-out;
+                    }
+
+                    .svg_path_stroke path {
+                        stroke: $Text-Secondary;
+                        transition: all .3s ease-in-out;
+                        -moz-transition: all .3s ease-in-out;
+                    }
+
+                    &:hover {
+                        .svg_path_stroke path {
+                            stroke: $bg-violet;
+                        }
+
+                        .svg_path_fill path {
+                            fill: $bg-violet;
+                        }
+                    }
+                }
+            }
+
+            .progress {
+                width: calc(100% - 2rem);
+                display: none;
+                height: .4rem;
+                margin: 0 1rem;
+                border-radius: 999px;
+                background: linear-gradient(to right, $bg-violet 0%, $bg-violet 0%, $Text-Secondary 0%, $Text-Secondary 100%);
+
+                &:is(.active) {
+                    display: block;
                 }
             }
         }
