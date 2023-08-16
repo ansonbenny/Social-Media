@@ -2,6 +2,7 @@ import chat from "../../helper/chat.js";
 import jwt from "jsonwebtoken";
 import user from "../../helper/user.js";
 import { Router } from "express";
+import multer from "../../multer/index.js";
 
 const router = Router();
 
@@ -88,7 +89,52 @@ export default (app, io) => {
         }
     })
 
-    router.post("/share_file", (req, res) => {
+    router.post("/share_file", CheckLogged, multer?.share_user?.single('file'), async (req, res) => {
+        try {
+            let sockets = await chat?.getSocketId?.(req?.body?.chatId, req?.body?.userId);
 
+            let response = await chat?.newMsg({
+                users: [req?.body?.chatId, req?.body?.userId],
+                chat: {
+                    id: req?.body?.id,
+                    date: req?.body?.date,
+                    file: {
+                        ...req?.file,
+                        url: `/${req?.file?.path}`,
+                        type: req?.file?.mimetype
+                    },
+                    from: req?.body?.userId,
+                    read: req?.body?.chatId == req?.body?.userId ? true : undefined
+                },
+            });
+
+            if (response && sockets?.ids?.length > 0) {
+                io.to(sockets?.ids).emit("chat message", {
+                    id: req?.body?.id,
+                    date: req?.body?.date,
+                    file: {
+                        ...req?.file,
+                        url: `/${req?.file?.path}`,
+                        type: req?.file?.mimetype
+                    },
+                    from: req?.body?.userId,
+                    user: sockets?.name || "",
+                    match:
+                        req?.body?.chatId == req?.body?.userId
+                            ? req?.body?.userId
+                            : `${req?.body?.userId}${req?.body?.chatId}`,
+                });
+
+                res.status(200).json({
+                    status: 200,
+                    message: 'Success'
+                })
+            }
+        } catch (err) {
+            res.status(500).json({
+                status: 500,
+                message: err
+            })
+        }
     })
 }

@@ -291,9 +291,7 @@ const Chats = () => {
           {state?.modal?.details || state?.size?.lg ? (
             <ChatDetails
               details={state?.details}
-              isModal={
-                state?.modal?.details && !state?.size?.lg ? true : undefined
-              }
+              isUser
               setModal={
                 state?.modal?.details && !state?.size?.lg
                   ? () => {

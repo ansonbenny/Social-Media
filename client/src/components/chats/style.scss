@@ -119,8 +119,7 @@
                     color: var(--text-primary);
                 }
 
-                img,
-                video {
+                img {
                     margin-top: .5rem;
                     border-radius: 10px;
                     width: 100%;
@@ -128,13 +127,56 @@
                     height: auto;
                 }
 
-                @include audio_controls;
+                .video {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    margin-top: .5rem;
+                    border-radius: 10px;
+                    padding: 1.5rem 2.5rem;
+                    background: linear-gradient(140deg, var(--bg-grey) 50%, var(--bg-primary) 50%);
+
+                    svg {
+                        width: 3rem;
+                        height: 3rem;
+                        pointer-events: none;
+                        border-radius: 9999px;
+                        padding: .5rem;
+                        fill: $bg-violet;
+                        border: 3px solid $bg-violet;
+                        transition: all .5s ease-in-out;
+                        -moz-transition: all .5s ease-in-out;
+                    }
+
+                    &:hover {
+                        svg {
+                            transform: scale(1.2)
+                        }
+                    }
+                }
+
+                @if $me {
+                    .audio_outer {
+                        margin-top: .5rem;
+                        border-radius: 10px;
+                        padding: .5rem;
+                        width: calc(100% - 1rem);
+                        background: linear-gradient(140deg, var(--bg-grey) 50%, var(--bg-primary) 50%);
+
+                        @include audio_controls;
+                    }
+                }
+
+                @else {
+                    @include audio_controls($m_top : true);
+                }
             }
         }
 
         .actions-msg {
             position: absolute;
-            z-index: 999;
+            z-index: 800;
             bottom: .2rem;
             left: 0;
             background: var(--bg-primary);
@@ -191,9 +233,9 @@
     }
 }
 
-@mixin audio_controls($modal: false) {
+@mixin audio_controls($m_top: false) {
     .audio {
-        margin-top: .5rem;
+        margin-top: 0;
         width: 100%;
         height: auto;
         display: flex;
@@ -201,8 +243,8 @@
         align-items: center;
         gap: .5rem;
 
-        @if $modal {
-            margin-top: 0;
+        @if $m_top {
+            margin-top: .5rem;
         }
 
         input[type="range"] {
@@ -923,7 +965,7 @@
 
     section[data-for="modal_outer"] {
         position: absolute;
-        z-index: 500;
+        z-index: 888;
         width: 100%;
         height: 100%;
         display: none;
@@ -994,7 +1036,7 @@
                 height: auto;
             }
 
-            @include audio_controls($modal : true);
+            @include audio_controls;
 
             form {
                 width: 100%;

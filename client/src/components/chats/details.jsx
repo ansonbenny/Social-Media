@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   AvatarSvg,
   ChatsSvg,
@@ -9,15 +9,19 @@ import {
   VideoSvg,
   Xsvg,
 } from "../../assets";
-import "./style.scss";
 import Modal from "./modal";
+import "./style.scss";
 
-const ChatDetails = ({ isModal, setModal, details }) => {
+const ChatDetails = ({ setModal, isUser, details }) => {
+  useEffect(() => {
+    const abortControl = new AbortController()
+  }, []);
+
   return (
     <section
-      className={`details-chat ${isModal ? "modal-details-chat" : null}`}
+      className={`details-chat ${setModal ? "modal-details-chat" : null}`}
     >
-      {isModal && (
+      {setModal && (
         <div className="exit">
           <button
             onClick={() => {
@@ -81,7 +85,7 @@ const ChatDetails = ({ isModal, setModal, details }) => {
           </div>
         </div>
 
-        {/*  <div className="media">
+        <div className="media">
           <h1>
             <ParticleSvg />
             Shared Media
@@ -115,9 +119,9 @@ const ChatDetails = ({ isModal, setModal, details }) => {
           </div>
 
           <button>View More</button>
-        </div>  */}
+        </div>
 
-        {!details?.user && (
+        {!isUser && (
           <div className="members">
             <div className="top">
               <h1>

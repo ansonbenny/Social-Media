@@ -1,14 +1,16 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useReducer, useRef } from 'react'
 import { ClipSvg, PauseSvg, PlaySvg, SendSvg, Xsvg } from '../../assets'
 import { useAudio } from '../../hooks'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import { axios } from '../../lib'
+import { useSelector } from 'react-redux'
 
 const reducer = (value, { type, ...actions }) => {
     switch (type) {
         case 'open':
             return { ...value, active: true, form: actions?.form || undefined }
         case 'close':
-            return { ...value, active: undefined }
+            return { active: undefined }
         case "file":
             if (/video/i.test(actions?.file?.type)) {
                 delete value?.audio
@@ -34,20 +36,31 @@ const reducer = (value, { type, ...actions }) => {
             delete value?.image
 
             return { ...value }
+        case "abort_controller":
+            return { ...value, abort_controller: actions?.data }
+
+        case "progress":
+            return { ...value, progrees: actions?.data }
         default:
             return value
     }
 }
 
-const Modal = forwardRef(({ audio_live, isUser, setChat }, ref) => {
+const Modal = forwardRef(({ audio_live, isUser }, ref) => {
 
     const refs = useAudio()
 
+    const navigate = useNavigate()
+
     const { id } = useParams()
+
+    const user = useSelector((state) => state?.user)
 
     const [state, action] = useReducer(reducer, {})
 
     const CloseModal = () => {
+        state?.abort_controller?.abort?.()
+
         action({ type: "close" })
 
         if (refs?.current?.['audio_seekbar']?.classList?.contains('modal_audio_seekBar')) {
@@ -55,11 +68,59 @@ const Modal = forwardRef(({ audio_live, isUser, setChat }, ref) => {
         }
     }
 
-    const FormHanlde = (e) => {
+    const onUploadProgress = (e) => {
+        const { loaded, total } = e;
+
+        let percent = Math.floor((loaded * 100) / total);
+
+        if (percent < 100) {
+            action({ type: "progress", data: percent })
+        } else {
+            action({ type: 'close' })
+        }
+    };
+
+    const FormHanlde = async (e) => {
         e?.preventDefault?.()
 
-        if (isUser) {
+        action({ type: 'abort_controller', data: new AbortController() })
 
+        if (isUser) {
+            try {
+                const formdata = new FormData();
+
+                const date = new Date()
+
+                formdata.append("id", Date?.now()?.toString(16))
+                formdata.append("date", `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()} | ${date.getHours()}:${date.getMinutes()}`)
+                formdata.append("chatId", id)
+                formdata.append("userId", user?._id)
+
+                if (state?.video) {
+                    formdata.append("file", state?.video)
+                } else if (state?.audio) {
+                    formdata.append("file", state?.audio)
+                } else {
+                    formdata.append("file", state?.image)
+                }
+
+                await axios.post('/chat-single/share_file', formdata, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                    signal: state?.abort_controller?.signal,
+                    onUploadProgress
+                })
+            } catch (err) {
+                if (err?.response?.data?.status == 405) {
+                    alert("Please Login")
+                    navigate('/')
+                } else if (err?.code !== "ERR_CANCELED") {
+                    alert(err?.response?.data?.message || "Something Went Wrong");
+                } else {
+                    alert("Cancelled Old Request")
+                }
+            }
         }
     }
 
@@ -84,7 +145,12 @@ const Modal = forwardRef(({ audio_live, isUser, setChat }, ref) => {
 
     useImperativeHandle(ref, () => ({
         Modal: (data) => {
-            action({ type: "open", form: data })
+            if (typeof data == 'object') {
+                action({ type: "open" })
+                action({ type: "file", file: data })
+            } else {
+                action({ type: "open", form: data })
+            }
         }
     }))
 
@@ -178,18 +244,19 @@ const Modal = forwardRef(({ audio_live, isUser, setChat }, ref) => {
                     <button type="button" onClick={CloseModal}>
                         <Xsvg class_name={"svg_path_fill"} />
                     </button>
-                    <button type="submit">
-                        <SendSvg
-                            class_name={"svg_path_stroke"}
-                        />
-                    </button>
+                    {
+                        !state?.progrees && <button type="submit">
+                            <SendSvg
+                                class_name={"svg_path_stroke"}
+                            />
+                        </button>
+                    }
                 </form>}
 
-                <div className="progress" ref={(elm) => {
-                    if (refs?.current) {
-                        refs.current.upload_progress = elm
-                    }
-                }} />
+                <div
+                    className={`progress ${state?.progrees ? 'active' : 'hide'}`}
+                    style={{ background: `linear-gradient(to right, #6b8afd 0%, #6b8afd ${state?.progrees}%, #333 ${state?.progrees}%, #333 100%)` }}
+                />
             </div>
 
             <audio id="audio_tag" controls ref={(elm) => {

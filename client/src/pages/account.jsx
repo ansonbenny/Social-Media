@@ -1,10 +1,46 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useReducer, useRef, useState } from "react";
 import { Input } from "../components";
 import { AvatarSvg, LogoutSvg } from "../assets";
 import { setLoading } from "../redux/additional";
 import { useDispatch } from "react-redux";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { axios } from "../lib";
+
+const reducer = (value, { type, data }) => {
+  switch (type) {
+    case 'size':
+      return { ...value, size_sm: window.matchMedia("(max-width:680px)")?.matches }
+
+    case "avatar":
+      return { ...value, form: { ...value?.form, img: URL.createObjectURL(data) } }
+
+    case "input":
+      if (data?.name == "email") {
+        return { ...value, otp: undefined, form: { ...value?.form, OTP: "", [data?.name]: data?.value } }
+      } else {
+        return { ...value, form: { ...value?.form, [data?.name]: data?.value } }
+      }
+
+    case "progress":
+      if (data < 100) {
+        return { ...value, uploading: { status: true, percent: data } }
+      } else {
+        return { ...value, uploading: {} }
+      }
+
+    case "reset_form":
+      return { ...value, otp: undefined, form: { ...value?.form, OTP: "" } }
+
+    case "otp_sented":
+      return { ...value, otp: true }
+
+    case "remove_avatar":
+      return { ...value, form: { ...value?.form, img: null } }
+
+    default:
+      return value
+  }
+}
 
 const Account = () => {
   const dispatch = useDispatch();
@@ -15,30 +51,19 @@ const Account = () => {
 
   const { location, user } = useOutletContext();
 
-  const [state, setState] = useState({
-    otp: undefined,
+  const [state, action] = useReducer(reducer, {
     form: {
       ...user,
       img: user?.img && `/files/profiles/${user?.img}`,
     },
     size_sm: window.matchMedia("(max-width:680px)")?.matches,
-    uploading: {
-      status: false,
-      percent: 0,
-    },
-  });
+  })
 
   const InputHandle = async (e) => {
     e?.preventDefault?.();
 
     if (e?.target?.name === "avatar") {
-      setState((state) => ({
-        ...state,
-        form: {
-          ...state?.form,
-          img: URL.createObjectURL(e?.target?.files?.[0]),
-        },
-      }));
+      action({ type: "avatar", data: e?.target?.files?.[0] })
 
       const formData = new FormData();
       // appending file to formData
@@ -64,24 +89,7 @@ const Account = () => {
         ref.current.div.style.display = "none";
       }
     } else {
-      if (e?.target?.name === "email") {
-        setState((state) => ({
-          ...state,
-          form: {
-            ...state.form,
-            OTP: "",
-          },
-          otp: undefined,
-        }));
-      }
-
-      setState((state) => ({
-        ...state,
-        form: {
-          ...state?.form,
-          [e?.target?.name]: e?.target?.value,
-        },
-      }));
+      action({ type: 'input', data: e?.target })
     }
   };
 
@@ -90,23 +98,7 @@ const Account = () => {
 
     let percent = Math.floor((loaded * 100) / total);
 
-    if (percent < 100) {
-      setState((state) => ({
-        ...state,
-        uploading: {
-          status: true,
-          percent,
-        },
-      }));
-    } else {
-      setState((state) => ({
-        ...state,
-        uploading: {
-          status: false,
-          percent: 0,
-        },
-      }));
-    }
+    action({ type: "progress", data: percent })
   };
 
   const FormHandle = async (e, resend) => {
@@ -123,14 +115,7 @@ const Account = () => {
         });
 
         if (res?.["data"]) {
-          setState((state) => ({
-            ...state,
-            otp: undefined,
-            form: {
-              ...state.form,
-              OTP: "",
-            },
-          }));
+          action({ type: "reset_form" })
         }
       } else {
         let res = await axios.post(`/user/edit-profile-otp`, {
@@ -141,10 +126,7 @@ const Account = () => {
         });
 
         if (res?.["data"]?.data?.otp) {
-          setState((state) => ({
-            ...state,
-            otp: true,
-          }));
+          action({ type: "otp_sented" })
         }
       }
     } catch (err) {
@@ -175,10 +157,7 @@ const Account = () => {
     }
 
     const onResize = () => {
-      setState((state) => ({
-        ...state,
-        size_sm: window.matchMedia("(max-width:680px)")?.matches,
-      }));
+      action({ type: 'size' })
     };
 
     const onClick = (e) => {
@@ -256,13 +235,7 @@ const Account = () => {
                             let res = await axios.delete("/user/remove-avatar");
 
                             if (res?.["data"]) {
-                              setState((stat) => ({
-                                ...state,
-                                form: {
-                                  ...state?.form,
-                                  img: null,
-                                },
-                              }));
+                              action({ type: "remove_avatar" })
                             }
                           } catch (err) {
                             if (err?.response?.data?.status === 405) {
@@ -291,9 +264,8 @@ const Account = () => {
                 )}
 
                 <div
-                  className={`uploading ${
-                    state?.uploading?.status ? "active" : ""
-                  }`}
+                  className={`uploading ${state?.uploading?.status ? "active" : ""
+                    }`}
                   style={{
                     background: `linear-gradient(to right, #6b8afd ${state?.uploading?.percent}%, #fff 0%)`,
                   }}
@@ -304,9 +276,8 @@ const Account = () => {
                 <AvatarSvg height={"4.5rem"} width={"4.5rem"} />
 
                 <div
-                  className={`uploading ${
-                    state?.uploading?.status ? "active" : ""
-                  }`}
+                  className={`uploading ${state?.uploading?.status ? "active" : ""
+                    }`}
                   style={{
                     background: `linear-gradient(to right, #6b8afd ${state?.uploading?.percent}%, #fff 0%)`,
                   }}

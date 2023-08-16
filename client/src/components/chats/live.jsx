@@ -20,8 +20,8 @@ import { useSelector } from "react-redux";
 import { LoadingCircle } from "../";
 import useScroll from "../../hooks/scroll";
 import Modal from "./modal";
-import "./style.scss";
 import { useAudio } from "../../hooks";
+import "./style.scss";
 
 const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
   const audio = useAudio();
@@ -107,8 +107,6 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
           audio_live={audio?.current?.audio_tag}
 
           isUser={details?.user}
-
-          setChat={action}
         />
 
         <div
@@ -138,21 +136,110 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
                         </div>
                       </div>
 
-                      <div className="msg">{obj?.msg}</div>
+                      <div className="msg">
+                        {obj?.msg}
+                        {
+                          /image/i.test(obj?.file?.type) &&
+                          <img
+                            loading="lazy" src={obj?.file?.url}
+                            className="file_for_modal"
+                            onClick={() => {
+                              refs?.current?.modal_msgs?.Modal?.(obj?.file)
+                            }}
+                          />
+                        }
+                        {
+                          /video/i.test(obj?.file?.type) &&
+                          <div className="video file_for_modal" onClick={() => {
+                            refs?.current?.modal_msgs?.Modal?.(obj?.file)
+                          }}>
+                            <PlaySvg />
+                          </div>
+                        }
+                        {
+                          /audio/i.test(obj?.file?.type) &&
+                          <div className="audio_outer">
+                            <div className="audio">
+                              <button
+                                className={`${obj?.id}_audio_btn audio_btn`}
+                                onClick={(e) => {
+                                  audio?.current?.audio_tag?.pause?.()
+
+                                  if (!e?.target?.classList?.contains?.("play")) {
+                                    audio.current.audio_btn = e?.target
+
+                                    audio.current.audio_seekbar = e?.target?.parentElement?.querySelector('input')
+
+                                    audio.current.audio_tag.src = e?.target?.getAttribute('src')
+
+                                    audio?.current?.audio_tag?.play?.()
+                                  }
+
+                                  refs?.current?.audio_btns?.forEach((elm) => {
+                                    elm?.classList?.remove("play")
+                                  })
+                                }}
+                                type="button"
+                                src={obj?.file?.url}
+                                ref={(elm) => {
+                                  if (refs?.current && refs?.current?.audio_btns) {
+                                    refs.current.audio_btns.push(elm)
+                                  } else if (refs?.current) {
+                                    refs.current.audio_btns = [elm]
+                                  }
+                                }}
+                              >
+                                <PlaySvg />
+                                <PauseSvg />
+                              </button>
+                              <input
+                                type="range"
+                                step="any"
+                                onChange={(e) => {
+                                  if (audio?.current?.audio_seekbar &&
+                                    audio?.current?.audio_seekbar?.classList?.contains(`${obj?.id}_seekBar`)) {
+
+                                    if (audio?.current?.['audio_tag']) {
+                                      audio.current['audio_tag'].currentTime = e?.target?.value
+                                    }
+                                  } else {
+                                    const button = e?.target?.parentElement?.querySelector('button')
+
+                                    refs?.current?.audio_btns?.forEach((elm) => {
+                                      elm?.classList?.remove('play')
+                                    })
+
+                                    audio.current.audio_btn = button
+
+                                    audio.current.audio_seekbar = e?.target
+
+                                    audio.current.audio_tag.src = button?.getAttribute('src')
+
+                                    audio?.current?.audio_tag?.play?.()
+                                  }
+                                }}
+                                className={`non_active ${obj?.id}_seekBar`}
+                              />
+                            </div>
+                          </div>
+                        }
+                      </div>
                     </div>
 
                     <div className="actions-msg">
                       <button onClick={() => window.alert("click")}>
                         <TrashSvg />
                       </button>
-                      <button
-                        onClick={() => {
-                          window?.navigator?.clipboard?.writeText?.(obj?.msg);
-                          window?.alert?.("Text Copied");
-                        }}
-                      >
-                        <CopySvg class_name={"path_fill"} />
-                      </button>
+                      {
+                        !obj?.file && <button
+                          onClick={() => {
+                            window?.navigator?.clipboard?.writeText?.(obj?.msg);
+                            window?.alert?.("Text Copied");
+                          }}
+                        >
+                          <CopySvg class_name={"path_fill"} />
+                        </button>
+                      }
                     </div>
                   </div>
 
@@ -178,7 +265,7 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
                       <AvatarSvg />
                     )}
                   </div>
-                  <div className="card actionable">
+                  <div className={`card ${!obj?.file ? 'actionable' : 'no_action'}`}>
                     <div className="inner">
                       <div className="from">
                         <p className="author">{details?.name}</p>
@@ -186,28 +273,112 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
                       </div>
 
                       <div className="msg">
-                        {/* <img src="https://images.mktw.net/im-764473?width=1280&size=1" /> */}
                         {obj?.msg}
+                        {
+                          /image/i.test(obj?.file?.type) &&
+                          <img
+                            loading="lazy" src={obj?.file?.url}
+                            className="file_for_modal"
+                            onClick={() => {
+                              refs?.current?.modal_msgs?.Modal?.(obj?.file)
+                            }}
+                          />
+                        }
+                        {
+                          /video/i.test(obj?.file?.type) &&
+                          <div className="video file_for_modal" onClick={() => {
+                            refs?.current?.modal_msgs?.Modal?.(obj?.file)
+                          }}>
+                            <PlaySvg />
+                          </div>
+                        }
+                        {
+                          /audio/i.test(obj?.file?.type) &&
+                          <div className="audio">
+                            <button
+                              className={`${obj?.id}_audio_btn audio_btn`}
+                              onClick={(e) => {
+                                audio?.current?.audio_tag?.pause?.()
+
+                                if (!e?.target?.classList?.contains?.("play")) {
+                                  audio.current.audio_btn = e?.target
+
+                                  audio.current.audio_seekbar = e?.target?.parentElement?.querySelector('input')
+
+                                  audio.current.audio_tag.src = e?.target?.getAttribute('src')
+
+                                  audio?.current?.audio_tag?.play?.()
+                                }
+
+                                refs?.current?.audio_btns?.forEach((elm) => {
+                                  elm?.classList?.remove("play")
+                                })
+                              }}
+                              type="button"
+                              src={obj?.file?.url}
+                              ref={(elm) => {
+                                if (refs?.current && refs?.current?.audio_btns) {
+                                  refs.current.audio_btns.push(elm)
+                                } else if (refs?.current) {
+                                  refs.current.audio_btns = [elm]
+                                }
+                              }}
+                            >
+                              <PlaySvg />
+                              <PauseSvg />
+                            </button>
+                            <input
+                              type="range"
+                              step="any"
+                              onChange={(e) => {
+                                if (audio?.current?.audio_seekbar &&
+                                  audio?.current?.audio_seekbar?.classList?.contains(`${obj?.id}_seekBar`)) {
+
+                                  if (audio?.current?.['audio_tag']) {
+                                    audio.current['audio_tag'].currentTime = e?.target?.value
+                                  }
+                                } else {
+                                  const button = e?.target?.parentElement?.querySelector('button')
+
+                                  refs?.current?.audio_btns?.forEach((elm) => {
+                                    elm?.classList?.remove('play')
+                                  })
+
+                                  audio.current.audio_btn = button
+
+                                  audio.current.audio_seekbar = e?.target
+
+                                  audio.current.audio_tag.src = button?.getAttribute('src')
+
+                                  audio?.current?.audio_tag?.play?.()
+                                }
+                              }}
+                              className={`non_active ${obj?.id}_seekBar`}
+                            />
+                          </div>
+                        }
                       </div>
                     </div>
 
-                    <div className="actions-msg">
-                      <button
-                        onClick={() => {
-                          window?.navigator?.clipboard?.writeText?.(obj?.msg);
-                          window?.alert?.("Text Copied");
-                        }}
-                      >
-                        <CopySvg class_name={"path_fill"} />
-                      </button>
-                    </div>
+                    {
+                      !obj?.file && <div className="actions-msg">
+                        <button
+                          onClick={() => {
+                            window?.navigator?.clipboard?.writeText?.(obj?.msg);
+                            window?.alert?.("Text Copied");
+                          }}
+                        >
+                          <CopySvg class_name={"path_fill"} />
+                        </button>
+                      </div>
+                    }
                   </div>
                 </div>
               );
             }
           })}
 
-          <div className="others">
+          {/* <div className="others">
             <div className="cover">
               <img
                 src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
@@ -339,88 +510,7 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
               </div>
             </div>
           </div>
-
-          <div className="others">
-            <div className="cover">
-              <img
-                src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
-                alt="profile"
-              />
-            </div>
-            <div className="card">
-              <div className="inner">
-                <div className="from">
-                  <p className="author">Anson</p>
-                  <p className="time">08:35</p>
-                </div>
-
-                <div className="msg">
-                  <div className="audio">
-                    <button
-                      className="1234_audio_btn audio_btn"
-                      onClick={(e) => {
-                        audio?.current?.audio_tag?.pause?.()
-
-                        if (!e?.target?.classList?.contains?.("play")) {
-                          audio.current.audio_btn = e?.target
-
-                          audio.current.audio_seekbar = e?.target?.parentElement?.querySelector('input')
-
-                          audio.current.audio_tag.src = e?.target?.getAttribute('src')
-
-                          audio?.current?.audio_tag?.play?.()
-                        }
-
-                        refs?.current?.audio_btns?.forEach((elm) => {
-                          elm?.classList?.remove("play")
-                        })
-                      }}
-                      type="button"
-                      src="/song.mp3"
-                      ref={(elm) => {
-                        if (refs?.current && refs?.current?.audio_btns) {
-                          refs.current.audio_btns.push(elm)
-                        } else if (refs?.current) {
-                          refs.current.audio_btns = [elm]
-                        }
-                      }}
-                    >
-                      <PlaySvg />
-                      <PauseSvg />
-                    </button>
-                    <input
-                      type="range"
-                      step="any"
-                      onChange={(e) => {
-                        if (audio?.current?.audio_seekbar &&
-                          audio?.current?.audio_seekbar?.classList?.contains(`${1234}_seekBar`)) {
-
-                          if (audio?.current?.['audio_tag']) {
-                            audio.current['audio_tag'].currentTime = e?.target?.value
-                          }
-                        } else {
-                          const button = e?.target?.parentElement?.querySelector('button')
-
-                          refs?.current?.audio_btns?.forEach((elm) => {
-                            elm?.classList?.remove('play')
-                          })
-
-                          audio.current.audio_btn = button
-
-                          audio.current.audio_seekbar = e?.target
-
-                          audio.current.audio_tag.src = button?.getAttribute('src')
-
-                          audio?.current?.audio_tag?.play?.()
-                        }
-                      }}
-                      className="non_active 1234_seekBar"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+                    */}
 
         </div>
 
