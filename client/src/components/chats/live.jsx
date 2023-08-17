@@ -42,6 +42,9 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
     },
     readMsgs: (data) => {
       action({ type: "read", data })
+    },
+    deleteMsg: (data) => {
+      action({ type: "delete", data })
     }
   }));
 
@@ -227,7 +230,13 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
                     </div>
 
                     <div className="actions-msg">
-                      <button onClick={() => window.alert("click")}>
+                      <button onClick={() =>
+                        onChat(undefined, {
+                          id: obj?.id,
+                          file: obj?.file,
+                          date: obj?.date
+                        })
+                      }>
                         <TrashSvg />
                       </button>
                       {
@@ -377,140 +386,6 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
               );
             }
           })}
-
-          {/* <div className="others">
-            <div className="cover">
-              <img
-                src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
-                alt="profile"
-              />
-            </div>
-            <div className="card">
-              <div className="inner">
-                <div className="from">
-                  <p className="author">Anson</p>
-                  <p className="time">08:35</p>
-                </div>
-
-                <div className="msg">
-                  <img
-                    className="img_for_modal"
-                    onClick={() => {
-                      if (refs?.current?.modal_msgs) {
-                        refs.current.modal_msgs.className = 'active'
-                      }
-                    }}
-                    src="https://images.mktw.net/im-764473?width=1280&size=1"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="others">
-            <div className="cover">
-              <img
-                src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
-                alt="profile"
-              />
-            </div>
-            <div className="card">
-              <div className="inner">
-                <div className="from">
-                  <p className="author">Anson</p>
-                  <p className="time">08:35</p>
-                </div>
-
-                <div className="msg">
-                  <video controls src="https://www.learningcontainer.com/download/sample-mp4-video-file-download-for-testing/?wpdmdl=2727&refresh=64d1d134e3c431691472180" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="others">
-            <div className="cover">
-              <img
-                src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
-                alt="profile"
-              />
-            </div>
-            <div className="card">
-              <div className="inner">
-                <div className="from">
-                  <p className="author">Anson</p>
-                  <p className="time">08:35</p>
-                </div>
-
-                <div className="msg">
-                  <div className="audio">
-                    <button
-                      className="123_audio_btn audio_btn"
-                      onClick={(e) => {
-                        audio?.current?.audio_tag?.pause?.()
-
-                        if (!e?.target?.classList?.contains?.("play")) {
-                          audio.current.audio_btn = e?.target
-
-                          audio.current.audio_seekbar = e?.target?.parentElement?.querySelector('input')
-
-                          audio.current.audio_tag.src = e?.target?.getAttribute('src')
-
-                          audio?.current?.audio_tag?.play?.()
-                        }
-
-                        refs?.current?.audio_btns?.forEach((elm) => {
-                          elm?.classList?.remove("play")
-                        })
-                      }}
-                      type="button"
-                      src="/song.mp3"
-                      ref={(elm) => {
-                        if (refs?.current && refs?.current?.audio_btns) {
-                          refs.current.audio_btns.push(elm)
-                        } else if (refs?.current) {
-                          refs.current.audio_btns = [elm]
-                        }
-                      }}
-                    >
-                      <PlaySvg />
-                      <PauseSvg />
-                    </button>
-                    <input
-                      type="range"
-                      step="any"
-                      onChange={(e) => {
-                        if (audio?.current?.audio_seekbar &&
-                          audio?.current?.audio_seekbar?.classList?.contains(`${123}_seekBar`)) {
-
-                          if (audio?.current?.['audio_tag']) {
-                            audio.current['audio_tag'].currentTime = e?.target?.value
-                            audio?.current?.audio_tag?.play?.()
-                          }
-                        } else {
-                          const button = e?.target?.parentElement?.querySelector('button')
-
-                          refs?.current?.audio_btns?.forEach((elm) => {
-                            elm?.classList?.remove('play')
-                          })
-
-                          audio.current.audio_btn = button
-
-                          audio.current.audio_seekbar = e?.target
-
-                          audio.current.audio_tag.src = button?.getAttribute('src')
-
-                          audio?.current?.audio_tag?.play?.()
-                        }
-                      }}
-                      className="non_active 123_seekBar"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-                    */}
 
         </div>
 

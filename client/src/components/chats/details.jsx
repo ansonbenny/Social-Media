@@ -1,21 +1,83 @@
-import React, { useEffect } from "react";
+import React, { forwardRef, useEffect, useImperativeHandle, useReducer, useRef } from "react";
 import {
   AvatarSvg,
   ChatsSvg,
+  HeadsetSvg,
   ParticleSvg,
   PhoneSvg,
+  PlaySvg,
   PlusSvg,
   TrashSvg,
   VideoSvg,
   Xsvg,
 } from "../../assets";
 import Modal from "./modal";
+import { axios } from "../../lib";
+import { useNavigate } from "react-router-dom";
 import "./style.scss";
 
-const ChatDetails = ({ setModal, isUser, details }) => {
+const reducer = (values, { type, data }) => {
+  switch (type) {
+    case "initial_media":
+      return { ...values, media: data }
+    case "media_new":
+      return { ...values, media: { total: data?.total, files: [...values?.media?.files, ...data?.files] } }
+    default:
+      return values
+  }
+}
+
+const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
+  const navigate = useNavigate();
+
+  const modalRef = useRef()
+
+  const [state, action] = useReducer(reducer, {})
+
+  const LoadMedia = async (abortControl, offset) => {
+    if (isUser) {
+      try {
+        let res = await axios.get('/chat-single/get_media', {
+          params: {
+            chatId: details?._id,
+            offset
+          },
+          signal: abortControl?.signal
+        })
+
+        if (res?.['data'] && !offset) {
+          action({ type: "initial_media", data: res?.['data']?.data })
+        } else if (res?.['data'] && offset) {
+          action({ type: "media_new", data: res?.['data']?.data })
+        }
+      } catch (err) {
+        if (err?.response?.data?.status == 405) {
+          alert("Please Login")
+          navigate('/')
+        } else if (err?.code !== "ERR_CANCELED") {
+          alert(err?.response?.data?.message || "Something Went Wrong");
+        }
+      }
+    }
+  }
+
+  useImperativeHandle(ref, () => ({
+    ReloadMedia: () => {
+      LoadMedia?.()
+    }
+  }))
+
   useEffect(() => {
     const abortControl = new AbortController()
-  }, []);
+
+    // update media when new file recieved / sented / deleted call axios
+
+    LoadMedia?.(abortControl)
+
+    return () => {
+      abortControl?.abort?.()
+    }
+  }, [details]);
 
   return (
     <section
@@ -33,7 +95,7 @@ const ChatDetails = ({ setModal, isUser, details }) => {
         </div>
       )}
       <div className="scrollable">
-        <Modal />
+        <Modal ref={modalRef} />
         <div className="basic">
           <div className="cover">
             {details?.img ? (
@@ -85,41 +147,43 @@ const ChatDetails = ({ setModal, isUser, details }) => {
           </div>
         </div>
 
-        <div className="media">
-          <h1>
-            <ParticleSvg />
-            Shared Media
-            <span>(300 items)</span>
-          </h1>
-          <div className="grid">
-            <img
-              src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
-              alt="profile"
-            />
-            <img
-              src="https://img.i-scmp.com/cdn-cgi/image/fit=contain,width=425,format=auto/sites/default/files/styles/768x768/public/d8/images/methode/2021/01/11/d5ed0832-5001-11eb-ad83-255e1243236c_image_hires_113755.jpg?itok=6PsAhoy2&v=1610336282"
-              alt="profile"
-            />
-            <img
-              src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
-              alt="profile"
-            />
-            <img
-              src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
-              alt="profile"
-            />
-            <img
-              src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
-              alt="profile"
-            />
-            <img
-              src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
-              alt="profile"
-            />
-          </div>
+        {
+          state?.media?.total > 0 && <div className="media">
+            <h1>
+              <ParticleSvg />
+              Shared Media
+              <span>({state?.media?.total} items)</span>
+            </h1>
+            <div className="grid">
+              {
+                state?.media?.files?.map((obj, key) => {
+                  if (/image/i.test(obj?.file?.type)) {
+                    return (
+                      <img key={key} className="file_for_modal" src={obj?.file?.url} alt={obj?.id} onClick={() => {
+                        modalRef?.current?.Modal?.(obj?.file)
+                      }} />
+                    )
+                  } else {
+                    return (<div className="extra_file file_for_modal" key={key} onClick={() => {
+                      modalRef?.current?.Modal?.(obj?.file)
+                    }}>
+                      {/video/i.test(obj?.file?.type) && <PlaySvg />}
+                      {/audio/i.test(obj?.file?.type) && <HeadsetSvg />}
+                    </div>)
+                  }
+                })
+              }
+            </div>
 
-          <button>View More</button>
-        </div>
+            {
+              state?.media?.total > state?.media?.files?.length && <button
+                onClick={() => {
+                  LoadMedia(undefined, state?.media?.files?.length)
+                }}
+              >View More</button>
+            }
+          </div>
+        }
 
         {!isUser && (
           <div className="members">
@@ -174,6 +238,6 @@ const ChatDetails = ({ setModal, isUser, details }) => {
       </div>
     </section>
   );
-};
+});
 
 export default ChatDetails;

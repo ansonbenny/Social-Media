@@ -373,5 +373,128 @@ export default {
         reject(err)
       }
     })
+  },
+  getMediaSigleChat: ({ userId, chatId, offset = 0 }) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let media = await db.collection(collections.USERS).aggregate([{
+          $match: {
+            _id: new ObjectId(chatId)
+          },
+        }, {
+          $lookup: {
+            from: collections.CHAT,
+            pipeline: [{
+              $match: {
+                $or: [
+                  {
+                    users: [chatId, userId],
+                  },
+                  {
+                    users: [userId, chatId],
+                  },
+                ],
+              },
+            }, {
+              $unwind: "$chat"
+            }, {
+              $match: {
+                "chat.file": {
+                  $exists: true
+                },
+                "chat.msg": {
+                  $exists: false
+                }
+              }
+            }, {
+              $sort: {
+                "chat.id": -1
+              }
+            }, {
+              $skip: parseInt(offset)
+            }, {
+              $limit: 6
+            }, {
+              $project: {
+                id: "$chat.id",
+                file: "$chat.file"
+              }
+            }],
+            as: "media"
+          }
+        }, {
+          $lookup: {
+            from: collections.CHAT,
+            pipeline: [{
+              $match: {
+                $or: [
+                  {
+                    users: [chatId, userId],
+                  },
+                  {
+                    users: [userId, chatId],
+                  },
+                ],
+              },
+            }, {
+              $unwind: "$chat"
+            }, {
+              $match: {
+                "chat.file": {
+                  $exists: true
+                },
+                "chat.msg": {
+                  $exists: false
+                }
+              }
+            }, {
+              $group: {
+                _id: 1,
+                total: {
+                  $sum: 1
+                }
+              }
+            }],
+            as: "total"
+          }
+        }, {
+          $project: {
+            _id: 0,
+            total: {
+              $arrayElemAt: ["$total.total", 0]
+            },
+            files: "$media"
+          }
+        }]).toArray()
+
+        resolve(media?.[0] || {})
+      } catch (err) {
+        reject(err)
+      }
+    })
+  },
+  delete_msg_user: ({ users, ...details }) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let res = await db.collection(collections.CHAT).updateOne({
+          $or: [
+            {
+              users: users,
+            },
+            {
+              users: [users[1], users[0]],
+            },
+          ],
+        }, {
+          $pull: {
+            chat: details
+          }
+        })
+
+        resolve(res)
+      } catch (err) {
+        reject(err)
+      }
+    })
   }
 };

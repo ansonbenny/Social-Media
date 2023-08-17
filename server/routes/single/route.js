@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import user from "../../helper/user.js";
 import { Router } from "express";
 import multer from "../../multer/index.js";
+import files from "../../helper/files.js";
 
 const router = Router();
 
@@ -16,6 +17,7 @@ const CheckLogged = (req, res, next) => {
 
                 if (userData) {
                     req.query.userId = userData?._id?.toString?.();
+                    req.body.userId = userData?._id?.toString?.();
                     next();
                 }
             } catch (err) {
@@ -129,6 +131,63 @@ export default (app, io) => {
                     status: 200,
                     message: 'Success'
                 })
+            }
+        } catch (err) {
+            res.status(500).json({
+                status: 500,
+                message: err
+            })
+        }
+    })
+
+    router.get('/get_media', CheckLogged, async (req, res) => {
+        try {
+            let response = await chat.getMediaSigleChat(req?.query)
+
+            res.status(200).json({
+                status: 200,
+                message: "Success",
+                data: response,
+            });
+        } catch (err) {
+            res.status(500).json({
+                status: 500,
+                message: err ? err : "Something Went Wrong",
+            });
+        }
+    })
+
+    router.delete('/delete_msg', CheckLogged, async (req, res) => {
+        try {
+            let sockets = await chat?.getSocketId?.(req?.body?.chatId, req?.body?.userId);
+
+            let response = await chat?.delete_msg_user({
+                users: [req?.body?.chatId, req?.body?.userId],
+                id: req?.body?.msg_id,
+                date: req?.body?.date
+            })
+
+            if (response?.modifiedCount > 0) {
+                if (req?.body?.file) {
+                    files?.delete_file(req?.body?.file?.url)
+                }
+
+                if (sockets?.ids?.length > 0) {
+                    io.to(sockets?.ids).emit("chat delete", {
+                        id: req?.body?.msg_id,
+                        from: req?.body?.userId,
+                        file: req?.body?.file ? true : false,
+                        match:
+                            req?.body?.chatId == req?.body?.userId
+                                ? req?.body?.userId
+                                : `${req?.body?.userId}${req?.body?.chatId}`,
+                    });
+
+                    res.status(200).json({
+                        status: 200,
+                        message: 'Success'
+                    })
+                }
             }
         } catch (err) {
             res.status(500).json({

@@ -47,7 +47,8 @@ const Chats = () => {
 
   const ref = useRef({
     live: null,
-    list: null
+    list: null,
+    details: null
   });
 
   const { id } = useParams();
@@ -65,45 +66,63 @@ const Chats = () => {
     details: {},
   });
 
-  const onChat = (e) => {
+  const onChat = async (e, del_data) => {
     e?.preventDefault?.();
 
-    const input = e?.target?.querySelector?.("input")
+    if (!del_data) {
+      const input = e?.target?.querySelector?.("input")
 
-    if (input?.value) {
-      const date = new Date();
+      if (input?.value) {
+        const date = new Date();
 
-      const chat = {
-        id: Date?.now()?.toString(16),
-        msg: input?.value,
-        date: `${date.getDate()}-${date.getMonth() + 1
-          }-${date.getFullYear()} | ${date.getHours()}:${date.getMinutes()}`,
-      };
+        const chat = {
+          id: Date?.now()?.toString(16),
+          msg: input?.value,
+          date: `${date.getDate()}-${date.getMonth() + 1
+            }-${date.getFullYear()} | ${date.getHours()}:${date.getMinutes()}`,
+        };
 
-      Socket?.emit(
-        "chat message",
-        {
-          chatId: id,
-          userId: user?._id,
-          chat,
-        },
-        (err, res) => {
-          if (res) {
-            input.value = ''
+        Socket?.emit(
+          "chat message",
+          {
+            chatId: id,
+            userId: user?._id,
+            chat,
+          },
+          (err, res) => {
+            if (res) {
+              input.value = ''
 
-            ref?.current?.live?.insertMsg?.({
-              from: user?._id,
-              ...chat,
-            });
-          } else {
-            alert(
-              typeof err?.message == "string"
-                ? err?.message
-                : "Something went wrong. Try again."
-            );
+              ref?.current?.live?.insertMsg?.({
+                from: user?._id,
+                ...chat,
+              });
+            } else {
+              alert(
+                typeof err?.message == "string"
+                  ? err?.message
+                  : "Something went wrong. Try again."
+              );
+            }
           }
+        );
+      }
+    } else {
+      try {
+        await axios.delete('/chat-single/delete_msg', {
+          data: {
+            chatId: state?.details?._id,
+            msg_id: del_data?.id,
+            file: del_data?.file,
+            date: del_data?.date
+          }
+        })
+      } catch (err) {
+        if (err?.response?.data?.status == 405) {
+          alert("Please Login")
+          navigate('/')
         }
-      );
+      }
     }
   };
 
@@ -153,6 +172,10 @@ const Chats = () => {
         ) {
           ref?.current?.live?.insertMsg?.(msg);
 
+          if (msg?.file) {
+            ref?.current?.details?.ReloadMedia?.()
+          }
+
           Socket?.emit?.("read msg", {
             chatId: id,
             userId: user?._id,
@@ -160,11 +183,37 @@ const Chats = () => {
         } else if (msg?.match == user?._id) {
           if (id == user?._id) {
             ref?.current?.live?.insertMsg?.({ ...msg, read: true });
+
+            if (msg?.file) {
+              ref?.current?.details?.ReloadMedia?.()
+            }
           }
         } else {
           dispatch(
             setNotification({ name: msg?.user, url: `/chat/${msg?.from}` })
           );
+        }
+      });
+
+      // deleted messages
+      Socket?.on("chat delete", (msg) => {
+        if (
+          msg?.match == `${user?._id}${id}` ||
+          msg?.match == `${id}${user?._id}`
+        ) {
+          ref?.current?.live?.deleteMsg?.(msg);
+
+          if (msg?.file) {
+            ref?.current?.details?.ReloadMedia?.()
+          }
+        } else if (msg?.match == user?._id) {
+          if (id == user?._id) {
+            ref?.current?.live?.deleteMsg?.(msg);
+
+            if (msg?.file) {
+              ref?.current?.details?.ReloadMedia?.()
+            }
+          }
         }
       });
 
@@ -290,6 +339,11 @@ const Chats = () => {
 
           {state?.modal?.details || state?.size?.lg ? (
             <ChatDetails
+              ref={(elm) => {
+                if (ref?.current) {
+                  ref.current.details = elm
+                }
+              }}
               details={state?.details}
               isUser
               setModal={

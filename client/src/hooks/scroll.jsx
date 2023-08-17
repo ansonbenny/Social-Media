@@ -18,6 +18,13 @@ const reducer = (state, { type, data }) => {
         return state;
       }
 
+    case "delete":
+      return {
+        ...state, msgs: state?.msgs?.filter((obj) => {
+          return obj?.id !== data?.id
+        }), new: false
+      }
+
     case "old":
       if (data?.length > 0 && state?.msgs?.length > 0) {
         if (!state?.msgs?.find((obj) => obj?.id == data?.[data?.length - 1]?.id)) {
@@ -115,7 +122,7 @@ const useScroll = ({ url, details }) => {
     };
 
     const onWheelTouch = () => {
-      if (state?.length > 0) {
+      if (state?.msgs?.length > 0) {
         if (
           ref?.current?.main?.scrollHeight <= ref?.current?.main?.clientHeight
         ) {

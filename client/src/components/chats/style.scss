@@ -1,5 +1,47 @@
 @import '../../index.scss';
 
+@mixin playcard ($medias: false) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-top: .5rem;
+    border-radius: 10px;
+    padding: 1.5rem 2.5rem;
+    background: linear-gradient(140deg, var(--bg-grey) 50%, var(--bg-primary) 50%);
+
+    @if $medias {
+        width: calc(100% - 1rem);
+        height: calc(100% - 1rem);
+        background: linear-gradient(140deg, var(--bg-grey) 50%, var(--text-primary) 50%);
+        margin-top: 0;
+        padding: .5rem;
+    }
+
+    svg {
+        width: 3rem;
+        height: 3rem;
+        pointer-events: none;
+        border-radius: 9999px;
+        padding: .5rem;
+        fill: $bg-violet;
+        border: 3px solid $bg-violet;
+        transition: all .5s ease-in-out;
+        -moz-transition: all .5s ease-in-out;
+
+        @if $medias {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+    }
+
+    &:hover {
+        svg {
+            transform: scale(1.2)
+        }
+    }
+}
+
 @mixin msgCard ($me: false) {
     display: flex;
     flex-direction: row;
@@ -128,32 +170,7 @@
                 }
 
                 .video {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    cursor: pointer;
-                    margin-top: .5rem;
-                    border-radius: 10px;
-                    padding: 1.5rem 2.5rem;
-                    background: linear-gradient(140deg, var(--bg-grey) 50%, var(--bg-primary) 50%);
-
-                    svg {
-                        width: 3rem;
-                        height: 3rem;
-                        pointer-events: none;
-                        border-radius: 9999px;
-                        padding: .5rem;
-                        fill: $bg-violet;
-                        border: 3px solid $bg-violet;
-                        transition: all .5s ease-in-out;
-                        -moz-transition: all .5s ease-in-out;
-                    }
-
-                    &:hover {
-                        svg {
-                            transform: scale(1.2)
-                        }
-                    }
+                    @include playcard;
                 }
 
                 @if $me {
@@ -361,7 +378,7 @@
                 display: flex;
                 align-items: center;
 
-                @media screen and (max-width:900px) {
+                @media screen and (max-width:950px) {
                     cursor: pointer;
                 }
 
@@ -388,7 +405,7 @@
                 align-items: center;
                 margin-right: auto;
 
-                @media screen and (max-width:900px) {
+                @media screen and (max-width:950px) {
                     cursor: pointer;
                 }
 
@@ -778,6 +795,11 @@
                         aspect-ratio: 1/1;
                         object-fit: cover;
                         object-position: center;
+                        cursor: pointer;
+                    }
+
+                    .extra_file {
+                        @include playcard($medias: true)
                     }
                 }
 
@@ -788,6 +810,7 @@
                     font-weight: normal;
                     border: none;
                     background: transparent;
+                    cursor: pointer;
                 }
             }
 

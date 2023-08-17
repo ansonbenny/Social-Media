@@ -203,22 +203,22 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
                             type="range"
                             step="any"
                             onChange={(e) => {
+                                const button = e?.target?.parentElement?.querySelector('button')
+
+                                audio_live?.pause?.()
+
                                 if (refs?.current?.audio_seekbar && refs?.current?.['audio_tag']) {
                                     refs.current['audio_tag'].currentTime = e?.target?.value
-                                } else if (!refs?.current?.audio_seekbar) {
-                                    const button = e?.target?.parentElement?.querySelector('button')
+                                }
 
-                                    audio_live?.pause?.()
+                                if (!button?.classList?.contains('play')) {
+                                    refs.current.audio_btn = button
 
-                                    if (!button?.classList?.contains('play')) {
-                                        refs.current.audio_btn = button
+                                    refs.current.audio_seekbar = e?.target
 
-                                        refs.current.audio_seekbar = e?.target
+                                    refs.current.audio_tag.src = state?.audio?.url
 
-                                        refs.current.audio_tag.src = state?.audio?.url
-
-                                        refs?.current?.audio_tag?.play?.()
-                                    }
+                                    refs?.current?.audio_tag?.play?.()
                                 }
                             }}
                             className="non_active modal_audio_seekBar"
