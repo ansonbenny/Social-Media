@@ -41,6 +41,30 @@ export default (app, io) => {
     // config for express route
     app.use("/api/chat-single", router);
 
+    router.get("/user_details", CheckLogged, async (req, res) => {
+        try {
+            let response = await user.get_user(req?.query?.user)
+
+            response.id = response._id
+
+            delete response?.socketId
+            delete response?._id
+            delete response?.number
+            delete response?.email
+
+            res.status(200).json({
+                status: 200,
+                message: "success",
+                data: response
+            })
+        } catch (err) {
+            res.status(500).json({
+                status: 500,
+                message: err
+            })
+        }
+    })
+
     router.get("/userChat/:id", CheckLogged, async (req, res) => {
         if (req?.params?.id?.length == 24) {
             try {
@@ -72,16 +96,21 @@ export default (app, io) => {
         }
     });
 
-    router.get("/users_chat", CheckLogged, async (req, res) => {
+    router.get("/recent_users", CheckLogged, async (req, res) => {
         const { userId = null } = req?.query
 
         try {
-            const chats = await chat.get_users_chat(userId)
+            const total_unreaded = await chat.get_total_unreaded(userId)
+
+            const users = await chat.get_recent_users(userId)
 
             res.status(200).json({
                 status: 200,
                 message: "Success",
-                data: chats
+                data: {
+                    users,
+                    total: total_unreaded
+                }
             })
         } catch (err) {
             res.status(500).json({

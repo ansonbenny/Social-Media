@@ -62,13 +62,14 @@ export default (socket, io) => {
     socket.on("read msg", async (data) => {
         if (data?.chatId?.length === 24) {
             try {
-                let sockets = await chat?.getSocketIdTo?.(data?.chatId);
+                let sockets = await chat?.getSocketId?.(data?.chatId, data?.userId);
 
                 await chat?.readMsgs(data?.chatId, data?.userId)
 
                 if (sockets?.ids?.length > 0 && data?.chatId !== data?.userId) {
                     io.to(sockets?.ids).emit("read msg", {
                         to: data?.userId,
+                        from: data?.chatId,
                         match: `${data?.userId}${data?.chatId}`
                     })
                 }

@@ -279,11 +279,17 @@ export default {
             },
             {
               $set: {
-                chat: {
-                  $arrayElemAt: ["$chat", 0],
+                items: {
+                  $arrayElemAt: ["$chat.msgs", 0],
                 },
               },
             },
+            {
+              $project: {
+                items: 1,
+                details: 1
+              }
+            }
           ])
           .toArray();
 
@@ -301,24 +307,27 @@ export default {
     return new Promise(async (resolve, reject) => {
       try {
         await db.collection(collections.CHAT).updateOne({
-          $or: [
-            {
-              users: [to, from],
-            },
-            {
-              users: [from, to],
-            },
-          ],
-          "chat": {
-            $exists: true
-          }
+          $and: [{
+            $or: [
+              {
+                users: [to, from],
+              },
+              {
+                users: [from, to],
+              },
+            ]
+          }, {
+            "chat": {
+              $exists: true
+            }
+          }],
         }, {
           $set: {
             "chat.$[elm].read": true
           }
         }, {
           arrayFilters: [{
-            "elm.from": { $eq: to },
+            "elm.from": { $eq: from },
             "elm.read": {
               $ne: true
             }
@@ -331,44 +340,143 @@ export default {
       }
     })
   },
-  get_users_chat: (userId) => {
+  get_recent_users: (userId, offset = 0) => {
     return new Promise(async (resolve, reject) => {
       try {
-        const chats = await db.collection(collections.CHAT).aggregate([{
+        const users = await db.collection(collections.CHAT).aggregate([{
           $match: {
             users: {
+              $in: [userId],
               $ne: [userId, userId]
             }
           }
         }, {
-          $unwind: "$users"
+          $project: {
+            users: 1,
+            "last_msg": {
+              $last: "$chat"
+            }
+          }
         }, {
-          $group: {
-            _id: 1,
-            users: {
-              $addToSet: {
-                $toObjectId: "$users"
+          $sort: {
+            "last_msg": -1
+          }
+        }, {
+          $lookup: {
+            from: collections.CHAT,
+            let: { users: "$users" },
+            pipeline: [{
+              $match: {
+                $expr: {
+                  $eq: ["$users", "$$users"]
+                }
+              }
+            }, {
+              $unwind: "$chat"
+            }, {
+              $match: {
+                "chat.read": {
+                  $ne: true
+                },
+                "chat.from": {
+                  $ne: userId
+                }
+              }
+            }, {
+              $group: {
+                _id: 1,
+                total: {
+                  $sum: 1
+                }
+              }
+            }],
+            as: "unread"
+          }
+        }, {
+          $project: {
+            _id: 0,
+            unread: {
+              $arrayElemAt: ["$unread.total", 0]
+            },
+            id: {
+              $first: {
+                $filter: {
+                  input: "$users",
+                  as: "users",
+                  cond: {
+                    $ne: ["$$users", userId]
+                  }
+                }
               }
             }
           }
         }, {
           $lookup: {
             from: collections.USERS,
-            localField: "users",
-            foreignField: "_id",
-            as: "user"
+            let: { user: "$id" },
+            pipeline: [{
+              $match: {
+                $expr: {
+                  $eq: ["$_id", {
+                    $toObjectId: "$$user"
+                  }]
+                }
+              }
+            }, {
+              $project: {
+                _id: "$_id",
+                name: "$name",
+                about: "$about",
+                img: "$img"
+              }
+            }],
+            as: "details"
           }
         }, {
-          $unwind: "$user"
-        }, {
-          $project: {
-            _id: "$user._id",
-            name: "$user.name",
-            img: "$user.img",
-            about: "$user.about"
+          $set: {
+            details: {
+              $arrayElemAt: ["$details", 0]
+            }
           }
         }]).toArray()
-        resolve(chats || [])
+
+        resolve(users || [])
+      } catch (err) {
+        reject(err)
+      }
+    })
+  },
+  get_total_unreaded: (userId) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let total = await db.collection(collections.CHAT).aggregate([{
+          $match: {
+            users: {
+              $in: [userId],
+              $ne: [userId, userId]
+            }
+          },
+        }, {
+          $unwind: "$chat"
+        }, {
+          $match: {
+            "chat.read": {
+              $ne: true
+            },
+            "chat.from": {
+              $ne: userId
+            }
+          }
+        }, {
+          $group: {
+            _id: 1,
+            count: {
+              $sum: 1
+            }
+          }
+        }]).toArray()
+
+        resolve(total?.[0]?.count || 0)
       } catch (err) {
         reject(err)
       }

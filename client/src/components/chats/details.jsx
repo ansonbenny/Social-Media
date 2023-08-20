@@ -65,7 +65,7 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
     ReloadMedia: () => {
       LoadMedia?.()
     }
-  }))
+  }), [])
 
   useEffect(() => {
     const abortControl = new AbortController()

@@ -152,7 +152,7 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
                 action({ type: "open", form: data })
             }
         }
-    }))
+    }), [])
 
     return (
         <section data-for="modal_outer" className={state?.active ? "active" : "none"} >

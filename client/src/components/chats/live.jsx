@@ -46,7 +46,7 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
     deleteMsg: (data) => {
       action({ type: "delete", data })
     }
-  }));
+  }), []);
 
   useEffect(() => {
     if (state?.new) {
@@ -54,7 +54,7 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
     } else {
       refs?.current?.main?.scroll?.(0, 30);
     }
-  }, [state?.msgs]);
+  }, [state?.items]);
 
   return (
     <section className="live">
@@ -122,7 +122,7 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
         >
           <LoadingCircle ref={refs} />
 
-          {state?.msgs?.map((obj, key) => {
+          {state?.items?.map((obj, key) => {
             if (obj?.from == user?._id) {
               return (
                 <div className="me" key={key}>

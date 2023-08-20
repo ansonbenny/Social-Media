@@ -1024,7 +1024,9 @@
                 height: auto;
                 max-height: 350px;
                 overflow: auto;
-                scrollbar-width: 5px;
+                scrollbar-width: 10px !important;
+                scroll-behavior: smooth;
+                scrollbar-color: var(--text-primary) var(--bg-grey);
 
                 &::-webkit-scrollbar {
                     height: 5px;

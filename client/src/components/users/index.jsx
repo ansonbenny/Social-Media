@@ -1,6 +1,6 @@
 import React, { Fragment, forwardRef, useEffect, useImperativeHandle, useReducer } from "react";
 import { AvatarSvg, SearchSvg } from "../../assets";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { LoadingCircle } from "..";
 import { axios } from "../../lib";
 import { useSelector } from "react-redux";
@@ -11,15 +11,89 @@ const reducer = (value, { type, data, ...actions }) => {
     case "initial":
       return data
     case "status":
-      return value?.map((users) => {
-        if (data?.find((obj) => obj?.userId == users?._id)) {
-          users.status = true
-          return users
-        } else {
-          users.status = undefined
-          return users
+      return {
+        ...value, users: value?.users?.map((users) => {
+          if (data?.find((obj) => obj?.userId == users?.id)) {
+            users.status = true
+            return users
+          } else {
+            users.status = undefined
+            return users
+          }
+        })
+      }
+
+    case "to_top": {
+      const user = value?.users?.find?.((obj) => obj?.id == data)
+
+      return {
+        ...value,
+        users: [user, ...value?.users?.filter((obj) => obj?.id !== data)]
+      }
+    }
+
+    case "readed":
+      const users = value?.users?.map((obj) => {
+        if (obj?.id == data) {
+          value.total = value.total - obj?.unread
+
+          obj.unread = null
         }
+
+        return obj
       })
+
+      return {
+        ...value, users
+      }
+    case "unread":
+
+      const user = value?.users?.find?.((obj) => obj?.id == data)
+
+      if (user?.unread) {
+        user.unread += 1
+      } else {
+        user.unread = 1
+      }
+
+      return {
+        ...value,
+        total: value?.total ? value?.total + 1 : 1,
+        users: [user, ...value?.users?.filter((obj) => obj?.id !== data)]
+      }
+
+    case "new_user":
+      let total = value?.total;
+
+      if (total && data?.unread) {
+        total += 1
+      } else if (data?.unread) {
+        total = 1
+      } else if (total) {
+        total = total
+      } else {
+        total = 0
+      }
+
+      if (!value?.users?.find((obj) => obj?.id == data?.user?.id)) {
+        return { ...value, total: total, users: [data?.user, ...value?.users] }
+      } else if (data?.unread) {
+        return {
+          total: total, users: value?.users?.map((obj) => {
+            if (obj?.id == data?.user?.id) {
+              if (obj?.unread) {
+                obj.unread += 1
+              } else {
+                obj.unread = 1
+              }
+            }
+
+            return obj
+          })
+        }
+      } else {
+        return value
+      }
     default:
       return value
   }
@@ -28,6 +102,8 @@ const reducer = (value, { type, data, ...actions }) => {
 const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
   const { id } = useParams()
 
+  const location = useLocation();
+
   const navigate = useNavigate();
 
   const user = useSelector((state) => state?.user)
@@ -35,10 +111,67 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
   const [state, action] = useReducer(reducer, [])
 
   useImperativeHandle(ref, () => ({
+    // optimise and check users listing and add scroll feature
+
     users_status: (data) => {
       action({ type: "status", data })
+    },
+    readMsgs: (data) => {
+      action({ type: "readed", data: data?.from })
+    },
+    pushToTop: async (data) => {
+      if (!state?.users?.find((obj) => obj?.id == data?.id)) {
+        try {
+          let res = await axios.get('/chat-single/user_details', {
+            params: {
+              user: data?.id
+            }
+          })
+
+          action({
+            type: "new_user", data: {
+              user: {
+                id: res?.['data']?.data?.id,
+                status: data?.status,
+                details: res?.['data']?.data
+              }
+            }
+          })
+        } catch (err) {
+          console.log("something went wrong")
+        }
+      } else {
+        action({ type: "to_top", data: data?.id })
+      }
+    },
+    unReadMsgs: async (data) => {
+      if (!state?.users?.find((obj) => obj?.id == data?.from)) {
+        try {
+          let res = await axios.get('/chat-single/user_details', {
+            params: {
+              user: data?.from
+            }
+          })
+
+          action({
+            type: "new_user", data: {
+              unread: true,
+              user: {
+                id: res?.['data']?.data?.id,
+                unread: 1,
+                status: true,
+                details: res?.['data']?.data
+              }
+            }
+          })
+        } catch (err) {
+          console.log("something went wrong")
+        }
+      } else {
+        action({ type: "unread", data: data?.from })
+      }
     }
-  }))
+  }), [])
 
   useEffect(() => {
     let abortControl = new AbortController();
@@ -46,7 +179,7 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
     if (isUsers) {
       (async () => {
         try {
-          let res = await axios.get("/chat-single/users_chat", {
+          let res = await axios.get("/chat-single/recent_users", {
             signal: abortControl?.signal
           })
 
@@ -62,7 +195,7 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
     return () => {
       abortControl?.abort?.()
     }
-  }, [])
+  }, [location])
 
   return (
     <section id="all-users">
@@ -88,7 +221,7 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
         <Fragment>
           <div className="title">
             <h1>
-              Messages <span>(0)</span>
+              Messages <span>({state?.total || 0})</span>
             </h1>
           </div>
 
@@ -121,23 +254,17 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
             </p>
           </div>
 
-          {!stories && false && (
-            <button className="count" type="button">
-              12
-            </button>
-          )}
-
         </div>
 
-        {state?.map((obj, key) => {
-          if (obj?._id !== user?._id) {
+        {state?.users?.map((obj, key) => {
+          if (obj?.id !== user?._id) {
             return (
-              <div className={`card ${id && id == obj?._id ? "active" : ""}`} key={key}
-                onClick={() => navigate(`/chat/${obj?._id}`)}>
+              <div className={`card ${id && id == obj?.id ? "active" : ""}`} key={key}
+                onClick={() => navigate(`/chat/${obj?.id}`)}>
                 <div className="cover">
                   {
-                    obj?.img ? <img
-                      src={`/files/profiles/${obj?.img}`}
+                    obj?.details?.img ? <img
+                      src={`/files/profiles/${obj?.details?.img}`}
                       alt="profile"
                     />
                       : <AvatarSvg />
@@ -147,12 +274,21 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
                     obj?.status && <div data-for="status" />
                   }
                 </div>
+
                 <div className="content">
-                  <h1>{obj?.name}</h1>
+                  <h1>{obj?.details?.name}</h1>
                   <p>
-                    {obj?.about}
+                    {obj?.details?.about}
                   </p>
                 </div>
+
+                {
+                  obj?.unread && (
+                    <button className="count" type="button">
+                      {obj?.unread}
+                    </button>
+                  )
+                }
               </div>
             );
           }

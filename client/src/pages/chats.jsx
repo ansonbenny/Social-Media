@@ -97,6 +97,11 @@ const Chats = () => {
                 from: user?._id,
                 ...chat,
               });
+
+              ref?.current?.list?.pushToTop({
+                id,
+                status: state?.details?.status?.toLowerCase?.() == 'online' ? true : false
+              })
             } else {
               alert(
                 typeof err?.message == "string"
@@ -108,19 +113,21 @@ const Chats = () => {
         );
       }
     } else {
-      try {
-        await axios.delete('/chat-single/delete_msg', {
-          data: {
-            chatId: state?.details?._id,
-            msg_id: del_data?.id,
-            file: del_data?.file,
-            date: del_data?.date
+      if (window.confirm("Do you want to delete it permanently?")) {
+        try {
+          await axios.delete('/chat-single/delete_msg', {
+            data: {
+              chatId: state?.details?._id,
+              msg_id: del_data?.id,
+              file: del_data?.file,
+              date: del_data?.date
+            }
+          })
+        } catch (err) {
+          if (err?.response?.data?.status == 405) {
+            alert("Please Login")
+            navigate('/')
           }
-        })
-      } catch (err) {
-        if (err?.response?.data?.status == 405) {
-          alert("Please Login")
-          navigate('/')
         }
       }
     }
@@ -172,6 +179,10 @@ const Chats = () => {
         ) {
           ref?.current?.live?.insertMsg?.(msg);
 
+          ref?.current?.list?.pushToTop?.({
+            id: msg?.from
+          })
+
           if (msg?.file) {
             ref?.current?.details?.ReloadMedia?.()
           }
@@ -189,6 +200,8 @@ const Chats = () => {
             }
           }
         } else {
+          ref?.current?.list?.unReadMsgs?.(msg);
+
           dispatch(
             setNotification({ name: msg?.user, url: `/chat/${msg?.from}` })
           );
@@ -222,6 +235,7 @@ const Chats = () => {
         if (data?.match == `${user?._id}${id}` ||
           data?.match == `${id}${user?._id}`) {
           ref?.current?.live?.readMsgs?.(data);
+          ref?.current?.list?.readMsgs?.(data);
         }
       })
 
@@ -263,7 +277,7 @@ const Chats = () => {
               signal: abortControl?.signal,
             });
 
-            ref?.current?.live?.insertInitial?.(res?.["data"]?.data?.chat?.msgs);
+            ref?.current?.live?.insertInitial?.(res?.["data"]?.data?.items);
 
             action({ type: "details", data: res?.["data"]?.data?.details });
 

@@ -5,14 +5,14 @@ import { axios } from "../lib";
 const reducer = (state, { type, data }) => {
   switch (type) {
     case "initial":
-      return { ...state, msgs: data, new: true };
+      return { ...state, items: data, new: true };
 
     case "new":
-      if (!state?.msgs?.find?.((obj) => obj?.id == data?.id)) {
-        if (state?.msgs?.length > 0) {
-          return { ...state, msgs: [...state?.msgs, data], new: true };
+      if (!state?.items?.find?.((obj) => obj?.id == data?.id)) {
+        if (state?.items?.length > 0) {
+          return { ...state, items: [...state?.items, data], new: true };
         } else {
-          return { ...state, msgs: [data], new: true }
+          return { ...state, items: [data], new: true }
         }
       } else {
         return state;
@@ -20,29 +20,29 @@ const reducer = (state, { type, data }) => {
 
     case "delete":
       return {
-        ...state, msgs: state?.msgs?.filter((obj) => {
+        ...state, items: state?.items?.filter((obj) => {
           return obj?.id !== data?.id
         }), new: false
       }
 
     case "old":
-      if (data?.length > 0 && state?.msgs?.length > 0) {
-        if (!state?.msgs?.find((obj) => obj?.id == data?.[data?.length - 1]?.id)) {
-          const old = state?.msgs;
+      if (data?.length > 0 && state?.items?.length > 0) {
+        if (!state?.items?.find((obj) => obj?.id == data?.[data?.length - 1]?.id)) {
+          const old = state?.items;
 
-          return { ...state, msgs: [...data, ...old], new: false };
+          return { ...state, items: [...data, ...old], new: false };
         } else {
           return state
         }
       } else if (data?.length > 0) {
-        return { ...state, msgs: data, new: false }
+        return { ...state, items: data, new: false }
       } else {
         return state;
       }
     case "read": {
       if (data) {
         return {
-          ...state, msgs: state?.msgs?.map((obj) => {
+          ...state, items: state?.items?.map((obj) => {
             if (data?.to !== obj?.from) {
               obj.read = true
             }
@@ -83,7 +83,7 @@ const useScroll = ({ url, details }) => {
         if (details?.user) {
           let res = await axios.get(url, {
             params: {
-              skip: state?.msgs?.length,
+              skip: state?.items?.length,
             },
             signal: abortControl?.signal,
           });
@@ -91,7 +91,7 @@ const useScroll = ({ url, details }) => {
           if (res?.["data"]?.data) {
             timeout = setTimeout(() => {
               ref?.current?.loading?.classList?.add?.("hide");
-              action({ type: "old", data: res?.["data"]?.data?.chat?.msgs });
+              action({ type: "old", data: res?.["data"]?.data?.items });
             }, 1000)
           }
         }
@@ -122,7 +122,7 @@ const useScroll = ({ url, details }) => {
     };
 
     const onWheelTouch = () => {
-      if (state?.msgs?.length > 0) {
+      if (state?.items?.length > 0) {
         if (
           ref?.current?.main?.scrollHeight <= ref?.current?.main?.clientHeight
         ) {
@@ -147,7 +147,7 @@ const useScroll = ({ url, details }) => {
 
       clearTimeout(timeout)
     };
-  }, [state?.msgs]);
+  }, [state?.items]);
 
   return [ref, state, action];
 };
