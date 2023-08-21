@@ -43,14 +43,7 @@ export default (app, io) => {
 
     router.get("/user_details", CheckLogged, async (req, res) => {
         try {
-            let response = await user.get_user(req?.query?.user)
-
-            response.id = response._id
-
-            delete response?.socketId
-            delete response?._id
-            delete response?.number
-            delete response?.email
+            let response = await chat.get_user(req?.query)
 
             res.status(200).json({
                 status: 200,
@@ -111,6 +104,25 @@ export default (app, io) => {
                     users,
                     total: total_unreaded
                 }
+            })
+        } catch (err) {
+            res.status(500).json({
+                status: 200,
+                message: err
+            })
+        }
+    })
+
+    router.get("/recent_users_more", CheckLogged, async (req, res) => {
+        const { userId = null, offset } = req?.query
+
+        try {
+            const users = await chat.get_recent_users(userId, offset)
+
+            res.status(200).json({
+                status: 200,
+                message: "Success",
+                data: users
             })
         } catch (err) {
             res.status(500).json({

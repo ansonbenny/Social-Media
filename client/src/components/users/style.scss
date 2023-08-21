@@ -102,6 +102,10 @@
         scrollbar-width: 0px;
         margin-bottom: auto;
         padding-bottom: .5rem;
+        // selection remove
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
 
         &::-webkit-scrollbar {
             width: 0px;

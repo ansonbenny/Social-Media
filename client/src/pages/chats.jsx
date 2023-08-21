@@ -100,7 +100,7 @@ const Chats = () => {
 
               ref?.current?.list?.pushToTop({
                 id,
-                status: state?.details?.status?.toLowerCase?.() == 'online' ? true : false
+                status: state?.details?.status?.toLowerCase?.()
               })
             } else {
               alert(
@@ -180,7 +180,8 @@ const Chats = () => {
           ref?.current?.live?.insertMsg?.(msg);
 
           ref?.current?.list?.pushToTop?.({
-            id: msg?.from
+            id: msg?.from,
+            status: state?.details?.status?.toLowerCase?.()
           })
 
           if (msg?.file) {

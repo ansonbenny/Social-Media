@@ -1,7 +1,7 @@
 import chat from "../helper/chat.js";
 import jwt from "jsonwebtoken";
 import user from "../helper/user.js";
-import { RouteSingle, SocketSingle } from "./single/index.js";
+import { RouteSingle, SocketSingle } from "./private/index.js";
 
 // express route middleware to check user is logged or not
 

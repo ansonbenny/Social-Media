@@ -1,6 +1,6 @@
 import React, { Fragment, forwardRef, useEffect, useImperativeHandle, useReducer } from "react";
 import { AvatarSvg, SearchSvg } from "../../assets";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { LoadingCircle } from "..";
 import { axios } from "../../lib";
 import { useSelector } from "react-redux";
@@ -65,22 +65,24 @@ const reducer = (value, { type, data, ...actions }) => {
     case "new_user":
       let total = value?.total;
 
-      if (total && data?.unread) {
-        total += 1
-      } else if (data?.unread) {
-        total = 1
-      } else if (total) {
-        total = total
-      } else {
-        total = 0
-      }
+      if (!value?.users?.find((obj) => obj?.id == data?.id)) {
+        if (total && data?.unread) {
+          total += data?.unread
+        } else if (data?.unread) {
+          total = data?.unread
+        }
 
-      if (!value?.users?.find((obj) => obj?.id == data?.user?.id)) {
-        return { ...value, total: total, users: [data?.user, ...value?.users] }
-      } else if (data?.unread) {
+        return { ...value, total: total, users: [data, ...value?.users] }
+      } else if (actions?.unread) {
+        if (total) {
+          total += 1
+        } else {
+          total = 1
+        }
+
         return {
           total: total, users: value?.users?.map((obj) => {
-            if (obj?.id == data?.user?.id) {
+            if (obj?.id == data?.id) {
               if (obj?.unread) {
                 obj.unread += 1
               } else {
@@ -102,8 +104,6 @@ const reducer = (value, { type, data, ...actions }) => {
 const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
   const { id } = useParams()
 
-  const location = useLocation();
-
   const navigate = useNavigate();
 
   const user = useSelector((state) => state?.user)
@@ -124,17 +124,14 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
         try {
           let res = await axios.get('/chat-single/user_details', {
             params: {
-              user: data?.id
+              chatId: data?.id
             }
           })
 
           action({
             type: "new_user", data: {
-              user: {
-                id: res?.['data']?.data?.id,
-                status: data?.status,
-                details: res?.['data']?.data
-              }
+              ...res?.['data']?.data,
+              status: data?.status == 'online' ? true : data?.status ? false : res?.['data']?.data?.status
             }
           })
         } catch (err) {
@@ -149,20 +146,12 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
         try {
           let res = await axios.get('/chat-single/user_details', {
             params: {
-              user: data?.from
+              chatId: data?.from
             }
           })
 
           action({
-            type: "new_user", data: {
-              unread: true,
-              user: {
-                id: res?.['data']?.data?.id,
-                unread: 1,
-                status: true,
-                details: res?.['data']?.data
-              }
-            }
+            type: "new_user", data: res?.['data']?.data, unread: true
           })
         } catch (err) {
           console.log("something went wrong")
@@ -195,7 +184,7 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
     return () => {
       abortControl?.abort?.()
     }
-  }, [location])
+  }, [isUsers])
 
   return (
     <section id="all-users">

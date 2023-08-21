@@ -362,6 +362,8 @@ export default {
             "last_msg": -1
           }
         }, {
+          $limit: 2 // limit
+        }, {
           $lookup: {
             from: collections.CHAT,
             let: { users: "$users" },
@@ -441,6 +443,74 @@ export default {
         }]).toArray()
 
         resolve(users || [])
+      } catch (err) {
+        reject(err)
+      }
+    })
+  },
+  get_user: ({ userId, chatId }) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const user = await db.collection(collections.USERS).aggregate([{
+          $match: {
+            "_id": new ObjectId(chatId)
+          }
+        }, {
+          $project: {
+            _id: 0,
+            id: "$_id",
+            details: {
+              id: "$_id",
+              name: "$name",
+              about: "$about",
+              img: "$img"
+            }
+          }
+        }, {
+          $lookup: {
+            from: collections.CHAT,
+            pipeline: [{
+              $match: {
+                $expr: {
+                  $or: [{
+                    $eq: ["$users", [userId, chatId]]
+                  }, {
+                    $eq: ["$users", [chatId, userId]]
+                  }]
+                }
+              }
+            }, {
+              $unwind: "$chat"
+            }, {
+              $match: {
+                "chat.read": {
+                  $ne: true
+                },
+                "chat.from": {
+                  $ne: userId
+                }
+              }
+            }, {
+              $group: {
+                _id: 1,
+                total: {
+                  $sum: 1
+                }
+              }
+            }],
+            as: "unread"
+          }
+        }, {
+          $set: {
+            status: true,
+            unread: {
+              $arrayElemAt: ["$unread.total", 0]
+            }
+          }
+        }]).toArray()
+
+        resolve(user?.[0] || {})
+
       } catch (err) {
         reject(err)
       }
