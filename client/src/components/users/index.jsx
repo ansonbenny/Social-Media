@@ -4,102 +4,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { LoadingCircle } from "..";
 import { axios } from "../../lib";
 import { useSelector } from "react-redux";
+import { useScroll } from "../../hooks";
 import "./style.scss";
-
-const reducer = (value, { type, data, ...actions }) => {
-  switch (type) {
-    case "initial":
-      return data
-    case "status":
-      return {
-        ...value, users: value?.users?.map((users) => {
-          if (data?.find((obj) => obj?.userId == users?.id)) {
-            users.status = true
-            return users
-          } else {
-            users.status = undefined
-            return users
-          }
-        })
-      }
-
-    case "to_top": {
-      const user = value?.users?.find?.((obj) => obj?.id == data)
-
-      return {
-        ...value,
-        users: [user, ...value?.users?.filter((obj) => obj?.id !== data)]
-      }
-    }
-
-    case "readed":
-      const users = value?.users?.map((obj) => {
-        if (obj?.id == data) {
-          value.total = value.total - obj?.unread
-
-          obj.unread = null
-        }
-
-        return obj
-      })
-
-      return {
-        ...value, users
-      }
-    case "unread":
-
-      const user = value?.users?.find?.((obj) => obj?.id == data)
-
-      if (user?.unread) {
-        user.unread += 1
-      } else {
-        user.unread = 1
-      }
-
-      return {
-        ...value,
-        total: value?.total ? value?.total + 1 : 1,
-        users: [user, ...value?.users?.filter((obj) => obj?.id !== data)]
-      }
-
-    case "new_user":
-      let total = value?.total;
-
-      if (!value?.users?.find((obj) => obj?.id == data?.id)) {
-        if (total && data?.unread) {
-          total += data?.unread
-        } else if (data?.unread) {
-          total = data?.unread
-        }
-
-        return { ...value, total: total, users: [data, ...value?.users] }
-      } else if (actions?.unread) {
-        if (total) {
-          total += 1
-        } else {
-          total = 1
-        }
-
-        return {
-          total: total, users: value?.users?.map((obj) => {
-            if (obj?.id == data?.id) {
-              if (obj?.unread) {
-                obj.unread += 1
-              } else {
-                obj.unread = 1
-              }
-            }
-
-            return obj
-          })
-        }
-      } else {
-        return value
-      }
-    default:
-      return value
-  }
-}
 
 const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
   const { id } = useParams()
@@ -108,7 +14,9 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
 
   const user = useSelector((state) => state?.user)
 
-  const [state, action] = useReducer(reducer, [])
+  const [refs, state, action] = useScroll({
+    url: `/chat-single/recent_users_more`,
+  })
 
   useImperativeHandle(ref, () => ({
     // optimise and check users listing and add scroll feature
@@ -120,7 +28,7 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
       action({ type: "readed", data: data?.from })
     },
     pushToTop: async (data) => {
-      if (!state?.users?.find((obj) => obj?.id == data?.id)) {
+      if (!state?.items?.find((obj) => obj?.id == data?.id)) {
         try {
           let res = await axios.get('/chat-single/user_details', {
             params: {
@@ -142,7 +50,7 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
       }
     },
     unReadMsgs: async (data) => {
-      if (!state?.users?.find((obj) => obj?.id == data?.from)) {
+      if (!state?.items?.find((obj) => obj?.id == data?.from)) {
         try {
           let res = await axios.get('/chat-single/user_details', {
             params: {
@@ -221,7 +129,11 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
         </Fragment>
       )}
 
-      <div className="list">
+      <div className="list" ref={(elm) => {
+        if (refs?.current) {
+          refs.current.main = elm
+        }
+      }}>
         <div
           className={`card ${id && id == user?._id ? "active" : ""}`}
           onClick={() => navigate(`/chat/${user?._id}`)}
@@ -245,7 +157,7 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
 
         </div>
 
-        {state?.users?.map((obj, key) => {
+        {state?.items?.map((obj, key) => {
           if (obj?.id !== user?._id) {
             return (
               <div className={`card ${id && id == obj?.id ? "active" : ""}`} key={key}
@@ -283,7 +195,7 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
           }
         })}
 
-        <LoadingCircle />
+        <LoadingCircle ref={refs} />
       </div>
     </section>
   );

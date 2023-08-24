@@ -38,7 +38,7 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
       action({ type: "new", data });
     },
     insertInitial: (data) => {
-      action({ type: "initial", data });
+      action({ type: "initial_msg", data });
     },
     readMsgs: (data) => {
       action({ type: "read", data })

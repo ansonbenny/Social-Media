@@ -37,7 +37,7 @@ const CheckLogged = (req, res, next) => {
     });
 };
 
-export default (app, io) => {
+export default (app, io, getOnlineUsers) => {
     // config for express route
     app.use("/api/chat-single", router);
 
@@ -101,7 +101,7 @@ export default (app, io) => {
                 status: 200,
                 message: "Success",
                 data: {
-                    users,
+                    items: users,
                     total: total_unreaded
                 }
             })
@@ -122,7 +122,10 @@ export default (app, io) => {
             res.status(200).json({
                 status: 200,
                 message: "Success",
-                data: users
+                data: {
+                    items: users,
+                    online: getOnlineUsers?.()
+                }
             })
         } catch (err) {
             res.status(500).json({
@@ -130,6 +133,10 @@ export default (app, io) => {
                 message: err
             })
         }
+    })
+
+    router.get('/search_users', CheckLogged, async (req, res) => {
+
     })
 
     router.post("/share_file", CheckLogged, multer?.share_user?.single('file'), async (req, res) => {

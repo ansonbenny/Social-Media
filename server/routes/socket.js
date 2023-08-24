@@ -6,8 +6,54 @@ import { RouteSingle, SocketSingle } from "./private/index.js";
 // express route middleware to check user is logged or not
 
 export default (app, io) => {
-  // variable for save online users
-  let onlineUsers = []
+  // closure for online users
+  const onlineUsers = () => {
+    let users = []
+
+    const getOnline = () => {
+      return users
+    }
+
+    const onConnect = (socketId, _id) => {
+      let user = users?.find((obj) => obj?.userId == _id)
+
+      if (user) {
+        users?.forEach((obj) => {
+          if (obj?.userId == _id) {
+            if (obj?.socketId?.length > 0) {
+              if (!obj?.socketId?.includes?.(socketId)) {
+                obj.socketId = [...obj?.socketId, socketId]
+              }
+            } else {
+              obj.socketId = [socketId]
+            }
+          }
+        })
+      } else {
+        users.push({ userId: _id, socketId: [socketId] })
+      }
+    }
+
+    const onDisconnect = (socketId) => {
+      let user = users?.find((obj) => {
+        return obj?.socketId?.includes(socketId)
+      })
+
+      if (user?.socketId?.length > 1) {
+        users?.forEach((obj) => {
+          if (obj?.userId == user?.userId) {
+            obj.socketId = obj?.socketId?.filter?.((ids) => ids !== socketId)
+          }
+        })
+      } else {
+        users = users?.filter((obj) => obj?.userId !== user?.userId)
+      }
+    }
+
+    return { getOnline, onConnect, onDisconnect }
+  }
+
+  const { getOnline, onConnect, onDisconnect } = onlineUsers?.()
 
   // socket io
   io.use((socket, next) => {
@@ -51,27 +97,11 @@ export default (app, io) => {
 
       // adding to onlineUsers
       if (_id) {
-        let user = onlineUsers?.find((obj) => obj?.userId == _id)
-
-        if (user) {
-          onlineUsers?.forEach((obj) => {
-            if (obj?.userId == _id) {
-              if (obj?.socketId?.length > 0) {
-                if (!obj?.socketId?.includes?.(socket?.id)) {
-                  obj.socketId = [...obj?.socketId, socket?.id]
-                }
-              } else {
-                obj.socketId = [socket.id]
-              }
-            }
-          })
-        } else {
-          onlineUsers.push({ userId: _id, socketId: [socket?.id] })
-        }
+        onConnect(socket?.id, _id)
       }
 
       // senting to users
-      io.emit("all user status", onlineUsers)
+      io.emit("all user status", getOnline?.())
     });
 
     SocketSingle(socket, io);
@@ -81,25 +111,13 @@ export default (app, io) => {
       await chat?.removeSocketId?.(socket.id)?.catch?.(() => { });
 
       // removeing from onlineUsers
-      let user = onlineUsers?.find((obj) => {
-        return obj?.socketId?.includes(socket?.id)
-      })
-
-      if (user?.socketId?.length > 1) {
-        onlineUsers?.forEach((obj) => {
-          if (obj?.userId == user?.userId) {
-            obj.socketId = obj?.socketId?.filter?.((ids) => ids !== socket?.id)
-          }
-        })
-      } else {
-        onlineUsers = onlineUsers?.filter((obj) => obj?.userId !== user?.userId)
-      }
+      onDisconnect(socket?.id)
 
       // senting to users
-      io.emit("all user status", onlineUsers)
+      io.emit("all user status", getOnline?.())
     });
   });
 
   // express routes
-  RouteSingle(app, io)
+  RouteSingle(app, io, getOnline)
 };

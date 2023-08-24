@@ -173,7 +173,7 @@ export default {
       }
     });
   },
-  getUserChats: (to, { userId, skip = 0 }) => {
+  getUserChats: (to, { userId, offset = 0 }) => {
     return new Promise(async (resolve, reject) => {
       try {
         await db.collection(collections.CHAT).updateOne({
@@ -253,7 +253,7 @@ export default {
                     $unwind: "$msgs",
                   },
                   {
-                    $skip: parseInt(skip),
+                    $skip: parseInt(offset),
                   },
                   {
                     $limit: 10,
@@ -355,6 +355,17 @@ export default {
             users: 1,
             "last_msg": {
               $last: "$chat"
+            },
+            id: {
+              $first: {
+                $filter: {
+                  input: "$users",
+                  as: "users",
+                  cond: {
+                    $ne: ["$$users", userId]
+                  }
+                }
+              }
             }
           }
         }, {
@@ -362,7 +373,44 @@ export default {
             "last_msg": -1
           }
         }, {
-          $limit: 2 // limit
+          $skip: parseInt(offset)
+        }, {
+          $limit: 15 // limit
+        }, {
+          $lookup: {
+            from: collections.USERS,
+            let: { user: "$id" },
+            pipeline: [{
+              $match: {
+                $expr: {
+                  $eq: ["$_id", {
+                    $toObjectId: "$$user"
+                  }]
+                }
+              }
+            }, {
+              $project: {
+                _id: "$_id",
+                name: "$name",
+                about: "$about",
+                img: "$img",
+                //socketId: "$socketId"
+              }
+            }],
+            as: "details"
+          }
+        }, {
+          $set: {
+            details: {
+              $arrayElemAt: ["$details", 0]
+            }
+          }
+        }, {
+          $match: {
+            "details._id": {
+              $exists: true
+            }
+          }
         }, {
           $lookup: {
             from: collections.CHAT,
@@ -397,47 +445,23 @@ export default {
         }, {
           $project: {
             _id: 0,
+            id: 1,
+            details: 1,
+            /*status: {
+              $cond: {
+                if: {
+                  $and: [{
+                    $eq: [{
+                      $type: "$details.socketId"
+                    }, 'array']
+                  }, {
+                    $ne: ["$details.socketId", []]
+                  }]
+                }, then: true, else: false
+              }
+            },*/
             unread: {
               $arrayElemAt: ["$unread.total", 0]
-            },
-            id: {
-              $first: {
-                $filter: {
-                  input: "$users",
-                  as: "users",
-                  cond: {
-                    $ne: ["$$users", userId]
-                  }
-                }
-              }
-            }
-          }
-        }, {
-          $lookup: {
-            from: collections.USERS,
-            let: { user: "$id" },
-            pipeline: [{
-              $match: {
-                $expr: {
-                  $eq: ["$_id", {
-                    $toObjectId: "$$user"
-                  }]
-                }
-              }
-            }, {
-              $project: {
-                _id: "$_id",
-                name: "$name",
-                about: "$about",
-                img: "$img"
-              }
-            }],
-            as: "details"
-          }
-        }, {
-          $set: {
-            details: {
-              $arrayElemAt: ["$details", 0]
             }
           }
         }]).toArray()
@@ -460,7 +484,7 @@ export default {
             _id: 0,
             id: "$_id",
             details: {
-              id: "$_id",
+              _id: "$_id",
               name: "$name",
               about: "$about",
               img: "$img"
@@ -526,6 +550,49 @@ export default {
               $ne: [userId, userId]
             }
           },
+        }, {
+          $set: {
+            id: {
+              $first: {
+                $filter: {
+                  input: "$users",
+                  as: "users",
+                  cond: {
+                    $ne: ["$$users", userId]
+                  }
+                }
+              }
+            }
+          }
+        }, {
+          $lookup: {
+            from: collections.USERS,
+            let: { user: "$id" },
+            pipeline: [{
+              $match: {
+                $expr: {
+                  $eq: ["$_id", {
+                    $toObjectId: "$$user"
+                  }]
+                }
+              }
+            }, {
+              $project: {
+                _id: "$_id"
+              }
+            }],
+            as: "details"
+          }
+        }, {
+          $match: {
+            $expr: {
+              $eq: ["$details", [{
+                "_id": {
+                  $toObjectId: "$id"
+                }
+              }]]
+            }
+          }
         }, {
           $unwind: "$chat"
         }, {
