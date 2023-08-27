@@ -1,4 +1,4 @@
-import chat from "../../helper/chat.js";
+import chat from "../../helper/private.js";
 import jwt from "jsonwebtoken";
 import user from "../../helper/user.js";
 import { Router } from "express";
@@ -136,7 +136,40 @@ export default (app, io, getOnlineUsers) => {
     })
 
     router.get('/search_users', CheckLogged, async (req, res) => {
+        try {
+            if (req?.query?.search?.length >= 1) {
+                const response = await chat.searchUser(req?.query)
 
+                res.status(200).json({
+                    status: 200,
+                    message: "Success",
+                    data: {
+                        items: response,
+                        online: getOnlineUsers?.()
+                    }
+                })
+            } else {
+                const total_unreaded = await chat.get_total_unreaded(req?.query?.userId)
+
+                const users = await chat.get_recent_users(req?.query?.userId)
+
+                res.status(200).json({
+                    status: 200,
+                    message: "Success",
+                    data: {
+                        recent: true,
+                        items: users,
+                        total: total_unreaded,
+                        online: getOnlineUsers?.()
+                    }
+                })
+            }
+        } catch (err) {
+            res.status(500).json({
+                status: 500,
+                message: err
+            })
+        }
     })
 
     router.post("/share_file", CheckLogged, multer?.share_user?.single('file'), async (req, res) => {

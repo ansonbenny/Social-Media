@@ -1,4 +1,4 @@
-import chat from "../helper/chat.js";
+import chat from "../helper/private.js";
 import jwt from "jsonwebtoken";
 import user from "../helper/user.js";
 import { RouteSingle, SocketSingle } from "./private/index.js";

@@ -1,4 +1,4 @@
-import chat from "../../helper/chat.js";
+import chat from "../../helper/private.js";
 
 export default (socket, io) => {
     socket.on("user status", async ({ from, to, status }) => {

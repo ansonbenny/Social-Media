@@ -741,5 +741,142 @@ export default {
         reject(err)
       }
     })
+  },
+  searchUser: ({ search = '', userId, offset = 0 }) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let res = await db.collection(collections.USERS).aggregate([{
+          $lookup: {
+            from: collections.USERS,
+            pipeline: [{
+              $match: {
+                $or: [
+                  {
+                    number: search
+                  }, {
+                    _id: search?.length == 24 ? new ObjectId(search) : '' // add name feild for friends
+                  }
+                ]
+              }
+            }, {
+              $project: {
+                _id: 0,
+                id: {
+                  $toString: "$_id"
+                },
+                details: {
+                  _id: "$_id",
+                  name: "$name",
+                  about: "$about",
+                  img: "$img"
+                }
+              }
+            }],
+            as: 'search'
+          }
+        }, {
+          $lookup: {
+            from: collections.USERS,
+            pipeline: [{
+              $match: {
+                name: {
+                  $regex: search,
+                  $options: 'i'
+                }
+              }
+            }, {
+              $project: {
+                id: {
+                  $toString: "$_id"
+                },
+                details: {
+                  _id: "$_id",
+                  name: "$name",
+                  about: "$about",
+                  img: "$img"
+                }
+              }
+            }],
+            as: 'by_name'
+          }
+        }, {
+          $lookup: {
+            from: collections.CHAT,
+            let: { search: "$by_name" },
+            pipeline: [{
+              $match: {
+                $expr: {
+                  $in: [userId, "$users"]
+                }
+              }
+            }, {
+              $unwind: "$users"
+            }, {
+              $group: {
+                _id: 1,
+                users: {
+                  $addToSet: "$users"
+                },
+                search: {
+                  $first: "$$search"
+                }
+              }
+            }, {
+              $unwind: "$search"
+            }, {
+              $match: {
+                $expr: {
+                  $in: ["$search.id", "$users"]
+                }
+              }
+            }, {
+              $project: {
+                _id: 0,
+                id: "$search.id",
+                details: "$search.details"
+              }
+            }],
+            as: 'matched'
+          }
+        }, {
+          $project: {
+            _id: 1,
+            items: {
+              $concatArrays: ["$search", "$matched"]
+            }
+          }
+        }, {
+          $unwind: "$items"
+        }, {
+          $group: {
+            _id: 1,
+            items: {
+              $addToSet: "$items"
+            }
+          }
+        }, {
+          $unwind: "$items"
+        }, {
+          $sort: {
+            "items.id": -1
+          }
+        }, {
+          $skip: parseInt(offset)
+        }, {
+          $limit: 15
+        }, {
+          $project: {
+            _id: 0,
+            id: "$items.id",
+            details: "$items.details"
+          }
+        }]).toArray()
+
+        resolve(res)
+      } catch (err) {
+        reject(err)
+      }
+    })
   }
 };
+

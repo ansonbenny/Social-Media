@@ -43,6 +43,9 @@ const reducer = (state, { type, data, ...actions }) => {
     case "initial":
       return data
 
+    case "initial_search":
+      return { ...state, items: data?.items, search: data?.search }
+
     case "status":
       return {
         ...state, items: state?.items?.map((item) => {
@@ -57,11 +60,15 @@ const reducer = (state, { type, data, ...actions }) => {
       }
 
     case "to_top": {
-      const user = state?.items?.find?.((obj) => obj?.id == data)
+      if (!state?.search) {
+        const user = state?.items?.find?.((obj) => obj?.id == data)
 
-      return {
-        ...state,
-        items: [user, ...state?.items?.filter((obj) => obj?.id !== data)]
+        return {
+          ...state,
+          items: [user, ...state?.items?.filter((obj) => obj?.id !== data)]
+        }
+      } else {
+        return state
       }
     }
 
@@ -82,18 +89,22 @@ const reducer = (state, { type, data, ...actions }) => {
 
     case "unread":
 
-      const user = state?.items?.find?.((obj) => obj?.id == data)
+      if (!state?.search) {
+        const user = state?.items?.find?.((obj) => obj?.id == data)
 
-      if (user?.unread) {
-        user.unread += 1
+        if (user?.unread) {
+          user.unread += 1
+        } else {
+          user.unread = 1
+        }
+
+        return {
+          ...state,
+          total: state?.total ? state?.total + 1 : 1,
+          items: [user, ...state?.items?.filter((obj) => obj?.id !== data)]
+        }
       } else {
-        user.unread = 1
-      }
-
-      return {
-        ...state,
-        total: state?.total ? state?.total + 1 : 1,
-        items: [user, ...state?.items?.filter((obj) => obj?.id !== data)]
+        return { ...state, total: state?.total ? state?.total + 1 : 1, }
       }
 
     case "new_user":
@@ -106,7 +117,11 @@ const reducer = (state, { type, data, ...actions }) => {
           total = data?.unread
         }
 
-        return { ...state, total: total, items: [data, ...state?.items] }
+        if (!state?.search) {
+          return { ...state, total: total, items: [data, ...state?.items] }
+        } else {
+          return { ...state, total: total }
+        }
       } else if (actions?.unread) {
         if (total) {
           total += 1
@@ -114,18 +129,22 @@ const reducer = (state, { type, data, ...actions }) => {
           total = 1
         }
 
-        return {
-          total: total, items: state?.items?.map((obj) => {
-            if (obj?.id == data?.id) {
-              if (obj?.unread) {
-                obj.unread += 1
-              } else {
-                obj.unread = 1
+        if (!state?.search) {
+          return {
+            total: total, items: state?.items?.map((obj) => {
+              if (obj?.id == data?.id) {
+                if (obj?.unread) {
+                  obj.unread += 1
+                } else {
+                  obj.unread = 1
+                }
               }
-            }
 
-            return obj
-          })
+              return obj
+            })
+          }
+        } else {
+          return { ...state, total: total }
         }
       } else {
         return state
@@ -150,7 +169,7 @@ const reducer = (state, { type, data, ...actions }) => {
   }
 };
 
-const useScroll = ({ url, details }) => {
+const useScroll = ({ url, search_url, details }) => {
   const ref = useRef({
     main: null,
     loading: null
@@ -173,12 +192,25 @@ const useScroll = ({ url, details }) => {
       abortControl = new AbortController();
 
       try {
-        let res = await axios.get(url, {
-          params: {
-            offset: state?.items?.length,
-          },
-          signal: abortControl?.signal,
-        });
+        let res;
+
+        if (state?.search) {
+          res = await axios.get(search_url, {
+            params: {
+              search: state?.search,
+              offset: state?.items?.length,
+            },
+            signal: abortControl?.signal,
+          });
+
+        } else {
+          res = await axios.get(url, {
+            params: {
+              offset: state?.items?.length,
+            },
+            signal: abortControl?.signal,
+          });
+        }
 
         if (res?.["data"]?.data) {
           timeout = setTimeout(() => {

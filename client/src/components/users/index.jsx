@@ -1,4 +1,4 @@
-import React, { Fragment, forwardRef, useEffect, useImperativeHandle, useReducer } from "react";
+import React, { Fragment, forwardRef, useEffect, useImperativeHandle } from "react";
 import { AvatarSvg, SearchSvg } from "../../assets";
 import { useNavigate, useParams } from "react-router-dom";
 import { LoadingCircle } from "..";
@@ -16,11 +16,59 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
 
   const [refs, state, action] = useScroll({
     url: `/chat-single/recent_users_more`,
+    search_url: `/chat-single/search_users`
   })
 
-  useImperativeHandle(ref, () => ({
-    // optimise and check users listing and add scroll feature
+  const OnInput = async (e) => {
+    if (refs?.current?.abort_search) {
+      refs.current.abort_search?.abort?.()
+    }
 
+    refs.current.abort_search = new AbortController()
+
+    if (isUsers) {
+      try {
+        const res = await axios.get('/chat-single/search_users', {
+          params: {
+            search: e?.target?.value
+          },
+          signal: refs?.current?.abort_search?.signal
+        })
+
+        if (res?.['data']?.data?.recent) {
+          action({
+            type: "initial_search", data: {
+              items: res?.['data']?.data?.items,
+              total: res?.['data']?.data?.total
+            }
+          })
+        } else {
+          action({
+            type: "initial_search", data: {
+              items: res?.['data']?.data?.items,
+              search: e?.target?.value || ' '
+            }
+          })
+        }
+
+        if (res?.["data"]?.data?.online) {
+          action({ type: "status", data: res?.["data"]?.data?.online });
+        }
+      } catch (err) {
+        if (err?.code !== "ERR_CANCELED") {
+          ref?.current?.loading?.classList?.add?.("hide");
+
+          if (err?.response?.data?.status == 405) {
+            navigate("/");
+          } else {
+            alert(err?.response?.data?.message || "Something Went Wrong");
+          }
+        }
+      }
+    }
+  }
+
+  useImperativeHandle(ref, () => ({
     users_status: (data) => {
       action({ type: "status", data })
     },
@@ -92,7 +140,7 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
     return () => {
       abortControl?.abort?.()
     }
-  }, [isUsers])
+  }, [isUsers, id])
 
   return (
     <section id="all-users">
@@ -124,7 +172,7 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
 
           <div className="search">
             <SearchSvg width={"22px"} height={"22px"} />
-            <input type="text" placeholder="Search" />
+            <input type="text" placeholder="Search" onInput={OnInput} />
           </div>
         </Fragment>
       )}
