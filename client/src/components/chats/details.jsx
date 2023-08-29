@@ -61,6 +61,27 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
     }
   }
 
+  const DeleteChat = async () => {
+    if (window.confirm("Do you want delete entire chat ?")) {
+      try {
+        if (isUser) {
+          await axios.delete('/chat-single/delete_chat', {
+            data: {
+              chatId: details?._id
+            }
+          })
+        }
+      } catch (err) {
+        if (err?.response?.data?.status == 405) {
+          alert("Please Login")
+          navigate('/')
+        } else if (err?.code !== "ERR_CANCELED") {
+          alert(err?.response?.data?.message || "Something Went Wrong");
+        }
+      }
+    }
+  }
+
   useImperativeHandle(ref, () => ({
     ReloadMedia: () => {
       LoadMedia?.()
@@ -130,7 +151,7 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
             <button>
               <VideoSvg width={"20px"} height={"20px"} />
             </button>
-            <button>
+            <button onClick={DeleteChat}>
               <TrashSvg isFull width={"18px"} height={"18px"} />
             </button>
           </div>

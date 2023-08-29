@@ -277,4 +277,38 @@ export default (app, io, getOnlineUsers) => {
             })
         }
     })
+
+    router.delete('/delete_chat', CheckLogged, async (req, res) => {
+        try {
+            let sockets = await chat?.getSocketId?.(req?.body?.chatId, req?.body?.userId);
+
+            let response = await chat?.delete_chat_private([req?.body?.chatId, req?.body?.userId])
+
+            if (response?.deletedCount >= 1) {
+                files?.delete_folder(`/files/private_chat/${req?.body?.chatId}/${req?.body?.userId}`)
+                files?.delete_folder(`/files/private_chat/${req?.body?.userId}/${req?.body?.chatId}`)
+
+                if (sockets?.ids?.length > 0) {
+                    io.to(sockets?.ids).emit("chat delete", {
+                        empty: true,
+                        match:
+                            req?.body?.chatId == req?.body?.userId
+                                ? req?.body?.userId
+                                : `${req?.body?.userId}${req?.body?.chatId}`,
+                    });
+
+                    res.status(200).json({
+                        status: 200,
+                        message: 'Success'
+                    })
+                }
+            }
+
+        } catch (err) {
+            res.status(500).json({
+                status: 500,
+                message: err
+            })
+        }
+    })
 }

@@ -30,7 +30,7 @@ export default {
   share_user: multer?.({
     storage: multer.diskStorage({
       destination: async (req, file, cb) => {
-        let dir = `./files/single_chat/${req?.body?.userId}/${req?.body?.chatId}`;
+        let dir = `./files/private_chat/${req?.body?.userId}/${req?.body?.chatId}`;
 
         try {
           await fs?.access(dir);

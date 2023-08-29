@@ -877,6 +877,26 @@ export default {
         reject(err)
       }
     })
+  },
+  delete_chat_private: (users) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let res = await db.collection(collections.CHAT).deleteOne({
+          $or: [
+            {
+              users: users,
+            },
+            {
+              users: [users[1], users[0]],
+            },
+          ],
+        })
+
+        resolve(res)
+      } catch (err) {
+        reject(err)
+      }
+    })
   }
 };
 

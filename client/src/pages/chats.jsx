@@ -209,19 +209,25 @@ const Chats = () => {
         }
       });
 
-      // deleted messages
+      // deleted messages / entire chat
       Socket?.on("chat delete", (msg) => {
         if (
           msg?.match == `${user?._id}${id}` ||
           msg?.match == `${id}${user?._id}`
         ) {
-          ref?.current?.live?.deleteMsg?.(msg);
+          if (msg?.empty) {
+            navigate('/')
+          } else {
+            ref?.current?.live?.deleteMsg?.(msg);
 
-          if (msg?.file) {
-            ref?.current?.details?.ReloadMedia?.()
+            if (msg?.file) {
+              ref?.current?.details?.ReloadMedia?.()
+            }
           }
-        } else if (msg?.match == user?._id) {
-          if (id == user?._id) {
+        } else if (msg?.match == user?._id && id == user?._id) {
+          if (msg?.empty) {
+            navigate('/')
+          } else {
             ref?.current?.live?.deleteMsg?.(msg);
 
             if (msg?.file) {
