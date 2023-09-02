@@ -37,7 +37,7 @@ const CheckLogged = (req, res, next) => {
     });
 };
 
-export default (app, io, getOnlineUsers) => {
+export default (app, io) => {
     // config for express route
     app.use("/api/chat-single", router);
 
@@ -123,8 +123,7 @@ export default (app, io, getOnlineUsers) => {
                 status: 200,
                 message: "Success",
                 data: {
-                    items: users,
-                    online: getOnlineUsers?.()
+                    items: users
                 }
             })
         } catch (err) {
@@ -144,8 +143,7 @@ export default (app, io, getOnlineUsers) => {
                     status: 200,
                     message: "Success",
                     data: {
-                        items: response,
-                        online: getOnlineUsers?.()
+                        items: response
                     }
                 })
             } else {
@@ -159,8 +157,7 @@ export default (app, io, getOnlineUsers) => {
                     data: {
                         recent: true,
                         items: users,
-                        total: total_unreaded,
-                        online: getOnlineUsers?.()
+                        total: total_unreaded
                     }
                 })
             }

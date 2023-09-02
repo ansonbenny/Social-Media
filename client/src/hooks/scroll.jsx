@@ -217,10 +217,6 @@ const useScroll = ({ url, search_url, details }) => {
             ref?.current?.loading?.classList?.add?.("hide");
 
             action({ type: "old", data: res?.["data"]?.data?.items });
-
-            if (res?.["data"]?.data?.online) {
-              action({ type: "status", data: res?.["data"]?.data?.online });
-            }
           }, 1000)
         }
       } catch (err) {

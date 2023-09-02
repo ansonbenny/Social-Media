@@ -5,7 +5,7 @@ export default (socket, io) => {
         try {
             let sockets = await chat?.getSocketIdTo?.(to)
 
-            if (sockets?.ids?.length > 0) {
+            if (sockets?.ids) {
                 io.to(sockets.ids).emit("user status", {
                     from,
                     status

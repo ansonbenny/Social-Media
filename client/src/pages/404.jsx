@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { setLoading } from "../redux/additional";
+import { setLoading, setMenu } from "../redux/additional";
 import { useNavigate } from "react-router-dom";
 
 const FourNotFour = () => {
@@ -9,6 +9,10 @@ const FourNotFour = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    document.title = "Soft Chat - Error"
+
+    dispatch(setMenu(false));
+
     const timer = setTimeout(() => {
       dispatch(setLoading(false));
     }, 1000);
@@ -20,14 +24,25 @@ const FourNotFour = () => {
 
   return (
     <section className="error_404">
-      <h1>404</h1>
-      <p>Sorry this page doesn't exist.</p>
+      {
+        /close_tab/i.test(window.location.pathname)
+          ? <h1>409</h1>
+          : <h1>404</h1>
+      }
+      {
+        /close_tab/i.test(window.location.pathname)
+          ? <p>Site Opened In Another Device or Browser Tab.</p>
+          : <p>Sorry this page doesn't exist.</p>
+      }
       <button
         onClick={() => {
           navigate("/");
         }}
       >
-        Home
+        {
+          /close_tab/i.test(window.location.pathname)
+            ? "Stay" : "Home"
+        }
       </button>
     </section>
   );

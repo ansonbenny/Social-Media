@@ -21,34 +21,16 @@ export default (app, io) => {
       if (user) {
         users?.forEach((obj) => {
           if (obj?.userId == _id) {
-            if (obj?.socketId?.length > 0) {
-              if (!obj?.socketId?.includes?.(socketId)) {
-                obj.socketId = [...obj?.socketId, socketId]
-              }
-            } else {
-              obj.socketId = [socketId]
-            }
+            obj.socketId = socketId
           }
         })
       } else {
-        users.push({ userId: _id, socketId: [socketId] })
+        users.push({ userId: _id, socketId })
       }
     }
 
     const onDisconnect = (socketId) => {
-      let user = users?.find((obj) => {
-        return obj?.socketId?.includes(socketId)
-      })
-
-      if (user?.socketId?.length > 1) {
-        users?.forEach((obj) => {
-          if (obj?.userId == user?.userId) {
-            obj.socketId = obj?.socketId?.filter?.((ids) => ids !== socketId)
-          }
-        })
-      } else {
-        users = users?.filter((obj) => obj?.userId !== user?.userId)
-      }
+      users = users?.filter((obj) => obj?.socketId !== socketId)
     }
 
     return { getOnline, onConnect, onDisconnect }
@@ -94,11 +76,15 @@ export default (app, io) => {
   io.on("connection", (socket) => {
 
     socket.on("user", async (_id) => {
-      await chat?.addSocketId?.(_id, socket.id)?.catch?.(() => { });
+      let previous = await chat?.addSocketId?.(_id, socket.id)?.catch?.(() => { });
 
       // adding to onlineUsers
       if (_id) {
         onConnect(socket?.id, _id)
+      }
+
+      if (previous?.socketId) {
+        io.to(previous?.socketId).emit("close_window", socket.id)
       }
 
       // senting to users
@@ -122,7 +108,7 @@ export default (app, io) => {
   });
 
   // express routes
-  RoutePrivate(app, io, getOnline)
+  RoutePrivate(app, io)
 
   RouteGroup(app, io)
 };

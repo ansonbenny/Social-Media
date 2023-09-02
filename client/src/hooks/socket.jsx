@@ -10,6 +10,7 @@ const useSocket = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+
     SocketRef.current = io();
 
     SocketRef?.current?.on("connect_error", (err) => {
@@ -18,9 +19,10 @@ const useSocket = () => {
       }
     });
 
-    SocketRef?.current?.on("close_window", () => {
-      console.log('close_wind')
-     // window.close()
+    SocketRef?.current?.on("close_window", (new_id) => {
+      if (SocketRef?.current.id !== new_id) {
+        navigate('/close_tab')
+      }
     });
 
     return () => {

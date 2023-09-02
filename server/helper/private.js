@@ -42,18 +42,18 @@ export default {
   addSocketId: (userId, socketId) => {
     return new Promise(async (resolve, reject) => {
       try {
-        await db.collection(collections.USERS).updateOne(
+        let previous = await db.collection(collections.USERS).findOneAndUpdate(
           {
             _id: new ObjectId(userId),
           },
           {
-            $addToSet: {
+            $set: {
               socketId: socketId,
             },
           }
         );
 
-        resolve();
+        resolve(previous?.value);
       } catch (err) {
         resolve();
       }
@@ -130,14 +130,9 @@ export default {
                 name: {
                   $arrayElemAt: ["$from.name", 0],
                 },
-                ids: {
-                  $concatArrays: [
-                    "$ids",
-                    {
-                      $arrayElemAt: ["$from.socketId", 0],
-                    },
-                  ],
-                },
+                ids: ["$ids", {
+                  $arrayElemAt: ["$from.socketId", 0],
+                }]
               },
             },
           ])
@@ -161,8 +156,8 @@ export default {
             socketId: socketId,
           },
           {
-            $pull: {
-              socketId: socketId,
+            $unset: {
+              socketId: 1,
             },
           }
         );
@@ -394,7 +389,7 @@ export default {
                 name: "$name",
                 about: "$about",
                 img: "$img",
-                //socketId: "$socketId"
+                socketId: "$socketId"
               }
             }],
             as: "details"
@@ -447,19 +442,15 @@ export default {
             _id: 0,
             id: 1,
             details: 1,
-            /*status: {
+            status: {
               $cond: {
                 if: {
-                  $and: [{
-                    $eq: [{
-                      $type: "$details.socketId"
-                    }, 'array']
-                  }, {
-                    $ne: ["$details.socketId", []]
-                  }]
+                  $eq: [{
+                    $type: "$details.socketId"
+                  }, 'string']
                 }, then: true, else: false
               }
-            },*/
+            },
             unread: {
               $arrayElemAt: ["$unread.total", 0]
             }
@@ -768,7 +759,8 @@ export default {
                   _id: "$_id",
                   name: "$name",
                   about: "$about",
-                  img: "$img"
+                  img: "$img",
+                  socketId: "$socketId"
                 }
               }
             }],
@@ -793,7 +785,8 @@ export default {
                   _id: "$_id",
                   name: "$name",
                   about: "$about",
-                  img: "$img"
+                  img: "$img",
+                  socketId: "$socketId"
                 }
               }
             }],
@@ -868,7 +861,16 @@ export default {
           $project: {
             _id: 0,
             id: "$items.id",
-            details: "$items.details"
+            details: "$items.details",
+            status: {
+              $cond: {
+                if: {
+                  $eq: [{
+                    $type: "$items.details.socketId"
+                  }, 'string']
+                }, then: true, else: false
+              }
+            },
           }
         }]).toArray()
 

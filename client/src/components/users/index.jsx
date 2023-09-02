@@ -52,9 +52,6 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
           })
         }
 
-        if (res?.["data"]?.data?.online) {
-          action({ type: "status", data: res?.["data"]?.data?.online });
-        }
       } catch (err) {
         if (err?.code !== "ERR_CANCELED") {
           ref?.current?.loading?.classList?.add?.("hide");
