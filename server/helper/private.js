@@ -6,7 +6,7 @@ export default {
   newMsg: (details) => {
     return new Promise(async (resolve, reject) => {
       try {
-        let res = await db.collection(collections.CHAT).updateOne(
+        let res = await db.collection(collections.PRIVATE).updateOne(
           {
             $or: [
               {
@@ -25,7 +25,7 @@ export default {
         );
 
         if (res?.matchedCount <= 0) {
-          let res = await db.collection(collections.CHAT).insertOne({
+          let res = await db.collection(collections.PRIVATE).insertOne({
             ...details,
             chat: [details?.chat],
           });
@@ -176,7 +176,7 @@ export default {
   getUserChats: (to, { userId, offset = 0 }) => {
     return new Promise(async (resolve, reject) => {
       try {
-        await db.collection(collections.CHAT).updateOne({
+        await db.collection(collections.PRIVATE).updateOne({
           $or: [
             {
               users: [to, userId],
@@ -228,7 +228,7 @@ export default {
             },
             {
               $lookup: {
-                from: collections.CHAT,
+                from: collections.PRIVATE,
                 pipeline: [
                   {
                     $match: {
@@ -306,7 +306,7 @@ export default {
   readMsgs: (from, to) => {
     return new Promise(async (resolve, reject) => {
       try {
-        await db.collection(collections.CHAT).updateOne({
+        await db.collection(collections.PRIVATE).updateOne({
           $and: [{
             $or: [
               {
@@ -343,7 +343,7 @@ export default {
   get_recent_users: (userId, offset = 0) => {
     return new Promise(async (resolve, reject) => {
       try {
-        const users = await db.collection(collections.CHAT).aggregate([{
+        const users = await db.collection(collections.PRIVATE).aggregate([{
           $match: {
             users: {
               $in: [userId],
@@ -413,7 +413,7 @@ export default {
           }
         }, {
           $lookup: {
-            from: collections.CHAT,
+            from: collections.PRIVATE,
             let: { users: "$users" },
             pipeline: [{
               $match: {
@@ -492,7 +492,7 @@ export default {
           }
         }, {
           $lookup: {
-            from: collections.CHAT,
+            from: collections.PRIVATE,
             pipeline: [{
               $match: {
                 $expr: {
@@ -543,7 +543,7 @@ export default {
   get_total_unreaded: (userId) => {
     return new Promise(async (resolve, reject) => {
       try {
-        let total = await db.collection(collections.CHAT).aggregate([{
+        let total = await db.collection(collections.PRIVATE).aggregate([{
           $match: {
             users: {
               $in: [userId],
@@ -628,7 +628,7 @@ export default {
           },
         }, {
           $lookup: {
-            from: collections.CHAT,
+            from: collections.PRIVATE,
             pipeline: [{
               $match: {
                 $or: [
@@ -669,7 +669,7 @@ export default {
           }
         }, {
           $lookup: {
-            from: collections.CHAT,
+            from: collections.PRIVATE,
             pipeline: [{
               $match: {
                 $or: [
@@ -721,7 +721,7 @@ export default {
   delete_msg_user: ({ users, ...details }) => {
     return new Promise(async (resolve, reject) => {
       try {
-        let res = await db.collection(collections.CHAT).updateOne({
+        let res = await db.collection(collections.PRIVATE).updateOne({
           $or: [
             {
               users: users,
@@ -754,7 +754,7 @@ export default {
                   {
                     number: search
                   }, {
-                    _id: search?.length == 24 ? new ObjectId(search) : '' // add name feild for friends
+                    _id: search?.length == 24 ? new ObjectId(search) : ''
                   }
                 ]
               }
@@ -801,7 +801,7 @@ export default {
           }
         }, {
           $lookup: {
-            from: collections.CHAT,
+            from: collections.PRIVATE,
             let: { search: "$by_name" },
             pipeline: [{
               $match: {
@@ -881,7 +881,7 @@ export default {
   delete_chat_private: (users) => {
     return new Promise(async (resolve, reject) => {
       try {
-        let res = await db.collection(collections.CHAT).deleteOne({
+        let res = await db.collection(collections.PRIVATE).deleteOne({
           $or: [
             {
               users: users,

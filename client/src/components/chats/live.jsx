@@ -33,6 +33,15 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
 
   const user = useSelector((state) => state?.user);
 
+  const IsValidUrl = (urlString) => {
+    try {
+      const res = new URL(urlString)
+      if (res) return true
+    } catch (err) {
+      return false
+    }
+  }
+
   useImperativeHandle(ref, () => ({
     insertMsg: (data) => {
       action({ type: "new", data });
@@ -140,12 +149,17 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
                       </div>
 
                       <div className="msg">
-                        {obj?.msg}
+                        {
+                          IsValidUrl(obj?.msg) ? <a href={obj?.msg} target="_blank">
+                            {obj?.msg}
+                          </a>
+                            : obj?.msg
+                        }
                         {
                           /image/i.test(obj?.file?.type) &&
                           <img
                             loading="lazy" src={obj?.file?.url}
-                            className="file_for_modal"
+                            className="chats_modal_special"
                             onClick={() => {
                               refs?.current?.modal_msgs?.Modal?.(obj?.file)
                             }}
@@ -153,7 +167,7 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
                         }
                         {
                           /video/i.test(obj?.file?.type) &&
-                          <div className="video file_for_modal" onClick={() => {
+                          <div className="video chats_modal_special" onClick={() => {
                             refs?.current?.modal_msgs?.Modal?.(obj?.file)
                           }}>
                             <PlaySvg />
@@ -282,12 +296,17 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
                       </div>
 
                       <div className="msg">
-                        {obj?.msg}
+                        {
+                          IsValidUrl(obj?.msg) ? <a href={obj?.msg} target="_blank">
+                            {obj?.msg}
+                          </a>
+                            : obj?.msg
+                        }
                         {
                           /image/i.test(obj?.file?.type) &&
                           <img
                             loading="lazy" src={obj?.file?.url}
-                            className="file_for_modal"
+                            className="chats_modal_special"
                             onClick={() => {
                               refs?.current?.modal_msgs?.Modal?.(obj?.file)
                             }}
@@ -295,7 +314,7 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
                         }
                         {
                           /video/i.test(obj?.file?.type) &&
-                          <div className="video file_for_modal" onClick={() => {
+                          <div className="video chats_modal_special" onClick={() => {
                             refs?.current?.modal_msgs?.Modal?.(obj?.file)
                           }}>
                             <PlaySvg />

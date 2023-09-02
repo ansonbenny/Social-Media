@@ -152,13 +152,22 @@
                 padding: 0 .5rem;
                 padding-bottom: .5rem;
                 font-size: small;
+                word-wrap: break-word;
 
                 @if $me {
                     color: #ffffff;
+
+                    a {
+                        color: $Text-primary;
+                    }
                 }
 
                 @else {
                     color: var(--text-primary);
+
+                    a {
+                        color: $bg-violet;
+                    }
                 }
 
                 img {
@@ -1147,6 +1156,44 @@
 
                         .svg_path_fill path {
                             fill: $bg-violet;
+                        }
+                    }
+                }
+
+                .group_create {
+                    width: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    gap: .5rem;
+
+                    .upload {
+                        margin: 0 auto;
+                    }
+
+                    input,
+                    textarea {
+                        width: calc(100% - 1rem);
+                        border: 2px solid var(--bg-grey);
+                        background: var(--bg-primary);
+                        padding: .5rem;
+                        resize: none;
+                        border-radius: .3rem;
+                    }
+
+                    button[type="submit"] {
+                        padding: .5rem 1.5rem;
+                        border: 2px solid $bg-violet;
+                        background: var(--bg-primary);
+                        color: var(--text-primary);
+                        cursor: pointer;
+                        transition: all .5s ease-in-out;
+                        -moz-transition: all .5s ease-in-out;
+
+                        &:hover {
+                            color: var(--bg-primary);
+                            background: $bg-violet;
                         }
                     }
                 }

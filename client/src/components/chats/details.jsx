@@ -180,12 +180,12 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
                 state?.media?.files?.map((obj, key) => {
                   if (/image/i.test(obj?.file?.type)) {
                     return (
-                      <img key={key} className="file_for_modal" src={obj?.file?.url} alt={obj?.id} onClick={() => {
+                      <img key={key} className="chats_modal_special" src={obj?.file?.url} alt={obj?.id} onClick={() => {
                         modalRef?.current?.Modal?.(obj?.file)
                       }} />
                     )
                   } else {
-                    return (<div className="extra_file file_for_modal" key={key} onClick={() => {
+                    return (<div className="extra_file chats_modal_special" key={key} onClick={() => {
                       modalRef?.current?.Modal?.(obj?.file)
                     }}>
                       {/video/i.test(obj?.file?.type) && <PlaySvg />}

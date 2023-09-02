@@ -1,2 +1,2 @@
-export { default as SocketSingle } from './socket.js'
-export { default as RouteSingle } from './route.js'
+export { default as SocketPrivate } from './socket.js'
+export { default as RoutePrivate } from './route.js'

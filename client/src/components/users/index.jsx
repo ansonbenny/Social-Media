@@ -1,10 +1,11 @@
 import React, { Fragment, forwardRef, useEffect, useImperativeHandle } from "react";
-import { AvatarSvg, SearchSvg } from "../../assets";
+import { AvatarSvg, PlusSvg, SearchSvg } from "../../assets";
 import { useNavigate, useParams } from "react-router-dom";
 import { LoadingCircle } from "..";
 import { axios } from "../../lib";
 import { useSelector } from "react-redux";
 import { useScroll } from "../../hooks";
+import Modal from "../chats/modal";
 import "./style.scss";
 
 const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
@@ -144,6 +145,17 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
 
   return (
     <section id="all-users">
+
+      {
+        !stories && !isUsers ?
+          <Modal ref={(elm) => {
+            if (refs?.current) {
+              refs.current.group_modal = elm
+            }
+          }} />
+          : null
+      }
+
       {!selected && (
         <div className="stories-recent">
           <div className="item">
@@ -182,28 +194,32 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
           refs.current.main = elm
         }
       }}>
-        <div
-          className={`card ${id && id == user?._id ? "active" : ""}`}
-          onClick={() => navigate(`/chat/${user?._id}`)}
-        >
-          <div className="cover">
-            {
-              user?.img ? <img
-                src={`/files/profiles/${user?.img}`}
-                alt="profile"
-              />
-                : <AvatarSvg />
-            }
-            <div data-for="status" />
-          </div>
-          <div className="content">
-            <h1>(You) {user?.name}</h1>
-            <p>
-              {user?.about}
-            </p>
-          </div>
 
-        </div>
+        {
+          stories || isUsers ? <div
+            className={`card ${id && id == user?._id ? "active" : ""}`}
+            onClick={() => navigate(`/chat/${user?._id}`)}
+          >
+            <div className="cover">
+              {
+                user?.img ? <img
+                  src={`/files/profiles/${user?.img}`}
+                  alt="profile"
+                />
+                  : <AvatarSvg />
+              }
+              <div data-for="status" />
+            </div>
+            <div className="content">
+              <h1>(You) {user?.name}</h1>
+              <p>
+                {user?.about}
+              </p>
+            </div>
+
+          </div>
+            : null
+        }
 
         {state?.items?.map((obj, key) => {
           if (obj?.id !== user?._id) {
@@ -245,6 +261,18 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
 
         <LoadingCircle ref={refs} />
       </div>
+
+      {
+        !stories && !isUsers ?
+          <button data-for="group_create_btn" onClick={() => {
+            refs?.current?.group_modal?.Modal(undefined, {
+              create: true
+            })
+          }} className="chats_modal_special" >
+            <PlusSvg />
+          </button>
+          : null
+      }
     </section>
   );
 });

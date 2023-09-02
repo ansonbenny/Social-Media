@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useReducer, useRef } from 'react'
+import React, { Fragment, forwardRef, useEffect, useImperativeHandle, useReducer, useRef } from 'react'
 import { ClipSvg, PauseSvg, PlaySvg, SendSvg, Xsvg } from '../../assets'
 import { useAudio } from '../../hooks'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -8,7 +8,11 @@ import { useSelector } from 'react-redux'
 const reducer = (value, { type, ...actions }) => {
     switch (type) {
         case 'open':
-            return { ...value, active: true, form: actions?.form || undefined }
+            if (actions?.group) {
+                return { ...value, active: true, form: true, group: actions?.group }
+            } else {
+                return { ...value, active: true, form: actions?.form || undefined }
+            }
         case 'close':
             return { active: undefined }
         case "file":
@@ -86,6 +90,8 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
         action({ type: 'abort_controller', data: new AbortController() })
 
         if (isUser) {
+            // for file share
+
             try {
                 const formdata = new FormData();
 
@@ -121,6 +127,28 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
                     alert("Cancelled Old Request")
                 }
             }
+        } else {
+            const form_data = new FormData(e?.target)
+
+            // for create group
+            try {
+                await axios.post('/chat-group/create_group', form_data, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                    signal: state?.abort_controller?.signal,
+                    onUploadProgress
+                })
+            } catch (err) {
+                if (err?.response?.data?.status == 405) {
+                    alert("Please Login")
+                    navigate('/')
+                } else if (err?.code !== "ERR_CANCELED") {
+                    alert(err?.response?.data?.message || "Something Went Wrong");
+                } else {
+                    alert("Cancelled Old Request")
+                }
+            }
         }
     }
 
@@ -128,7 +156,7 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
         const ModalControl = (e) => {
             if (
                 !refs?.current?.inner_modal?.contains(e?.target) &&
-                !e?.target?.classList?.contains("file_for_modal") &&
+                !e?.target?.classList?.contains("chats_modal_special") &&
                 !e?.target?.classList?.contains('file_upload')
             ) {
                 CloseModal?.()
@@ -144,10 +172,12 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
     }, [])
 
     useImperativeHandle(ref, () => ({
-        Modal: (data) => {
+        Modal: (data, group) => {
             if (typeof data == 'object') {
                 action({ type: "open" })
                 action({ type: "file", file: data })
+            } else if (group) {
+                action({ type: "open", group })
             } else {
                 action({ type: "open", form: data })
             }
@@ -227,29 +257,54 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
                 }
 
                 {state?.form && <form onSubmit={FormHanlde}>
-                    <div className="upload">
-                        <input className="file_input_box" onInput={(e) => {
-                            if (e?.target?.files?.[0]?.size > 26214400) {
-                                alert("File Size Allowed Maximum 25Mb")
-                                e.target.value = ''
-                                action({ type: "clear-file" })
-                            } else if (e?.target?.files?.[0]) {
-                                e.target.files[0].url = URL.createObjectURL(e?.target?.files?.[0])
-                                action({ type: "file", file: e?.target?.files?.[0] })
-                            }
-                        }} type="file" accept="image/* , video/* , audio/*" required />
-
-                        <ClipSvg />
-                    </div>
-                    <button type="button" onClick={CloseModal}>
-                        <Xsvg class_name={"svg_path_fill"} />
-                    </button>
                     {
-                        !state?.progrees && <button type="submit">
-                            <SendSvg
-                                class_name={"svg_path_stroke"}
-                            />
-                        </button>
+                        !state?.group ?
+                            (<Fragment>
+                                <div className="upload">
+                                    <input className="file_input_box" onInput={(e) => {
+                                        if (e?.target?.files?.[0]?.size > 26214400) {
+                                            alert("File Size Allowed Maximum 25Mb")
+                                            e.target.value = ''
+                                            action({ type: "clear-file" })
+                                        } else if (e?.target?.files?.[0]) {
+                                            e.target.files[0].url = URL.createObjectURL(e?.target?.files?.[0])
+                                            action({ type: "file", file: e?.target?.files?.[0] })
+                                        }
+                                    }} type="file" accept="image/* , video/* , audio/*" required />
+
+                                    <ClipSvg />
+                                </div>
+                                <button type="button" onClick={CloseModal}>
+                                    <Xsvg class_name={"svg_path_fill"} />
+                                </button>
+                                {
+                                    !state?.progrees && <button type="submit">
+                                        <SendSvg
+                                            class_name={"svg_path_stroke"}
+                                        />
+                                    </button>
+                                }
+                            </Fragment>) :
+                            state?.group?.create ?
+                                (<div className='group_create'>
+                                    <div className="upload">
+                                        <input name='file' className="file_input_box" onInput={(e) => {
+                                            if (e?.target?.files?.[0]) {
+                                                e.target.files[0].url = URL.createObjectURL(e?.target?.files?.[0])
+                                                action({ type: "file", file: e?.target?.files?.[0] })
+                                            }
+                                        }} type="file" accept="image/*" required />
+
+                                        <ClipSvg />
+                                    </div>
+                                    <input name='name' placeholder='Enter Group Name' required />
+                                    <textarea name='about' placeholder='Enter About' required />
+
+                                    {!state?.progrees && <button type="submit">
+                                        Create
+                                    </button>}
+                                </div>)
+                                : null
                     }
                 </form>}
 

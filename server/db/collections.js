@@ -1,6 +1,7 @@
 export default {
   USERS: "users",
   TEMP: "temp",
-  CHAT: "chat",
+  PRIVATE: "private",
+  GROUP: "group",
   FRIENDS: "friends"
 };

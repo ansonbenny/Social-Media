@@ -1,7 +1,8 @@
 import chat from "../helper/private.js";
 import jwt from "jsonwebtoken";
 import user from "../helper/user.js";
-import { RouteSingle, SocketSingle } from "./private/index.js";
+import { RoutePrivate, SocketPrivate } from "./private/index.js";
+import { RouteGroup, SocketGroup } from "./group/index.js";
 
 // express route middleware to check user is logged or not
 
@@ -104,8 +105,10 @@ export default (app, io) => {
       io.emit("all user status", getOnline?.())
     });
 
-    SocketSingle(socket, io);
+    // socket io routes / callback
+    SocketPrivate(socket, io);
 
+    SocketGroup(socket, io)
 
     socket.on("disconnect", async () => {
       await chat?.removeSocketId?.(socket.id)?.catch?.(() => { });
@@ -119,5 +122,7 @@ export default (app, io) => {
   });
 
   // express routes
-  RouteSingle(app, io, getOnline)
+  RoutePrivate(app, io, getOnline)
+
+  RouteGroup(app, io)
 };

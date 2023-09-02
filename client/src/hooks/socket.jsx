@@ -18,8 +18,15 @@ const useSocket = () => {
       }
     });
 
+    SocketRef?.current?.on("close_window", () => {
+      console.log('close_wind')
+     // window.close()
+    });
+
     return () => {
       SocketRef?.current?.off("connect_error");
+
+      SocketRef?.current?.off("close_window")
 
       SocketRef?.current?.disconnect?.();
     };

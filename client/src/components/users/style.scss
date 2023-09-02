@@ -8,6 +8,7 @@
     justify-content: center;
     height: calc(100% - 1.5rem);
     overflow: hidden;
+    position: relative;
 
     .search {
         margin-left: .5rem;
@@ -207,6 +208,47 @@
                     font-weight: normal;
                     line-height: 1.5rem;
                 }
+            }
+        }
+    }
+
+    button[data-for="group_create_btn"] {
+        width: 2.5rem;
+        height: 2.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid $bg-violet;
+        border-radius: 1rem;
+        border-top-right-radius: 0;
+        background: linear-gradient(to right, $bg-violet 50%, var(--bg-primary) 50%);
+        background-size: 200% 100%;
+        background-position: right bottom;
+        cursor: pointer;
+        bottom: .5rem;
+        right: 0;
+        position: absolute;
+        z-index: 500;
+        transition: all .5s ease-in-out;
+        -moz-transition: all .5s ease-in-out;
+
+        &:hover {
+            background-position: left bottom;
+
+            svg path {
+                fill: var(--bg-primary);
+            }
+        }
+
+        svg {
+            width: 1.5rem;
+            height: 1.5rem;
+            pointer-events: none;
+
+            path {
+                fill: $bg-violet;
+                transition: all .5s ease-in-out;
+                -moz-transition: all .5s ease-in-out;
             }
         }
     }
