@@ -16,8 +16,8 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
   const user = useSelector((state) => state?.user)
 
   const [refs, state, action] = useScroll({
-    url: `/chat-single/recent_users_more`,
-    search_url: `/chat-single/search_users`
+    url: `/chat-single/recent_users_more`, // change for users , stories ,groups
+    search_url: `/chat-single/search_users`// change for users , stories ,groups
   })
 
   const OnInput = async (e) => {
@@ -73,23 +73,27 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
     readMsgs: (data) => {
       action({ type: "readed", data: data?.from })
     },
-    pushToTop: async (data) => {
+    pushToTop: async (data, isGroup) => {
       if (!state?.items?.find((obj) => obj?.id == data?.id)) {
-        try {
-          let res = await axios.get('/chat-single/user_details', {
-            params: {
-              chatId: data?.id
-            }
-          })
+        if (isGroup) {
+          action({ type: "new_user", data })
+        } else {
+          try {
+            let res = await axios.get('/chat-single/user_details', {
+              params: {
+                chatId: data?.id
+              }
+            })
 
-          action({
-            type: "new_user", data: {
-              ...res?.['data']?.data,
-              status: data?.status == 'online' ? true : data?.status ? false : res?.['data']?.data?.status
-            }
-          })
-        } catch (err) {
-          console.log("something went wrong")
+            action({
+              type: "new_user", data: {
+                ...res?.['data']?.data,
+                status: data?.status == 'online' ? true : data?.status ? false : res?.['data']?.data?.status
+              }
+            })
+          } catch (err) {
+            console.log("something went wrong")
+          }
         }
       } else {
         action({ type: "to_top", data: data?.id })
@@ -113,27 +117,38 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
       } else {
         action({ type: "unread", data: data?.from })
       }
+    },
+    update_details: (data) => {
+      action({ type: "update_details", data })
     }
   }), [])
 
   useEffect(() => {
     let abortControl = new AbortController();
 
-    if (isUsers) {
-      (async () => {
-        try {
-          let res = await axios.get("/chat-single/recent_users", {
+    (async () => {
+      try {
+        let res;
+
+        if (isUsers) {
+          res = await axios.get("/chat-single/recent_users", {
             signal: abortControl?.signal
           })
+        } else if (stories) {
 
-          action({ type: "initial", data: res?.['data']?.data })
-        } catch (err) {
-          if (err?.code !== "ERR_CANCELED") {
-            alert(err?.response?.data?.message || "Something Went Wrong to Fetch Chats");
-          }
+        } else {
+          res = await axios.get("/chat-group/get_groups", {
+            signal: abortControl?.signal
+          })
         }
-      })();
-    }
+
+        action({ type: "initial", data: res?.['data']?.data })
+      } catch (err) {
+        if (err?.code !== "ERR_CANCELED") {
+          alert(err?.response?.data?.message || "Something Went Wrong to Fetch Chats");
+        }
+      }
+    })();
 
     return () => {
       abortControl?.abort?.()
@@ -153,7 +168,7 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
           : null
       }
 
-      {!selected && (
+      {!selected && stories ? (
         <div className="stories-recent">
           <div className="item">
             <img
@@ -169,7 +184,7 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
             />
           </div>
         </div>
-      )}
+      ) : null}
 
       {!stories && (
         <Fragment>
@@ -222,11 +237,19 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
           if (obj?.id !== user?._id) {
             return (
               <div className={`card ${id && id == obj?.id ? "active" : ""}`} key={key}
-                onClick={() => navigate(`/chat/${obj?.id}`)}>
+                onClick={() => {
+                  if (isUsers) {
+                    navigate(`/chat/${obj?.id}`)
+                  } else if (stories) {
+                    // for stories
+                  } else {
+                    navigate(`/groups/${obj?.id}`)
+                  }
+                }}>
                 <div className="cover">
                   {
                     obj?.details?.img ? <img
-                      src={`/files/profiles/${obj?.details?.img}`}
+                      src={obj?.details?.img?.url ? obj?.details?.img?.url : `/files/profiles/${obj?.details?.img}`}
                       alt="profile"
                     />
                       : <AvatarSvg />

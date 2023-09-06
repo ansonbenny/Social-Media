@@ -10,7 +10,6 @@ import {
   PauseSvg,
   PhoneSvg,
   PlaySvg,
-  PlusSvg,
   SendSvg,
   TickSvg,
   TrashSvg,
@@ -75,7 +74,7 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
           }}
         >
           {details?.img ? (
-            <img src={`/files/profiles/${details?.img}`} alt="profile" />
+            <img src={details?.img?.url ? details?.img?.url : `/files/profiles/${details?.img}`} alt="profile" />
           ) : (
             <AvatarSvg />
           )}
@@ -92,20 +91,17 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
           <h1>{details?.name}</h1>
           <p>{details?.status || "offline"}</p>
         </div>
-        <div className="actions">
-          {
-            // for groups
+
+        {
+          details?.user && <div className="actions">
             <button>
-              <PlusSvg width={"19px"} height={"19px"} />
+              <PhoneSvg width={"18px"} height={"18px"} />
             </button>
-          }
-          <button>
-            <PhoneSvg width={"18px"} height={"18px"} />
-          </button>
-          <button>
-            <VideoSvg width={"25px"} height={"25px"} />
-          </button>
-        </div>
+            <button>
+              <VideoSvg width={"25px"} height={"25px"} />
+            </button>
+          </div>
+        }
       </div>
 
       <div className="body">

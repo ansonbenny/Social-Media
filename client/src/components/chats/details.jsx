@@ -4,6 +4,7 @@ import {
   ChatsSvg,
   HeadsetSvg,
   ParticleSvg,
+  PenSvg,
   PhoneSvg,
   PlaySvg,
   PlusSvg,
@@ -95,6 +96,8 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
 
     LoadMedia?.(abortControl)
 
+    // create another function for members
+
     return () => {
       abortControl?.abort?.()
     }
@@ -122,9 +125,9 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
             {details?.img ? (
               <img
                 onClick={() => {
-                  window.open(`/files/profiles/${details?.img}`, "_blank");
+                  window.open(details?.img?.url ? details?.img?.url : `/files/profiles/${details?.img}`, "_blank");
                 }}
-                src={`/files/profiles/${details?.img}`}
+                src={details?.img?.url ? details?.img?.url : `/files/profiles/${details?.img}`}
                 alt="profile"
               />
             ) : (
@@ -134,7 +137,7 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
           <h1>{details?.name}</h1>
           <p className="status">{details?.status || "offline"}</p>
 
-          <div className="more_actions">
+          <div className={`more_actions ${!details?.user ? 'left' : ''}`}>
             <button
               onClick={() => {
                 setModal?.((state) => ({
@@ -145,23 +148,42 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
             >
               <ChatsSvg width={"20px"} height={"20px"} />
             </button>
-            <button>
-              <PhoneSvg width={"18px"} height={"18px"} />
-            </button>
-            <button>
-              <VideoSvg width={"20px"} height={"20px"} />
-            </button>
+            {
+              isUser && (
+                <>
+                  <button>
+                    <PhoneSvg width={"18px"} height={"18px"} />
+                  </button>
+                  <button>
+                    <VideoSvg width={"20px"} height={"20px"} />
+                  </button>
+                </>)
+            }
             <button onClick={DeleteChat}>
               <TrashSvg isFull width={"18px"} height={"18px"} />
             </button>
+
+            {
+              details?.isAdmin && <button className="chats_modal_special" onClick={() => {
+                modalRef?.current?.Modal?.(undefined, details)
+              }} >
+                <PenSvg width={'20px'} height={'20px'} />
+              </button>
+            }
           </div>
 
           <div className="description">
             <h1>Id</h1>
             <p>{details?._id}</p>
 
-            <h1>Number</h1>
-            <p>{details?.number}</p>
+            {
+              details?.user && (
+                <>
+                  <h1>Number</h1>
+                  <p>{details?.number}</p>
+                </>
+              )
+            }
 
             <h1>Description</h1>
             <p>{details?.about}</p>
@@ -214,9 +236,11 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
                 Members
                 <span>(22)</span>
               </h1>
-              <button>
-                <PlusSvg />
-              </button>
+              {
+                details?.isAdmin && <button>
+                  <PlusSvg />
+                </button>
+              }
             </div>
 
             <div className="list">

@@ -9,7 +9,7 @@ const reducer = (value, { type, ...actions }) => {
     switch (type) {
         case 'open':
             if (actions?.group) {
-                return { ...value, active: true, form: true, group: actions?.group }
+                return { ...value, active: true, form: true, group: actions?.group, image: actions?.group?.img }
             } else {
                 return { ...value, active: true, form: actions?.form || undefined }
             }
@@ -132,13 +132,23 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
 
             // for create group
             try {
-                await axios.post('/chat-group/create_group', form_data, {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                    signal: state?.abort_controller?.signal,
-                    onUploadProgress
-                })
+                if (state?.group?.create) {
+                    await axios.post('/chat-group/create_group', form_data, {
+                        headers: {
+                            "Content-Type": "multipart/form-data",
+                        },
+                        signal: state?.abort_controller?.signal,
+                        onUploadProgress
+                    })
+                } else if (state?.group?._id) {
+                    await axios.put(`/chat-group/edit_group?_id=${state?.group?._id}`, form_data, {
+                        headers: {
+                            "Content-Type": "multipart/form-data",
+                        },
+                        signal: state?.abort_controller?.signal,
+                        onUploadProgress
+                    })
+                }
             } catch (err) {
                 if (err?.response?.data?.status == 405) {
                     alert("Please Login")
@@ -285,7 +295,7 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
                                     </button>
                                 }
                             </Fragment>) :
-                            state?.group?.create ?
+                            state?.group ?
                                 (<div className='group_create'>
                                     <div className="upload">
                                         <input name='file' className="file_input_box" onInput={(e) => {
@@ -293,15 +303,15 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
                                                 e.target.files[0].url = URL.createObjectURL(e?.target?.files?.[0])
                                                 action({ type: "file", file: e?.target?.files?.[0] })
                                             }
-                                        }} type="file" accept="image/*" required />
+                                        }} type="file" accept="image/*" {...{ required: state?.group?.create }} />
 
                                         <ClipSvg />
                                     </div>
-                                    <input name='name' placeholder='Enter Group Name' required />
-                                    <textarea name='about' placeholder='Enter About' required />
+                                    <input name='name' placeholder={state?.group?.name || 'Enter Group Name'} {...{ required: state?.group?.create }} />
+                                    <textarea name='about' placeholder={state?.group?.about || 'Enter About'} {...{ required: state?.group?.create }} />
 
                                     {!state?.progrees && <button type="submit">
-                                        Create
+                                        {state?.group?.create ? 'Create' : 'Edit'}
                                     </button>}
                                 </div>)
                                 : null

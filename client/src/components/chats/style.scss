@@ -718,6 +718,15 @@
                     flex-direction: row;
                     margin: .5rem 0;
 
+                    &:is(.left) {
+                        justify-content: center;
+                        gap: 1.5rem;
+
+                        button {
+                            margin: 0;
+                        }
+                    }
+
                     button {
                         margin: auto;
                         border: none;
@@ -730,6 +739,10 @@
                         border-radius: 5px;
                         transition: all .3s ease-in-out;
                         -moz-transition: all .3s ease-in-out;
+
+                        svg {
+                            pointer-events: none;
+                        }
 
                         .path_svg_stroke,
                         .svg_path_fill {

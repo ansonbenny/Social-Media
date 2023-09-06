@@ -21,4 +21,5 @@ export { default as GoogleSvg } from "./google";
 export { default as TickSvg } from "./tick";
 export { default as PauseSvg } from "./pause";
 export { default as HeadsetSvg } from "./headset";
+export { default as PenSvg } from './pen'
 

@@ -1,9 +1,10 @@
 import React, { Fragment, useCallback, useEffect, useReducer, useRef } from "react";
 import { ChatDetails, ChatLive, Users } from "../components";
-import { useOutletContext, useParams } from "react-router-dom";
+import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setLoading } from "../redux/additional";
 import { useSocket } from "../hooks";
+import { axios } from "../lib";
 
 const reducer = (value, { type, ...actions }) => {
   switch (type) {
@@ -20,6 +21,11 @@ const reducer = (value, { type, ...actions }) => {
         ...value,
         modal: { ...value?.modal, ...actions },
       };
+    case "details":
+      return { ...value, details: { ...actions?.data } };
+
+    case "update_details":
+      return { ...value, details: { ...value?.details, ...actions?.data } }
 
     default:
       return value;
@@ -28,6 +34,8 @@ const reducer = (value, { type, ...actions }) => {
 
 const Groups = () => {
   const dispatch = useDispatch();
+
+  const navigate = useNavigate();
 
   const Socket = useSocket();
 
@@ -60,19 +68,46 @@ const Groups = () => {
 
     let timer;
 
+    let abortControl = new AbortController();
+
     if (user) {
       emitUser?.()
 
       Socket?.on("new group", (data) => {
-        console.log(data)
+        ref?.current?.list?.pushToTop?.(data, true)
       });
 
-      if (id) {
-        //api call
+      Socket?.on("edit group", (data) => {
+        if (id == data?.id) {
+          action({ type: "update_details", data: data?.details })
+        }
 
-        timer = setTimeout(() => {
-          dispatch(setLoading(false));
-        }, 1000);
+        ref?.current?.list?.update_details(data)
+      })
+
+      if (id) {
+        // fetching group details and latest chat
+
+        (async () => {
+          try {
+            let res = await axios.get(`/chat-group/get_group/${id}`, {
+              signal: abortControl?.signal,
+            });
+
+            ref?.current?.live?.insertInitial?.(res?.["data"]?.data?.items);
+
+            action({ type: "details", data: res?.["data"]?.data?.details });
+
+            timer = setTimeout(() => {
+              dispatch(setLoading(false));
+            }, 1000);
+          } catch (err) {
+            if (err?.code !== "ERR_CANCELED") {
+              alert(err?.response?.data?.message || "Something Went Wrong");
+              navigate("/groups");
+            }
+          }
+        })();
       } else {
         timer = setTimeout(() => {
           dispatch(setLoading(false));
@@ -97,11 +132,16 @@ const Groups = () => {
 
   return (
     <section className="chats">
-      {!id || !state?.size?.sm ? <Users /> : null}
+      {!id || !state?.size?.sm ? <Users ref={(elm) => {
+        if (ref?.current) {
+          ref.current.list = elm
+        }
+      }} /> : null}
 
       {id ? (
         <Fragment>
           <ChatLive
+            details={state?.details}
             setModal={!state?.size?.lg
               ? () => {
                 action({ type: "modal", details: true });
@@ -111,6 +151,7 @@ const Groups = () => {
 
           {state?.modal?.details || state?.size?.lg ? (
             <ChatDetails
+              details={state?.details}
               isModal={
                 state?.modal?.details && !state?.size?.lg ? true : undefined
               }

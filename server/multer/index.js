@@ -54,8 +54,8 @@ export default {
 
         let dir = './files/groups_logo'
 
-        if (!req?.body?._id) {
-          req.body._id = new ObjectId()?.toHexString?.()
+        if (!req?.query?._id) {
+          req.query._id = new ObjectId()?.toHexString?.()
         }
 
         try {
@@ -69,7 +69,7 @@ export default {
         cb(null, dir)
       },
       filename: (req, file, cb) => {
-        cb(null, `${req?.body?._id}.png`)
+        cb(null, `${req?.query?._id}.png`)
       }
     })
   })

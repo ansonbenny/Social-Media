@@ -108,7 +108,7 @@ const reducer = (state, { type, data, ...actions }) => {
       }
 
     case "new_user":
-      let total = state?.total;
+      let total = state?.total || 0;
 
       if (!state?.items?.find((obj) => obj?.id == data?.id)) {
         if (total && data?.unread) {
@@ -118,7 +118,9 @@ const reducer = (state, { type, data, ...actions }) => {
         }
 
         if (!state?.search) {
-          return { ...state, total: total, items: [data, ...state?.items] }
+          const items = state?.items || []
+
+          return { ...state, total: total, items: [data, ...items] }
         } else {
           return { ...state, total: total }
         }
@@ -148,6 +150,27 @@ const reducer = (state, { type, data, ...actions }) => {
         }
       } else {
         return state
+      }
+
+    case "update_details":
+      return {
+        ...state, items: state?.items?.map((obj) => {
+          if (obj?.id == data?.id) {
+            if (data?.details?.img) {
+              obj.details.img = data?.details?.img
+            }
+
+            if (data?.details?.name) {
+              obj.details.name = data?.details?.name
+            }
+
+            if (data?.details?.about) {
+              obj.details.about = data?.details?.about
+            }
+          }
+
+          return obj
+        })
       }
     // users / groups end
 
