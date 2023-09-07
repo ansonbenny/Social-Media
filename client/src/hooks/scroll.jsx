@@ -177,7 +177,13 @@ const reducer = (state, { type, data, ...actions }) => {
     case "old":
       if (data?.length > 0 && state?.items?.length > 0) {
         if (!state?.items?.find((obj) => obj?.id == data?.[data?.length - 1]?.id)) {
-          return { ...state, items: [...state?.items, ...data], new: false };
+          const previous = state?.items
+
+          if (actions?.chat_msgs) {
+            return { ...state, items: [...data, ...previous], new: false };
+          } else {
+            return { ...state, items: [...previous, ...data], new: false };
+          }
         } else {
           return state
         }
@@ -239,7 +245,7 @@ const useScroll = ({ url, search_url, details }) => {
           timeout = setTimeout(() => {
             ref?.current?.loading?.classList?.add?.("hide");
 
-            action({ type: "old", data: res?.["data"]?.data?.items });
+            action({ type: "old", data: res?.["data"]?.data?.items, chat_msgs: details ? true : false });
           }, 1000)
         }
       } catch (err) {

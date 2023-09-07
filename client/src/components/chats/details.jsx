@@ -23,6 +23,10 @@ const reducer = (values, { type, data }) => {
       return { ...values, media: data }
     case "media_new":
       return { ...values, media: { total: data?.total, files: [...values?.media?.files, ...data?.files] } }
+    case "initial_members":
+      return { ...values, members: data }
+    case "members_new":
+      return { ...values, members: { total: data?.total, users: [...values?.members?.users, ...data?.users] } }
     default:
       return values
   }
@@ -50,6 +54,33 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
           action({ type: "initial_media", data: res?.['data']?.data })
         } else if (res?.['data'] && offset) {
           action({ type: "media_new", data: res?.['data']?.data })
+        }
+      } catch (err) {
+        if (err?.response?.data?.status == 405) {
+          alert("Please Login")
+          navigate('/')
+        } else if (err?.code !== "ERR_CANCELED") {
+          alert(err?.response?.data?.message || "Something Went Wrong");
+        }
+      }
+    }
+  }
+
+  const LoadMembers = async (abortControl, offset) => {
+    if (!isUser && details?._id) {
+      try {
+        let res = await axios.get('/chat-group/get_members', {
+          params: {
+            groupId: details?._id,
+            offset
+          },
+          signal: abortControl?.signal
+        })
+
+        if (res?.['data'] && !offset) {
+          action({ type: "initial_members", data: res?.['data']?.data })
+        } else if (res?.['data'] && offset) {
+          action({ type: "members_new", data: res?.['data']?.data })
         }
       } catch (err) {
         if (err?.response?.data?.status == 405) {
@@ -92,11 +123,11 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
   useEffect(() => {
     const abortControl = new AbortController()
 
-    // update media when new file recieved / sented / deleted call axios
+    // update media & memebers reload, when new file recieved / sented / deleted call axios
 
     LoadMedia?.(abortControl)
 
-    // create another function for members
+    LoadMembers?.(abortControl)
 
     return () => {
       abortControl?.abort?.()
@@ -234,7 +265,7 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
               <h1>
                 <AvatarSvg width={"20px"} height={"20px"} />
                 Members
-                <span>(22)</span>
+                <span>({state?.members?.total})</span>
               </h1>
               {
                 details?.isAdmin && <button>
@@ -244,39 +275,37 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
             </div>
 
             <div className="list">
-              <div className="member">
-                <div className="cover">
-                  <img
-                    src="https://yt3.googleusercontent.com/ytc/AGIKgqPh9kVptaKpovayOfZGjfyZV7DExqpIUitIiTlKuQ=s900-c-k-c0x00ffffff-no-rj"
-                    alt="profile"
-                  />
-                </div>
-                <div className="content">
-                  <h1>Ajith George</h1>
-                </div>
-                <div className="role">Owner</div>
-              </div>
 
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]?.map(
+              {state?.members?.users?.map(
                 (obj, key) => {
                   return (
-                    <div className="member user" key={key}>
+                    <div className={`member ${!obj?.isAdmin && details?.isAdmin ? "user" : ''}`} key={key}>
                       <div className="cover">
                         <img
-                          src="https://yt3.googleusercontent.com/ytc/AGIKgqPh9kVptaKpovayOfZGjfyZV7DExqpIUitIiTlKuQ=s900-c-k-c0x00ffffff-no-rj"
+                          src={`/files/profiles/${obj?.img}`}
                           alt="profile"
                         />
                       </div>
                       <div className="content">
-                        <h1>Ajith George {obj}</h1>
+                        <h1>{obj?.name}</h1>
                       </div>
-                      <div className="role">User</div>
+                      <div className="role">{obj?.isAdmin ? 'Owner' : 'User'}</div>
 
-                      <button>Remove</button>
+                      {!obj?.isAdmin && details?.isAdmin ? <button>Remove</button> : null}
                     </div>
                   );
                 }
               )}
+
+              {
+                state?.members?.total > state?.members?.users?.length && (
+                  <button data-for="load"
+                    onClick={() => {
+                      LoadMembers(undefined, state?.members?.users?.length)
+                    }}
+                  >View More</button>
+                )
+              }
             </div>
           </div>
         )}

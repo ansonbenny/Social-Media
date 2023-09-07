@@ -2,7 +2,7 @@ import React, { Fragment, useCallback, useEffect, useReducer, useRef } from "rea
 import { ChatDetails, ChatLive, Users } from "../components";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setLoading } from "../redux/additional";
+import { setLoading, setNotification } from "../redux/additional";
 import { useSocket } from "../hooks";
 import { axios } from "../lib";
 
@@ -59,6 +59,74 @@ const Groups = () => {
     },
   });
 
+  const onChat = async (e, del_data) => {
+    e?.preventDefault?.();
+
+    if (!del_data) {
+      const input = e?.target?.querySelector?.("input")
+
+      if (input?.value) {
+        const date = new Date();
+
+        const chat = {
+          id: Date?.now()?.toString(16),
+          msg: input?.value,
+          date: `${date.getDate()}-${date.getMonth() + 1
+            }-${date.getFullYear()} | ${date.getHours()}:${date.getMinutes()}`,
+        };
+
+        Socket?.emit(
+          "group message",
+          {
+            groupId: id,
+            userId: user?._id,
+            user_name: user?.name,
+            profile: user?.img,
+            chat,
+          },
+          (err, res) => {
+            if (res) {
+              input.value = ''
+
+              ref?.current?.live?.insertMsg?.({
+                from: user?._id,
+                ...chat,
+              });
+
+              ref?.current?.list?.pushToTop({
+                id,
+              })
+            } else {
+              alert(
+                typeof err?.message == "string"
+                  ? err?.message
+                  : "Something went wrong. Try again."
+              );
+            }
+          }
+        );
+      }
+    } else {
+      if (window.confirm("Do you want to delete it permanently?")) {
+        try {
+          await axios.delete('/chat-single/delete_msg', {
+            data: {
+              groupId: state?.details?._id,
+              msg_id: del_data?.id,
+              file: del_data?.file,
+              date: del_data?.date
+            }
+          })
+        } catch (err) {
+          if (err?.response?.data?.status == 405) {
+            alert("Please Login")
+            navigate('/')
+          }
+        }
+      }
+    }
+  };
+
   const emitUser = useCallback(() => {
     Socket?.emit("user", user?._id);
   }, [Socket, user]);
@@ -84,6 +152,21 @@ const Groups = () => {
 
         ref?.current?.list?.update_details(data)
       })
+
+      Socket?.on("chat message", (msg) => {
+        if (msg?.group) {
+          // read msgs
+          console.log(msg)
+          if (msg?.group == id) {
+            ref?.current?.live?.insertMsg?.(msg)
+          }
+        } else {
+          dispatch(
+            setNotification({ name: msg?.user, url: `/chat/${msg?.from}` })
+          );
+        }
+      });
+
 
       if (id) {
         // fetching group details and latest chat
@@ -126,6 +209,12 @@ const Groups = () => {
     return () => {
       window.removeEventListener("resize", onResize);
 
+      Socket?.off("chat message");
+
+      Socket?.off("new group");
+
+      Socket?.off("edit group");
+
       clearTimeout(timer);
     };
   }, [id, location, emitUser]);
@@ -141,6 +230,12 @@ const Groups = () => {
       {id ? (
         <Fragment>
           <ChatLive
+            ref={(elm) => {
+              if (ref?.current) {
+                ref.current.live = elm
+              }
+            }}
+            onChat={onChat}
             details={state?.details}
             setModal={!state?.size?.lg
               ? () => {

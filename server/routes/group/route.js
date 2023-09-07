@@ -70,6 +70,23 @@ export default (app, io) => {
         }
     })
 
+    router.get('/get_members', CheckLogged, async (req, res) => {
+        try {
+            let response = await group.get_members(req?.query)
+
+            res.status(200).json({
+                status: 200,
+                message: "Success",
+                data: response
+            })
+        } catch (err) {
+            res.status(500).json({
+                status: 500,
+                message: err
+            })
+        }
+    })
+
     router.put('/edit_group', CheckLogged, multer.group_logo.single("file"), async (req, res) => {
         if (req?.file) {
             req.body.img = {
@@ -89,11 +106,8 @@ export default (app, io) => {
         try {
             let response = await group.edit_group(req?.body, req?.query)
 
-            // to make all users
-            let sockets = await _private.getSocketIdTo(req?.query?.userId)
-
             if (response) {
-                io.to(sockets?.ids).emit("edit group", {
+                io.to(req?.query?._id).emit("edit group", {
                     id: req?.query?._id,
                     details: req?.body
                 })
@@ -115,8 +129,7 @@ export default (app, io) => {
     router.get('/get_group/:id', CheckLogged, async (req, res) => {
         if (req?.params?.id?.length == 24) {
             try {
-                // group details and recent chats
-                let response = await group.get_group(req?.params?.id, req?.query?.userId)
+                let response = await group.get_group(req?.params?.id, req?.query)
 
                 res.status(200).json({
                     status: 200,
@@ -159,4 +172,5 @@ export default (app, io) => {
     })
 }
 
-// edit // recent // get group & groups // memebers need update // media
+// recent groups // memebers need update [add/remove] // media send // remove // in details
+// remove member with socket, add member with socket

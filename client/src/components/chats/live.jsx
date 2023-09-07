@@ -26,7 +26,7 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
   const audio = useAudio();
 
   const [refs, state, action] = useScroll({
-    url: `/chat-single/userChat/${details?._id}`,
+    url: `${details?.user ? `/chat-single/userChat/${details?._id}` : `/chat-group/get_group/${details?._id}`}`,
     details
   })
 
@@ -277,7 +277,7 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
                   <div className="cover">
                     {details?.img ? (
                       <img
-                        src={`/files/profiles/${details?.img}`}
+                        src={`/files/profiles/${obj?.profile || details?.img}`}
                         alt="profile"
                       />
                     ) : (
@@ -287,7 +287,7 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
                   <div className={`card ${!obj?.file ? 'actionable' : 'no_action'}`}>
                     <div className="inner">
                       <div className="from">
-                        <p className="author">{details?.name}</p>
+                        <p className="author">{obj?.user_name || details?.name}</p>
                         <p className="time">{obj?.date}</p>
                       </div>
 

@@ -966,6 +966,17 @@
                         }
                     }
                 }
+
+                button[data-for="load"] {
+                    color: $bg-violet;
+                    font-size: x-small;
+                    text-transform: uppercase;
+                    font-weight: normal;
+                    border: none;
+                    background: transparent;
+                    cursor: pointer;
+                    margin-bottom: .5rem;
+                }
             }
 
         }

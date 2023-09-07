@@ -1,4 +1,5 @@
 import chat from "../helper/private.js";
+import group from "../helper/group.js";
 import jwt from "jsonwebtoken";
 import user from "../helper/user.js";
 import { RoutePrivate, SocketPrivate } from "./private/index.js";
@@ -78,6 +79,8 @@ export default (app, io) => {
     socket.on("user", async (_id) => {
       let previous = await chat?.addSocketId?.(_id, socket.id)?.catch?.(() => { });
 
+      let groups = await group?.get_user_group_ids?.(_id)?.catch?.(() => { })
+
       // adding to onlineUsers
       if (_id) {
         onConnect(socket?.id, _id)
@@ -85,6 +88,11 @@ export default (app, io) => {
 
       if (previous?.socketId) {
         io.to(previous?.socketId).emit("close_window", socket.id)
+      }
+
+      // for group chat
+      if (groups?.[0]) {
+        socket.join(groups)
       }
 
       // senting to users

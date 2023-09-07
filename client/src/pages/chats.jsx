@@ -173,39 +173,41 @@ const Chats = () => {
 
       // recieve messages
       Socket?.on("chat message", (msg) => {
-        if (
-          msg?.match == `${user?._id}${id}` ||
-          msg?.match == `${id}${user?._id}`
-        ) {
-          ref?.current?.live?.insertMsg?.(msg);
+        if (!msg?.group) {
+          if (
+            msg?.match == `${user?._id}${id}` ||
+            msg?.match == `${id}${user?._id}`
+          ) {
+            ref?.current?.live?.insertMsg?.(msg);
 
-          ref?.current?.list?.pushToTop?.({
-            id: msg?.from,
-            status: state?.details?.status?.toLowerCase?.()
-          })
-
-          if (msg?.file) {
-            ref?.current?.details?.ReloadMedia?.()
-          }
-
-          Socket?.emit?.("read msg", {
-            chatId: id,
-            userId: user?._id,
-          })
-        } else if (msg?.match == user?._id) {
-          if (id == user?._id) {
-            ref?.current?.live?.insertMsg?.({ ...msg, read: true });
+            ref?.current?.list?.pushToTop?.({
+              id: msg?.from,
+              status: state?.details?.status?.toLowerCase?.()
+            })
 
             if (msg?.file) {
               ref?.current?.details?.ReloadMedia?.()
             }
-          }
-        } else {
-          ref?.current?.list?.unReadMsgs?.(msg);
 
-          dispatch(
-            setNotification({ name: msg?.user, url: `/chat/${msg?.from}` })
-          );
+            Socket?.emit?.("read msg", {
+              chatId: id,
+              userId: user?._id,
+            })
+          } else if (msg?.match == user?._id) {
+            if (id == user?._id) {
+              ref?.current?.live?.insertMsg?.({ ...msg, read: true });
+
+              if (msg?.file) {
+                ref?.current?.details?.ReloadMedia?.()
+              }
+            }
+          } else {
+            ref?.current?.list?.unReadMsgs?.(msg);
+
+            dispatch(
+              setNotification({ name: msg?.user, url: `/chat/${msg?.from}` })
+            );
+          }
         }
       });
 
