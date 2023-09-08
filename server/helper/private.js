@@ -151,7 +151,7 @@ export default {
   removeSocketId: (socketId) => {
     return new Promise(async (resolve, reject) => {
       try {
-        await db.collection(collections.USERS).updateMany(
+        let previous = await db.collection(collections.USERS).findOneAndUpdate(
           {
             socketId: socketId,
           },
@@ -162,7 +162,7 @@ export default {
           }
         );
 
-        resolve();
+        resolve(previous?.value);
       } catch (err) {
         reject(err);
       }
@@ -218,6 +218,16 @@ export default {
                   user: {
                     $toBool: true,
                   },
+                  status: {
+                    $cond: {
+                      if: {
+                        $eq: ['string', {
+                          $type: "$socketId"
+                        }]
+                      },
+                      then: 'online', else: false
+                    }
+                  }
                 },
               },
             },

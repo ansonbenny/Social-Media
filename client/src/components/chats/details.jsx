@@ -40,28 +40,38 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
   const [state, action] = useReducer(reducer, {})
 
   const LoadMedia = async (abortControl, offset) => {
-    if (isUser) {
-      try {
-        let res = await axios.get('/chat-single/get_media', {
+    try {
+      let res;
+
+      if (isUser) {
+        res = await axios.get('/chat-single/get_media', {
           params: {
             chatId: details?._id,
             offset
           },
           signal: abortControl?.signal
         })
+      } else {
+        res = await axios.get('/chat-group/get_media', {
+          params: {
+            groupId: details?._id,
+            offset
+          },
+          signal: abortControl?.signal
+        })
+      }
 
-        if (res?.['data'] && !offset) {
-          action({ type: "initial_media", data: res?.['data']?.data })
-        } else if (res?.['data'] && offset) {
-          action({ type: "media_new", data: res?.['data']?.data })
-        }
-      } catch (err) {
-        if (err?.response?.data?.status == 405) {
-          alert("Please Login")
-          navigate('/')
-        } else if (err?.code !== "ERR_CANCELED") {
-          alert(err?.response?.data?.message || "Something Went Wrong");
-        }
+      if (res?.['data'] && !offset) {
+        action({ type: "initial_media", data: res?.['data']?.data })
+      } else if (res?.['data'] && offset) {
+        action({ type: "media_new", data: res?.['data']?.data })
+      }
+    } catch (err) {
+      if (err?.response?.data?.status == 405) {
+        alert("Please Login")
+        navigate('/')
+      } else if (err?.code !== "ERR_CANCELED") {
+        alert(err?.response?.data?.message || "Something Went Wrong");
       }
     }
   }
@@ -102,6 +112,12 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
               chatId: details?._id
             }
           })
+        } else {
+          await axios.delete('/chat-group/delete_chat', {
+            data: {
+              groupId: details?._id
+            }
+          })
         }
       } catch (err) {
         if (err?.response?.data?.status == 405) {
@@ -138,6 +154,8 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
     <section
       className={`details-chat ${setModal ? "modal-details-chat" : null}`}
     >
+      <Modal ref={modalRef} />
+
       {setModal && (
         <div className="exit">
           <button
@@ -150,7 +168,6 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
         </div>
       )}
       <div className="scrollable">
-        <Modal ref={modalRef} />
         <div className="basic">
           <div className="cover">
             {details?.img ? (

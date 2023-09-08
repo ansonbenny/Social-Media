@@ -354,5 +354,158 @@ export default {
                 reject(err)
             }
         })
-    }
+    },
+    getMediaFiles: ({ userId, groupId, offset = 0 }) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let media = await db.collection(collections.GROUP).aggregate([{
+                    $match: {
+                        $expr: {
+                            $and: [{
+                                $eq: ["$_id", new ObjectId(groupId)]
+                            }, {
+                                $in: [userId, "$users"]
+                            }]
+                        }
+                    },
+                }, {
+                    $unwind: "$chat"
+                }, {
+                    $match: {
+                        "chat.file": {
+                            $exists: true
+                        },
+                        "chat.msg": {
+                            $exists: false
+                        }
+                    }
+                }, {
+                    $sort: {
+                        "chat.id": -1
+                    }
+                }, {
+                    $skip: parseInt(offset)
+                }, {
+                    $limit: 6
+                }, {
+                    $group: {
+                        _id: 1,
+                        media: {
+                            $push: {
+                                id: "$chat.id",
+                                file: "$chat.file"
+                            }
+                        }
+                    }
+                }, {
+                    $lookup: {
+                        from: collections.GROUP,
+                        pipeline: [{
+                            $match: {
+                                $expr: {
+                                    $and: [{
+                                        $eq: ["$_id", new ObjectId(groupId)]
+                                    }, {
+                                        $in: [userId, "$users"]
+                                    }]
+                                }
+                            },
+                        }, {
+                            $unwind: "$chat"
+                        }, {
+                            $match: {
+                                "chat.file": {
+                                    $exists: true
+                                },
+                                "chat.msg": {
+                                    $exists: false
+                                }
+                            }
+                        }, {
+                            $group: {
+                                _id: 1,
+                                total: {
+                                    $sum: 1
+                                }
+                            }
+                        }],
+                        as: "total"
+                    }
+                }, {
+                    $project: {
+                        _id: 0,
+                        total: {
+                            $arrayElemAt: ["$total.total", 0]
+                        },
+                        files: "$media"
+                    }
+                }]).toArray()
+
+                resolve(media?.[0] || {})
+            } catch (err) {
+                reject(err)
+            }
+        })
+    },
+    readMsgs: (groupId, userId) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                await db.collection(collections.GROUP).updateOne({
+                    $and: [{
+                        _id: new ObjectId(groupId)
+                    }, {
+                        "chat": {
+                            $exists: true
+                        }
+                    }],
+                }, {
+                    $push: {
+                        "chat.$[elm].read": userId
+                    }
+                }, {
+                    arrayFilters: [{
+                        "elm.from": { $ne: userId },
+                        "elm.read": {
+                            $nin: [userId]
+                        }
+                    }]
+                });
+
+                resolve()
+            } catch (err) {
+                reject()
+            }
+        })
+    },
+    delete_msg: ({ groupId, ...details }) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let res = await db.collection(collections.GROUP).updateOne({
+                    _id: new ObjectId(groupId),
+                }, {
+                    $pull: {
+                        chat: details
+                    }
+                })
+
+                resolve(res)
+            } catch (err) {
+                reject(err)
+            }
+        })
+    },
+    delete_chat: ({ groupId, userId }) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let res = await db.collection(collections.GROUP).deleteOne({
+                    _id: new ObjectId(groupId),
+                    admin: userId
+                })
+
+                resolve(res)
+            } catch (err) {
+                reject(err)
+            }
+        })
+    },
 }

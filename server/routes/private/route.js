@@ -242,6 +242,7 @@ export default (app, io) => {
             let response = await chat?.delete_msg_user({
                 users: [req?.body?.chatId, req?.body?.userId],
                 id: req?.body?.msg_id,
+                from: req?.body?.userId,
                 date: req?.body?.date
             })
 
@@ -260,13 +261,13 @@ export default (app, io) => {
                                 ? req?.body?.userId
                                 : `${req?.body?.userId}${req?.body?.chatId}`,
                     });
-
-                    res.status(200).json({
-                        status: 200,
-                        message: 'Success'
-                    })
                 }
             }
+
+            res.status(200).json({
+                status: 200,
+                message: 'Success'
+            })
         } catch (err) {
             res.status(500).json({
                 status: 500,
@@ -293,13 +294,13 @@ export default (app, io) => {
                                 ? req?.body?.userId
                                 : `${req?.body?.userId}${req?.body?.chatId}`,
                     });
-
-                    res.status(200).json({
-                        status: 200,
-                        message: 'Success'
-                    })
                 }
             }
+
+            res.status(200).json({
+                status: 200,
+                message: 'Success'
+            })
 
         } catch (err) {
             res.status(500).json({

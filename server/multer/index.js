@@ -72,5 +72,27 @@ export default {
         cb(null, `${req?.query?._id}.png`)
       }
     })
-  })
+  }),
+  share_group: multer?.({
+    storage: multer.diskStorage({
+      destination: async (req, file, cb) => {
+        req.body.user = JSON.parse(req?.body?.user)
+
+        let dir = `./files/group_chat/${req?.body?.groupId}/${req?.body?.user?._id}`;
+
+        try {
+          await fs?.access(dir);
+        } catch (err) {
+          await fs?.mkdir(dir, {
+            recursive: true,
+          });
+        }
+
+        cb(null, dir);
+      },
+      filename: (req, file, cb) => {
+        cb(null, `${req?.body?.id}_${file.originalname}`);
+      },
+    }),
+  }),
 };

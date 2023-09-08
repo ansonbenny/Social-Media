@@ -79,9 +79,7 @@ const Groups = () => {
           "group message",
           {
             groupId: id,
-            userId: user?._id,
-            user_name: user?.name,
-            profile: user?.img,
+            user,
             chat,
           },
           (err, res) => {
@@ -109,7 +107,7 @@ const Groups = () => {
     } else {
       if (window.confirm("Do you want to delete it permanently?")) {
         try {
-          await axios.delete('/chat-single/delete_msg', {
+          await axios.delete('/chat-group/delete_msg', {
             data: {
               groupId: state?.details?._id,
               msg_id: del_data?.id,
@@ -141,10 +139,12 @@ const Groups = () => {
     if (user) {
       emitUser?.()
 
+      // create group
       Socket?.on("new group", (data) => {
         ref?.current?.list?.pushToTop?.(data, true)
       });
 
+      // edit group
       Socket?.on("edit group", (data) => {
         if (id == data?.id) {
           action({ type: "update_details", data: data?.details })
@@ -153,12 +153,21 @@ const Groups = () => {
         ref?.current?.list?.update_details(data)
       })
 
+      // recieve msgs
       Socket?.on("chat message", (msg) => {
         if (msg?.group) {
           // read msgs
-          console.log(msg)
           if (msg?.group == id) {
             ref?.current?.live?.insertMsg?.(msg)
+
+            if (msg?.file) {
+              ref?.current?.details?.ReloadMedia?.()
+            }
+
+            Socket?.emit?.("read group msg", {
+              groupId: id,
+              userId: user?._id,
+            })
           }
         } else {
           dispatch(
@@ -167,6 +176,36 @@ const Groups = () => {
         }
       });
 
+      // deleted messages / entire chat
+      Socket?.on("group chat delete", (msg) => {
+        if (
+          msg?.group == id
+        ) {
+          if (msg?.empty) {
+            navigate('/groups')
+          } else {
+            ref?.current?.live?.deleteMsg?.(msg);
+
+            if (msg?.file) {
+              ref?.current?.details?.ReloadMedia?.()
+            }
+          }
+        }
+      });
+
+      // getting message read status
+      Socket?.on("read group msg", (data) => {
+        if (data?.from == id) {
+          ref?.current?.live?.readMsgs?.(data);
+          ref?.current?.list?.readMsgs?.(data);
+        }
+      })
+
+      // reading message when chat open
+      Socket?.emit?.("read group msg", {
+        groupId: id,
+        userId: user?._id,
+      })
 
       if (id) {
         // fetching group details and latest chat
@@ -215,6 +254,10 @@ const Groups = () => {
 
       Socket?.off("edit group");
 
+      Socket?.off("read group msg")
+
+      Socket?.off("group chat delete",)
+
       clearTimeout(timer);
     };
   }, [id, location, emitUser]);
@@ -246,6 +289,11 @@ const Groups = () => {
 
           {state?.modal?.details || state?.size?.lg ? (
             <ChatDetails
+              ref={(elm) => {
+                if (ref.current) {
+                  ref.current.details = elm
+                }
+              }}
               details={state?.details}
               isModal={
                 state?.modal?.details && !state?.size?.lg ? true : undefined

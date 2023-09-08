@@ -128,11 +128,11 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
                 }
             }
         } else {
-            const form_data = new FormData(e?.target)
-
-            // for create group
             try {
                 if (state?.group?.create) {
+                    // for create group
+                    const form_data = new FormData(e?.target)
+
                     await axios.post('/chat-group/create_group', form_data, {
                         headers: {
                             "Content-Type": "multipart/form-data",
@@ -141,7 +141,36 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
                         onUploadProgress
                     })
                 } else if (state?.group?._id) {
+                    // for edit group
+                    const form_data = new FormData(e?.target)
+
                     await axios.put(`/chat-group/edit_group?_id=${state?.group?._id}`, form_data, {
+                        headers: {
+                            "Content-Type": "multipart/form-data",
+                        },
+                        signal: state?.abort_controller?.signal,
+                        onUploadProgress
+                    })
+                } else {
+                    // for file share
+                    const form_data = new FormData()
+
+                    const date = new Date()
+
+                    form_data.append("id", Date?.now()?.toString(16))
+                    form_data.append("date", `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()} | ${date.getHours()}:${date.getMinutes()}`)
+                    form_data.append("groupId", id)
+                    form_data.append("user", JSON.stringify(user))
+
+                    if (state?.video) {
+                        form_data.append("file", state?.video)
+                    } else if (state?.audio) {
+                        form_data.append("file", state?.audio)
+                    } else {
+                        form_data.append("file", state?.image)
+                    }
+
+                    await axios.post('/chat-group/share_file', form_data, {
                         headers: {
                             "Content-Type": "multipart/form-data",
                         },

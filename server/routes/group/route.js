@@ -4,6 +4,7 @@ import { Router } from "express";
 import multer from "../../multer/index.js";
 import group from "../../helper/group.js";
 import _private from "../../helper/private.js";
+import files from "../../helper/files.js";
 
 const router = Router()
 
@@ -39,6 +40,45 @@ const CheckLogged = (req, res, next) => {
 
 export default (app, io) => {
     app.use("/api/chat-group", router)
+
+    router.post("/share_file", CheckLogged, multer?.share_group?.single('file'), async (req, res) => {
+        try {
+            const details = {
+                id: req?.body?.id,
+                date: req?.body?.date,
+                file: {
+                    ...req?.file,
+                    url: `/${req?.file?.path}`,
+                    type: req?.file?.mimetype
+                },
+                from: req?.body?.user?._id,
+            }
+
+            let response = await group?.newMsg(req?.body?.groupId, {
+                ...details,
+                read: []
+            });
+
+            if (response) {
+                io.to(req?.body?.groupId).emit("chat message", {
+                    ...details,
+                    user_name: req?.body?.user?.name,
+                    group: req?.body?.groupId,
+                    profile: req?.body?.user?.img,
+                });
+
+                res.status(200).json({
+                    status: 200,
+                    message: 'Success'
+                })
+            }
+        } catch (err) {
+            res.status(500).json({
+                status: 500,
+                message: err
+            })
+        }
+    })
 
     router.post('/create_group', CheckLogged, multer.group_logo.single("file"), async (req, res) => {
         req.body.img = {
@@ -125,7 +165,86 @@ export default (app, io) => {
         }
     })
 
-    // create api for members & media
+    router.get('/get_media', CheckLogged, async (req, res) => {
+        try {
+            let response = await group.getMediaFiles(req?.query)
+
+            res.status(200).json({
+                status: 200,
+                message: "Success",
+                data: response,
+            });
+        } catch (err) {
+            res.status(500).json({
+                status: 500,
+                message: err ? err : "Something Went Wrong",
+            });
+        }
+    })
+
+    router.delete('/delete_msg', CheckLogged, async (req, res) => {
+        try {
+            let response = await group?.delete_msg({
+                groupId: req?.body?.groupId,
+                id: req?.body?.msg_id,
+                from: req?.body?.userId,
+                date: req?.body?.date
+            })
+
+            if (response?.modifiedCount > 0) {
+                if (req?.body?.file) {
+                    files?.delete_file(req?.body?.file?.url)
+                }
+
+                io.to(req?.body?.groupId).emit("group chat delete", {
+                    id: req?.body?.msg_id,
+                    from: req?.body?.userId,
+                    file: req?.body?.file ? true : false,
+                    group: req?.body?.groupId
+                });
+            }
+
+            res.status(200).json({
+                status: 200,
+                message: 'Success'
+            })
+        } catch (err) {
+            res.status(500).json({
+                status: 500,
+                message: err
+            })
+        }
+    })
+
+    router.delete('/delete_chat', CheckLogged, async (req, res) => {
+        try {
+            let response = await group?.delete_chat(req?.body)
+
+            if (response?.deletedCount >= 1) {
+                files?.delete_folder(`/files/group_chat/${req?.body?.groupId}`)
+
+                files?.delete_file(`/files/groups_logo/${req?.body?.groupId}.png`)
+
+                io.to(req?.body?.groupId).emit("group chat delete", {
+                    empty: true,
+                    group: req?.body?.groupId
+                });
+            }
+
+            res.status(200).json({
+                status: 200,
+                message: 'Success'
+            })
+
+        } catch (err) {
+            res.status(500).json({
+                status: 500,
+                message: err
+            })
+        }
+    })
+
+    // create api for members 
     router.get('/get_group/:id', CheckLogged, async (req, res) => {
         if (req?.params?.id?.length == 24) {
             try {
@@ -172,5 +291,6 @@ export default (app, io) => {
     })
 }
 
-// recent groups // memebers need update [add/remove] // media send // remove // in details
+// recent groups // memebers need update [add/remove] 
 // remove member with socket, add member with socket
+// when new member added push to top list new member acc only

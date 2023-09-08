@@ -49,13 +49,13 @@ const reducer = (state, { type, data, ...actions }) => {
     case "status":
       return {
         ...state, items: state?.items?.map((item) => {
-          if (data?.find((obj) => obj?.userId == item?.id)) {
-            item.status = true
-            return item
-          } else {
+          if (data?._id == item?.id && data?.offline) {
             item.status = undefined
-            return item
+          } else if (data?._id == item?.id) {
+            item.status = true
           }
+
+          return item
         })
       }
 

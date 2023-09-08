@@ -254,17 +254,16 @@ const Chats = () => {
 
         if (id) {
           // for chat
-          const value = data?.find((obj) => obj?.userId == id)
 
-          if (value) {
-            action({ type: "status", data: "online" })
-          } else {
+          if (data?._id == id && data?.offline) {
             action({ type: "status", data: "offline" })
+          } else if (data?._id == id) {
+            action({ type: "status", data: "online" })
           }
         }
       })
 
-      // getting single user status [online / offline]
+      // getting single user status [online / typing]
       Socket?.on("user status", (data) => {
         if (data?.from == id) {
           action({ type: 'status', data: data?.status })

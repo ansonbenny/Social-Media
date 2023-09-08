@@ -8,36 +8,6 @@ import { RouteGroup, SocketGroup } from "./group/index.js";
 // express route middleware to check user is logged or not
 
 export default (app, io) => {
-  // closure for online users
-  const onlineUsers = () => {
-    let users = []
-
-    const getOnline = () => {
-      return users
-    }
-
-    const onConnect = (socketId, _id) => {
-      let user = users?.find((obj) => obj?.userId == _id)
-
-      if (user) {
-        users?.forEach((obj) => {
-          if (obj?.userId == _id) {
-            obj.socketId = socketId
-          }
-        })
-      } else {
-        users.push({ userId: _id, socketId })
-      }
-    }
-
-    const onDisconnect = (socketId) => {
-      users = users?.filter((obj) => obj?.socketId !== socketId)
-    }
-
-    return { getOnline, onConnect, onDisconnect }
-  }
-
-  const { getOnline, onConnect, onDisconnect } = onlineUsers?.()
 
   // socket io
   io.use((socket, next) => {
@@ -81,11 +51,6 @@ export default (app, io) => {
 
       let groups = await group?.get_user_group_ids?.(_id)?.catch?.(() => { })
 
-      // adding to onlineUsers
-      if (_id) {
-        onConnect(socket?.id, _id)
-      }
-
       if (previous?.socketId) {
         io.to(previous?.socketId).emit("close_window", socket.id)
       }
@@ -96,7 +61,9 @@ export default (app, io) => {
       }
 
       // senting to users
-      io.emit("all user status", getOnline?.())
+      io.emit("all user status", {
+        _id: previous?._id?.toString?.()
+      })
     });
 
     // socket io routes / callback
@@ -105,13 +72,13 @@ export default (app, io) => {
     SocketGroup(socket, io)
 
     socket.on("disconnect", async () => {
-      await chat?.removeSocketId?.(socket.id)?.catch?.(() => { });
-
-      // removeing from onlineUsers
-      onDisconnect(socket?.id)
+      let previous = await chat?.removeSocketId?.(socket.id)?.catch?.(() => { });
 
       // senting to users
-      io.emit("all user status", getOnline?.())
+      io.emit("all user status", {
+        _id: previous?._id?.toString?.(),
+        offline: true
+      })
     });
   });
 
