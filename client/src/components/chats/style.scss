@@ -1039,7 +1039,6 @@
             box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
             width: 350px;
             height: auto;
-            max-height: 350px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -1207,20 +1206,162 @@
                         resize: none;
                         border-radius: .3rem;
                     }
+                }
 
-                    button[type="submit"] {
-                        padding: .5rem 1.5rem;
-                        border: 2px solid $bg-violet;
-                        background: var(--bg-primary);
-                        color: var(--text-primary);
-                        cursor: pointer;
+                .add_members_group {
+                    -webkit-user-select: none;
+                    -ms-user-select: none;
+                    user-select: none;
+
+                    .selected,
+                    .list_friends {
+                        display: flex;
+                        align-items: center;
+                        justify-content: start;
+                        gap: .5rem;
+                        overflow-y: auto;
+                        overflow-x: hidden;
+                        scroll-behavior: smooth;
+                        scrollbar-color: $bg-violet var(--bg-grey);
+                        scrollbar-width: 5px !important;
+                        height: auto;
+
+                        &::-webkit-scrollbar {
+                            width: 5px;
+                        }
+
+                        &::-webkit-scrollbar-track {
+                            background: var(--bg-grey);
+                            border-radius: 10px;
+                        }
+
+                        &::-webkit-scrollbar-thumb {
+                            background: $bg-violet;
+                            border-radius: 10px;
+                        }
+                    }
+
+                    .selected .item,
+                    .list_friends .item {
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        background: transparent;
                         transition: all .5s ease-in-out;
                         -moz-transition: all .5s ease-in-out;
 
-                        &:hover {
-                            color: var(--bg-primary);
-                            background: $bg-violet;
+                        p {
+                            font-size: small;
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
                         }
+                    }
+
+                    .selected {
+                        flex-wrap: wrap;
+                        padding-bottom: .5rem;
+                        border-bottom: 1px solid var(--bg-grey);
+                        max-height: 15vh;
+
+                        .item {
+                            justify-content: center;
+                            gap: .2rem;
+                            padding-right: .5rem;
+                            border: 2px solid $bg-violet;
+                            border-radius: 9999px;
+
+                            img {
+                                width: 2rem;
+                                height: 2rem;
+                                @include coverImg;
+                            }
+
+                            p {
+                                color: $bg-violet;
+                                max-width: 4rem;
+                                transition: all .5s ease-in-out;
+                                -moz-transition: all .5s ease-in-out;
+                            }
+
+                            &:hover {
+                                cursor: pointer;
+                                background: $bg-violet;
+
+                                p {
+                                    color: $bg-primary;
+                                }
+                            }
+                        }
+
+                        input {
+                            display: flex;
+                            color: var(--text-primary);
+                            width: auto;
+                            height: auto;
+                            min-height: 2rem;
+                            border: none;
+                        }
+                    }
+
+                    .list_friends {
+                        flex-direction: column;
+                        margin-top: 1rem;
+                        max-height: 50vh;
+
+                        .item {
+                            justify-content: start;
+                            width: calc(100% - 1rem);
+                            gap: .5rem;
+                            padding: .5rem;
+
+                            img {
+                                width: 2.5rem;
+                                height: 2.5rem;
+                                @include coverImg;
+                            }
+
+                            p {
+                                color: var(--text-primary);
+                                max-width: 5rem;
+                            }
+
+                            &:hover {
+                                cursor: pointer;
+                                background: var(--bg-grey);
+                            }
+                        }
+                    }
+
+                    .devide {
+                        margin-top: .5rem;
+                        padding-top: .5rem;
+                        border-top: 1px solid var(--bg-grey);
+                    }
+
+                    button[data-for="loadmore"],
+                    button[type="submit"] {
+                        text-transform: uppercase;
+                        font-weight: bold;
+                    }
+                }
+
+                button[data-for="loadmore"],
+                button[type="submit"] {
+                    padding: .5rem .7rem;
+                    color: var(--text-primary);
+                    border: 2px solid $bg-violet;
+                    text-transform: capitalize;
+                    border-radius: 10px;
+                    background: linear-gradient(to right, $bg-violet 50%, transparent 50%);
+                    background-size: 250% 100%;
+                    background-position: right;
+                    transition: all .5s ease-in-out;
+                    -moz-transition: all .5s ease-in-out;
+
+                    &:hover {
+                        background-position: left;
+                        color: #fff;
                     }
                 }
             }

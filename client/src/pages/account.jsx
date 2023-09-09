@@ -143,6 +143,19 @@ const Account = () => {
     }
   };
 
+  // to logout button
+  const LogOut = async () => {
+    try {
+      let res = await axios.get("/user/logout");
+
+      if (res?.["data"]) {
+        navigate("/login");
+      }
+    } catch (err) {
+      alert("Sorry Something Went Wrong");
+    }
+  };
+
   useEffect(() => {
     document.title = "Soft Chat - Account";
 
@@ -186,7 +199,7 @@ const Account = () => {
   return (
     <section className="account">
       <div className="content">
-        <button className="logout">
+        <button className="logout" onClick={LogOut}>
           <LogoutSvg width={"20px"} height={"20px"} />
         </button>
 

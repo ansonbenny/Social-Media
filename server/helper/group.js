@@ -508,4 +508,13 @@ export default {
             }
         })
     },
+    get_friends_group_add: ({ userId, groupId, search = '', offset = 0 }) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+            } catch (err) {
+
+            }
+        })
+    }
 }

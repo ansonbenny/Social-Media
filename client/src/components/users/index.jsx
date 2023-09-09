@@ -25,7 +25,9 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
       refs.current.abort_search?.abort?.()
     }
 
-    refs.current.abort_search = new AbortController()
+    const abortController = new AbortController();
+
+    refs.current.abort_search = abortController;
 
     if (isUsers) {
       try {
@@ -33,7 +35,7 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
           params: {
             search: e?.target?.value
           },
-          signal: refs?.current?.abort_search?.signal
+          signal: abortController?.signal
         })
 
         if (res?.['data']?.data?.recent) {

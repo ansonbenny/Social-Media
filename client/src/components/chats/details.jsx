@@ -112,12 +112,14 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
               chatId: details?._id
             }
           })
-        } else {
+        } else if (details?.isAdmin) {
           await axios.delete('/chat-group/delete_chat', {
             data: {
               groupId: details?._id
             }
           })
+        } else {
+          console.log('exit group')
         }
       } catch (err) {
         if (err?.response?.data?.status == 405) {
@@ -133,6 +135,9 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
   useImperativeHandle(ref, () => ({
     ReloadMedia: () => {
       LoadMedia?.()
+    },
+    ReloadMembers: () => {
+      LoadMembers?.()
     }
   }), [])
 
@@ -285,7 +290,12 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
                 <span>({state?.members?.total})</span>
               </h1>
               {
-                details?.isAdmin && <button>
+                details?.isAdmin && <button className="chats_modal_special" onClick={() => {
+                  modalRef?.current?.Modal?.(undefined, {
+                    _id: details?._id,
+                    members: true
+                  })
+                }}>
                   <PlusSvg />
                 </button>
               }

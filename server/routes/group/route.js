@@ -244,6 +244,17 @@ export default (app, io) => {
         }
     })
 
+    router.get('/get_friends_group_add', CheckLogged, async (req, res) => {
+        try {
+            let response = await group.get_friends_group_add?.(req?.query)
+        } catch (err) {
+            res.status(500).json({
+                status: 200,
+                message: err
+            })
+        }
+    })
+
     // create api for members 
     router.get('/get_group/:id', CheckLogged, async (req, res) => {
         if (req?.params?.id?.length == 24) {
@@ -291,6 +302,6 @@ export default (app, io) => {
     })
 }
 
-// recent groups // memebers need update [add/remove] 
+// recent groups // memebers need update [add/remove] // exit group
 // remove member with socket, add member with socket
 // when new member added push to top list new member acc only

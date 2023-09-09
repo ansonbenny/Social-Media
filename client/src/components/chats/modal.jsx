@@ -72,6 +72,36 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
         }
     }
 
+    const LoadFriends = async (offset, search, groupId) => {
+        if (state?.abort_controller) {
+            state?.abort_controller?.abort?.()
+        }
+
+        const abortController = new AbortController()
+
+        action({ type: 'abort_controller', data: abortController })
+
+        try {
+            let res = await axios.get('/chat-group/get_friends_group_add', {
+                params: {
+                    groupId: state?.group?._id || groupId,
+                    offset: offset,
+                    search: search
+                },
+                signal: abortController?.signal
+            })
+
+            console.log(res?.['data'])
+        } catch (err) {
+            if (err?.response?.data?.status == 405) {
+                alert("Please Login")
+                navigate('/')
+            } else if (err?.code !== "ERR_CANCELED") {
+                alert(err?.response?.data?.message || "Something Went Wrong");
+            }
+        }
+    }
+
     const onUploadProgress = (e) => {
         const { loaded, total } = e;
 
@@ -87,7 +117,13 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
     const FormHanlde = async (e) => {
         e?.preventDefault?.()
 
-        action({ type: 'abort_controller', data: new AbortController() })
+        if (state?.abort_controller) {
+            state?.abort_controller?.abort?.()
+        }
+
+        const abortController = new AbortController()
+
+        action({ type: 'abort_controller', data: abortController })
 
         if (isUser) {
             // for file share
@@ -114,7 +150,7 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
                     headers: {
                         "Content-Type": "multipart/form-data",
                     },
-                    signal: state?.abort_controller?.signal,
+                    signal: abortController?.signal,
                     onUploadProgress
                 })
             } catch (err) {
@@ -129,7 +165,9 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
             }
         } else {
             try {
-                if (state?.group?.create) {
+                if (state?.group?.members) {
+                    console.log("ADD")
+                } else if (state?.group?.create) {
                     // for create group
                     const form_data = new FormData(e?.target)
 
@@ -137,7 +175,7 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
                         headers: {
                             "Content-Type": "multipart/form-data",
                         },
-                        signal: state?.abort_controller?.signal,
+                        signal: abortController?.signal,
                         onUploadProgress
                     })
                 } else if (state?.group?._id) {
@@ -148,7 +186,7 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
                         headers: {
                             "Content-Type": "multipart/form-data",
                         },
-                        signal: state?.abort_controller?.signal,
+                        signal: abortController?.signal,
                         onUploadProgress
                     })
                 } else {
@@ -174,7 +212,7 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
                         headers: {
                             "Content-Type": "multipart/form-data",
                         },
-                        signal: state?.abort_controller?.signal,
+                        signal: abortController?.signal,
                         onUploadProgress
                     })
                 }
@@ -217,6 +255,10 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
                 action({ type: "file", file: data })
             } else if (group) {
                 action({ type: "open", group })
+
+                if (group?.members) {
+                    LoadFriends?.(undefined, undefined, group?._id)
+                }
             } else {
                 action({ type: "open", form: data })
             }
@@ -324,8 +366,41 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
                                     </button>
                                 }
                             </Fragment>) :
-                            state?.group ?
-                                (<div className='group_create'>
+                            state?.group?.members ?
+                                <div className='add_members_group'>
+                                    <div className='selected'>
+                                        {[1, 2, 34, 5, 6, 1, 1, 1, 1]?.map?.((obj, key) => {
+                                            return <div className="item" key={key}>
+                                                <img src='http://localhost:5173/files/groups_logo/64fb43fde1cd02cf2eca5fd9.png' />
+                                                <p>ANSNSNSNSNSNS</p>
+                                            </div>
+                                        })}
+
+                                        <input placeholder='Search' />
+                                    </div>
+
+                                    <div className="list_friends">
+                                        {[1, 2, 3, 34, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,]?.map((obj, key) => {
+                                            return <div className="item" key={key}>
+                                                <img src='http://localhost:5173/files/groups_logo/64fb43fde1cd02cf2eca5fd9.png' />
+                                                <p>ANSNSNSNSNSNSaaaaaaaaaaaaaaaaaaaaaaaa</p>
+                                            </div>
+                                        })}
+
+                                        <button type='button' onClick={() => {
+                                            LoadFriends()
+                                        }} data-for="loadmore">
+                                            MORE
+                                        </button>
+                                    </div>
+
+                                    <div className='devide'>
+                                        <button type='submit'>
+                                            add
+                                        </button>
+                                    </div>
+                                </div>
+                                : (<div className='group_create'>
                                     <div className="upload">
                                         <input name='file' className="file_input_box" onInput={(e) => {
                                             if (e?.target?.files?.[0]) {
@@ -343,7 +418,6 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
                                         {state?.group?.create ? 'Create' : 'Edit'}
                                     </button>}
                                 </div>)
-                                : null
                     }
                 </form>}
 
