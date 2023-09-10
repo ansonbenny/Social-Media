@@ -308,10 +308,13 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
                   return (
                     <div className={`member ${!obj?.isAdmin && details?.isAdmin ? "user" : ''}`} key={key}>
                       <div className="cover">
-                        <img
-                          src={`/files/profiles/${obj?.img}`}
-                          alt="profile"
-                        />
+                        {
+                          obj?.img ? <img
+                            src={`/files/profiles/${obj?.img}`}
+                            alt="profile"
+                          />
+                            : <AvatarSvg />
+                        }
                       </div>
                       <div className="content">
                         <h1>{obj?.name}</h1>

@@ -171,33 +171,31 @@ export default (app, io) => {
 
     router.post("/share_file", CheckLogged, multer?.share_user?.single('file'), async (req, res) => {
         try {
+
+            const chat_msg = {
+                date: req?.body?.date,
+                id: Date?.now()?.toString(16),
+                from: req?.body?.userId,
+                file: {
+                    ...req?.file,
+                    url: `/${req?.file?.path}`,
+                    type: req?.file?.mimetype
+                },
+            }
+
             let sockets = await chat?.getSocketId?.(req?.body?.chatId, req?.body?.userId);
 
             let response = await chat?.newMsg({
                 users: [req?.body?.chatId, req?.body?.userId],
                 chat: {
-                    id: req?.body?.id,
-                    date: req?.body?.date,
-                    file: {
-                        ...req?.file,
-                        url: `/${req?.file?.path}`,
-                        type: req?.file?.mimetype
-                    },
-                    from: req?.body?.userId,
+                    ...chat_msg,
                     read: req?.body?.chatId == req?.body?.userId ? true : undefined
                 },
             });
 
             if (response && sockets?.ids?.length > 0) {
                 io.to(sockets?.ids).emit("chat message", {
-                    id: req?.body?.id,
-                    date: req?.body?.date,
-                    file: {
-                        ...req?.file,
-                        url: `/${req?.file?.path}`,
-                        type: req?.file?.mimetype
-                    },
-                    from: req?.body?.userId,
+                    ...chat_msg,
                     user: sockets?.name || "",
                     match:
                         req?.body?.chatId == req?.body?.userId

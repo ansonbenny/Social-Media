@@ -4,25 +4,28 @@ export default (socket, io) => {
     socket.on("group message", async (data, callback) => {
         if (data?.groupId?.length === 24) {
             try {
-                let res = await group?.newMsg(data?.groupId, {
-                    ...data?.chat,
+                const chat_msg = {
+                    msg: data?.msg,
+                    date: data?.date,
+                    id: Date?.now()?.toString(16),
                     from: data?.user?._id,
+                }
+
+                let res = await group?.newMsg(data?.groupId, {
+                    ...chat_msg,
                     read: []
                 });
 
                 if (res) {
                     io.to(data?.groupId).emit("chat message", {
-                        ...data?.chat,
-                        from: data?.user?._id,
+                        ...chat_msg,
                         user_name: data?.user?.name,
                         group: data?.groupId,
                         profile: data?.user?.img,
                     });
                 }
 
-                callback(undefined, {
-                    status: 200,
-                });
+                callback(undefined, chat_msg);
             } catch (err) {
                 callback({
                     status: 500,

@@ -275,7 +275,7 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
               return (
                 <div className="others" key={key}>
                   <div className="cover">
-                    {details?.img ? (
+                    {details?.img || obj?.profile ? (
                       <img
                         src={`/files/profiles/${obj?.profile || details?.img}`}
                         alt="profile"

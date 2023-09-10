@@ -75,28 +75,20 @@ const Chats = () => {
       if (input?.value) {
         const date = new Date();
 
-        const chat = {
-          id: Date?.now()?.toString(16),
-          msg: input?.value,
-          date: `${date.getDate()}-${date.getMonth() + 1
-            }-${date.getFullYear()} | ${date.getHours()}:${date.getMinutes()}`,
-        };
-
         Socket?.emit(
           "chat message",
           {
             chatId: id,
             userId: user?._id,
-            chat,
+            msg: input?.value,
+            date: `${date.getDate()}-${date.getMonth() + 1
+              }-${date.getFullYear()} | ${date.getHours()}:${date.getMinutes()}`,
           },
           (err, res) => {
             if (res) {
               input.value = ''
 
-              ref?.current?.live?.insertMsg?.({
-                from: user?._id,
-                ...chat,
-              });
+              ref?.current?.live?.insertMsg?.(res);
 
               ref?.current?.list?.pushToTop({
                 id,

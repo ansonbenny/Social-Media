@@ -19,21 +19,26 @@ export default (socket, io) => {
     socket.on("chat message", async (data, callback) => {
         if (data?.chatId?.length === 24) {
             try {
+                const chat_msg = {
+                    msg: data?.msg,
+                    date: data?.date,
+                    id: Date?.now()?.toString(16),
+                    from: data?.userId,
+                }
+
                 let sockets = await chat?.getSocketId?.(data?.chatId, data?.userId);
 
                 let res = await chat?.newMsg({
                     users: [data?.chatId, data?.userId],
                     chat: {
-                        ...data?.chat,
-                        from: data?.userId,
+                        ...chat_msg,
                         read: data?.chatId == data?.userId ? true : undefined
                     },
                 });
 
                 if (res && sockets?.ids?.length > 0) {
                     io.to(sockets?.ids).emit("chat message", {
-                        ...data?.chat,
-                        from: data?.userId,
+                        ...chat_msg,
                         user: sockets?.name || "",
                         match:
                             data?.chatId == data?.userId
@@ -42,9 +47,7 @@ export default (socket, io) => {
                     });
                 }
 
-                callback(undefined, {
-                    status: 200,
-                });
+                callback(undefined, chat_msg);
             } catch (err) {
                 callback({
                     status: 500,

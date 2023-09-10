@@ -132,7 +132,7 @@ export default {
                         $exists: true
                     }
                 }, {
-                    $push: {
+                    $addToSet: {
                         "chat.$[elm].read": userId
                     }
                 }, {
@@ -459,7 +459,7 @@ export default {
                         }
                     }],
                 }, {
-                    $push: {
+                    $addToSet: {
                         "chat.$[elm].read": userId
                     }
                 }, {
@@ -511,9 +511,152 @@ export default {
     get_friends_group_add: ({ userId, groupId, search = '', offset = 0 }) => {
         return new Promise(async (resolve, reject) => {
             try {
+                let res = await db.collection(collections.PRIVATE).aggregate([
+                    {
+                        $match: {
+                            users: {
+                                $in: [userId]
+                            }
+                        }
+                    }, {
+                        $unwind: "$chat"
+                    }, {
+                        $group: {
+                            _id: "$users",
+                            from: {
+                                $addToSet: {
+                                    $cond: {
+                                        if: {
+                                            $eq: ["$chat.from", userId]
+                                        },
+                                        then: userId, else: "friend"
+                                    }
+                                }
+                            },
+                        }
+                    }, {
+                        $match: {
+                            $expr: {
+                                $and: [{
+                                    $in: [userId, "$from"]
+                                }, {
+                                    $in: ["friend", "$from"]
+                                }]
+                            }
+                        }
+                    }, {
+                        $unwind: "$_id"
+                    }, {
+                        $match: {
+                            _id: {
+                                $ne: userId
+                            }
+                        }
+                    }, {
+                        $lookup: {
+                            from: collections.GROUP,
+                            let: { member: "$_id" },
+                            pipeline: [{
+                                $match: {
+                                    $expr: {
+                                        $and: [{
+                                            $eq: ["$_id", new ObjectId(groupId)]
+                                        }, {
+                                            $eq: ["$admin", userId]
+                                        }, {
+                                            $not: { $in: ["$$member", "$users"] }
+                                        }]
+                                    }
+                                },
+                            }, {
+                                $group: {
+                                    _id: 1
+                                }
+                            }],
+                            as: "nin_group"
+                        }
+                    }, {
+                        $match: {
+                            nin_group: [{
+                                _id: 1
+                            }]
+                        }
+                    }, {
+                        $lookup: {
+                            from: collections.USERS,
+                            let: { user: "$_id" },
+                            pipeline: [{
+                                $match: {
+                                    $expr: {
+                                        $and: {
+                                            $eq: ["$_id", {
+                                                $toObjectId: "$$user"
+                                            }]
+                                        }
+                                    },
+                                    name: {
+                                        $regex: search,
+                                        $options: "i"
+                                    }
+                                },
+                            }, {
+                                $project: {
+                                    _id: "$_id",
+                                    name: "$name",
+                                    img: "$img"
+                                }
+                            }],
+                            as: "user"
+                        }
+                    }, {
+                        $match: {
+                            "user.name": {
+                                $exists: true
+                            }
+                        }
+                    }, {
+                        $sort: {
+                            _id: 1
+                        }
+                    }, {
+                        $group: {
+                            _id: 1,
+                            total: {
+                                $sum: 1
+                            },
+                            users: {
+                                $push: {
+                                    _id: "$_id",
+                                    name: {
+                                        $arrayElemAt: ["$user.name", 0]
+                                    },
+                                    img: {
+                                        $arrayElemAt: ["$user.img", 0]
+                                    }
+                                }
+                            }
+                        }
+                    }, {
+                        $unwind: "$users"
+                    }, {
+                        $skip: parseInt(offset)
+                    }, {
+                        $limit: 10 // limit
+                    }, {
+                        $group: {
+                            _id: 1,
+                            total: {
+                                $first: "$total"
+                            },
+                            users: {
+                                $push: "$users"
+                            }
+                        }
+                    }]).toArray()
 
+                resolve(res?.[0] || { total: 0, users: [] })
             } catch (err) {
-
+                reject(err)
             }
         })
     }

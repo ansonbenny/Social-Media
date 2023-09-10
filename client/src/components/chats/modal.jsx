@@ -1,5 +1,5 @@
 import React, { Fragment, forwardRef, useEffect, useImperativeHandle, useReducer, useRef } from 'react'
-import { ClipSvg, PauseSvg, PlaySvg, SendSvg, Xsvg } from '../../assets'
+import { AvatarSvg, ClipSvg, PauseSvg, PlaySvg, SendSvg, Xsvg } from '../../assets'
 import { useAudio } from '../../hooks'
 import { useNavigate, useParams } from 'react-router-dom'
 import { axios } from '../../lib'
@@ -40,11 +40,17 @@ const reducer = (value, { type, ...actions }) => {
             delete value?.image
 
             return { ...value }
-        case "abort_controller":
-            return { ...value, abort_controller: actions?.data }
 
         case "progress":
             return { ...value, progrees: actions?.data }
+        case "friends":
+            if (actions?.intial) {
+                return { ...value, friends: actions?.data }
+            } else {
+                return { ...value, friends: { total: actions?.data?.total, users: [...value?.friends?.users, ...actions?.data?.users] } }
+            }
+        case "search":
+            return { ...value, search: actions?.data }
         default:
             return value
     }
@@ -63,7 +69,9 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
     const [state, action] = useReducer(reducer, {})
 
     const CloseModal = () => {
-        state?.abort_controller?.abort?.()
+        if (refs?.current?.abort_controller) {
+            refs?.current?.abort_controller?.abort?.()
+        }
 
         action({ type: "close" })
 
@@ -73,25 +81,32 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
     }
 
     const LoadFriends = async (offset, search, groupId) => {
-        if (state?.abort_controller) {
-            state?.abort_controller?.abort?.()
+
+        if (refs?.current?.abort_controller) {
+            refs?.current?.abort_controller?.abort?.()
         }
 
         const abortController = new AbortController()
 
-        action({ type: 'abort_controller', data: abortController })
+        if (refs?.current) {
+            refs.current.abort_controller = abortController
+        }
 
         try {
             let res = await axios.get('/chat-group/get_friends_group_add', {
                 params: {
                     groupId: state?.group?._id || groupId,
                     offset: offset,
-                    search: search
+                    search: search ? search?.value : state?.search
                 },
                 signal: abortController?.signal
             })
 
-            console.log(res?.['data'])
+            if (!offset && res?.['data']?.data) {
+                action({ type: "friends", intial: true, data: res?.['data']?.data })
+            } else if (res?.['data']?.data) {
+                action({ type: "friends", data: res?.['data']?.data })
+            }
         } catch (err) {
             if (err?.response?.data?.status == 405) {
                 alert("Please Login")
@@ -117,13 +132,15 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
     const FormHanlde = async (e) => {
         e?.preventDefault?.()
 
-        if (state?.abort_controller) {
-            state?.abort_controller?.abort?.()
+        if (refs?.current?.abort_controller) {
+            refs?.current?.abort_controller?.abort?.()
         }
 
         const abortController = new AbortController()
 
-        action({ type: 'abort_controller', data: abortController })
+        if (refs?.current) {
+            refs.current.abort_controller = abortController
+        }
 
         if (isUser) {
             // for file share
@@ -133,7 +150,6 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
 
                 const date = new Date()
 
-                formdata.append("id", Date?.now()?.toString(16))
                 formdata.append("date", `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()} | ${date.getHours()}:${date.getMinutes()}`)
                 formdata.append("chatId", id)
                 formdata.append("userId", user?._id)
@@ -195,7 +211,6 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
 
                     const date = new Date()
 
-                    form_data.append("id", Date?.now()?.toString(16))
                     form_data.append("date", `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()} | ${date.getHours()}:${date.getMinutes()}`)
                     form_data.append("groupId", id)
                     form_data.append("user", JSON.stringify(user))
@@ -376,26 +391,34 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
                                             </div>
                                         })}
 
-                                        <input placeholder='Search' />
+                                        <input placeholder='Search' onInput={(e) => {
+                                            action({ type: "search", data: e?.target?.value })
+                                            LoadFriends?.(undefined, { value: e?.target?.value })
+                                        }} />
                                     </div>
 
                                     <div className="list_friends">
-                                        {[1, 2, 3, 34, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,]?.map((obj, key) => {
+                                        {state?.friends?.users?.map((obj, key) => {
                                             return <div className="item" key={key}>
-                                                <img src='http://localhost:5173/files/groups_logo/64fb43fde1cd02cf2eca5fd9.png' />
-                                                <p>ANSNSNSNSNSNSaaaaaaaaaaaaaaaaaaaaaaaa</p>
+                                                {
+                                                    obj?.img ? <img src={`/files/profiles/${obj?.img}`} />
+                                                        : <AvatarSvg />
+                                                }
+                                                <p>{obj?.name}</p>
                                             </div>
                                         })}
 
-                                        <button type='button' onClick={() => {
-                                            LoadFriends()
-                                        }} data-for="loadmore">
-                                            MORE
-                                        </button>
+                                        {
+                                            state?.friends?.total > state?.friends?.users?.length && <button type='button' onClick={() => {
+                                                LoadFriends(state?.friends?.users?.length)
+                                            }} data-for="bordered">
+                                                MORE
+                                            </button>
+                                        }
                                     </div>
 
                                     <div className='devide'>
-                                        <button type='submit'>
+                                        <button type='submit' data-for="bordered">
                                             add
                                         </button>
                                     </div>
@@ -414,7 +437,7 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
                                     <input name='name' placeholder={state?.group?.name || 'Enter Group Name'} {...{ required: state?.group?.create }} />
                                     <textarea name='about' placeholder={state?.group?.about || 'Enter About'} {...{ required: state?.group?.create }} />
 
-                                    {!state?.progrees && <button type="submit">
+                                    {!state?.progrees && <button type="submit" data-for="bordered">
                                         {state?.group?.create ? 'Create' : 'Edit'}
                                     </button>}
                                 </div>)

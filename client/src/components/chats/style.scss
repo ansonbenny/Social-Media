@@ -916,6 +916,16 @@
                             img {
                                 width: 2rem;
                                 height: 2rem;
+                                border: 2px solid $bg-violet;
+                                @include coverImg;
+                            }
+
+                            svg {
+                                width: 1.6rem;
+                                height: 1.6rem;
+                                padding: .2rem;
+                                border: 2px solid $bg-violet;
+                                fill: var(--text-primary);
                                 @include coverImg;
                             }
                         }
@@ -1271,10 +1281,15 @@
                             border: 2px solid $bg-violet;
                             border-radius: 9999px;
 
-                            img {
+                            img,
+                            svg {
                                 width: 2rem;
                                 height: 2rem;
                                 @include coverImg;
+                            }
+
+                            svg {
+                                fill: var(--text-primary);
                             }
 
                             p {
@@ -1301,6 +1316,7 @@
                             height: auto;
                             min-height: 2rem;
                             border: none;
+                            background: transparent;
                         }
                     }
 
@@ -1315,10 +1331,19 @@
                             gap: .5rem;
                             padding: .5rem;
 
-                            img {
+                            img,
+                            svg {
                                 width: 2.5rem;
                                 height: 2.5rem;
                                 @include coverImg;
+                            }
+
+                            svg {
+                                width: calc(2.1rem - 4px) !important;
+                                height: calc(2.1rem - 4px) !important;
+                                padding: .2rem;
+                                border: 2px solid var(--text-primary);
+                                fill: var(--text-primary);
                             }
 
                             p {
@@ -1339,15 +1364,13 @@
                         border-top: 1px solid var(--bg-grey);
                     }
 
-                    button[data-for="loadmore"],
-                    button[type="submit"] {
+                    button[data-for="bordered"] {
                         text-transform: uppercase;
                         font-weight: bold;
                     }
                 }
 
-                button[data-for="loadmore"],
-                button[type="submit"] {
+                button[data-for="bordered"] {
                     padding: .5rem .7rem;
                     color: var(--text-primary);
                     border: 2px solid $bg-violet;

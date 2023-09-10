@@ -44,7 +44,7 @@ export default (app, io) => {
     router.post("/share_file", CheckLogged, multer?.share_group?.single('file'), async (req, res) => {
         try {
             const details = {
-                id: req?.body?.id,
+                id: Date?.now()?.toString(16),
                 date: req?.body?.date,
                 file: {
                     ...req?.file,
@@ -247,6 +247,12 @@ export default (app, io) => {
     router.get('/get_friends_group_add', CheckLogged, async (req, res) => {
         try {
             let response = await group.get_friends_group_add?.(req?.query)
+
+            res.status(200).json({
+                status: 200,
+                message: "Success",
+                data: response
+            })
         } catch (err) {
             res.status(500).json({
                 status: 200,
@@ -255,7 +261,15 @@ export default (app, io) => {
         }
     })
 
-    // create api for members 
+    // create api for members remove add
+    router.put('/add_member', CheckLogged, async (req, res) => {
+        try {
+            // after add member ,send socket msg to group members & selected users
+        } catch (err) {
+
+        }
+    })
+
     router.get('/get_group/:id', CheckLogged, async (req, res) => {
         if (req?.params?.id?.length == 24) {
             try {
@@ -280,6 +294,7 @@ export default (app, io) => {
         }
     })
 
+    // get recent based groups like users
     router.get('/get_groups', CheckLogged, async (req, res) => {
         try {
             // get recent based groups & total unreaded msgs

@@ -44,7 +44,7 @@ export default {
         cb(null, dir);
       },
       filename: (req, file, cb) => {
-        cb(null, `${req?.body?.id}_${file.originalname}`);
+        cb(null, `${Date?.now()?.toString?.(16)}_${file.originalname}`);
       },
     }),
   }),
@@ -91,7 +91,7 @@ export default {
         cb(null, dir);
       },
       filename: (req, file, cb) => {
-        cb(null, `${req?.body?.id}_${file.originalname}`);
+        cb(null, `${Date?.now()?.toString?.(16)}_${file.originalname}`);
       },
     }),
   }),
