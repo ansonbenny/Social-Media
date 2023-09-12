@@ -261,12 +261,69 @@ export default (app, io) => {
         }
     })
 
-    // create api for members remove add
     router.put('/add_member', CheckLogged, async (req, res) => {
         try {
-            // after add member ,send socket msg to group members & selected users
-        } catch (err) {
+            req.body.selected = req?.body?.selected?.map?.((obj) => obj?._id)
 
+            let response = await group.add_member(req?.body)
+
+            response?.users?.forEach((user) => {
+                io.to(user?.socketId).emit("new group", response?.group)
+            })
+
+            io.to(response?.group?.id).emit("new group", response?.group)
+
+            res.status(200).json({
+                status: 200,
+                message: "Success"
+            })
+        } catch (err) {
+            res.status(500).json({
+                status: 500,
+                message: err
+            })
+        }
+    })
+
+    router.delete('/exit_group/:id', CheckLogged, async (req, res) => {
+        try {
+            await group.exit_group(req?.params?.id, req?.query?.userId)
+
+            io.to(req?.params?.id).emit("remove member", {
+                id: req?.params?.id,
+                userId: req?.query?.userId
+            })
+
+            res.status(200).json({
+                status: 200,
+                message: "Success"
+            })
+        } catch (err) {
+            res.status(500).json({
+                status: 500,
+                message: err
+            })
+        }
+    })
+
+    router.delete('/remove_member/:id', CheckLogged, async (req, res) => {
+        try {
+            await group.remove_member(req?.body, req?.query?.userId)
+
+            io.to(req?.body?.groupId).emit("remove member", {
+                id: req?.body?.groupId,
+                userId: req?.body?.remove
+            })
+
+            res.status(200).json({
+                status: 200,
+                message: "Success"
+            })
+        } catch (err) {
+            res.status(500).json({
+                status: 500,
+                message: err
+            })
         }
     })
 
@@ -317,6 +374,4 @@ export default (app, io) => {
     })
 }
 
-// recent groups // memebers need update [add/remove] // exit group
-// remove member with socket, add member with socket
-// when new member added push to top list new member acc only
+// recent groups and unreded msgs

@@ -131,9 +131,13 @@ const Groups = () => {
     if (user) {
       emitUser?.()
 
-      // create group
+      // create group admin & for new members
       Socket?.on("new group", (data) => {
         ref?.current?.list?.pushToTop?.(data, true)
+
+        if (data?.id == id) {
+          ref?.current?.details?.ReloadMembers?.()
+        }
       });
 
       // edit group
@@ -143,6 +147,18 @@ const Groups = () => {
         }
 
         ref?.current?.list?.update_details(data)
+      })
+
+      //remove / exit member
+
+      Socket?.on("remove member", (data) => {
+        if (data?.id == id) {
+          if (data?.userId == user?._id) {
+            navigate("/groups")
+          } else {
+            ref?.current?.details?.ReloadMembers?.()
+          }
+        }
       })
 
       // recieve msgs
@@ -249,6 +265,8 @@ const Groups = () => {
       Socket?.off("read group msg")
 
       Socket?.off("group chat delete",)
+
+      Socket?.off("remove member")
 
       clearTimeout(timer);
     };

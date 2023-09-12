@@ -659,5 +659,79 @@ export default {
                 reject(err)
             }
         })
+    },
+    add_member: ({ userId, groupId, selected }) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let group = await db.collection(collections.GROUP).findOneAndUpdate({
+                    _id: new ObjectId(groupId),
+                    admin: userId
+                }, {
+                    $addToSet: {
+                        users: {
+                            $each: selected
+                        }
+                    }
+                })
+
+                let users = await db.collection(collections.USERS).find({
+                    _id: {
+                        $in: selected?.map?.((obj) => new ObjectId(obj))
+                    }
+                }).toArray()
+
+                resolve({
+                    group: {
+                        id: group?.value?._id?.toString?.(),
+                        details: {
+                            name: group?.value?.name,
+                            img: group?.value?.img,
+                            about: group?.value?.about
+                        }
+                    },
+                    users
+                })
+            } catch (err) {
+                reject(err)
+            }
+        })
+    },
+    exit_group: (groupId, userId) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let res = await db.collection(collections.GROUP).updateOne({
+                    _id: new ObjectId(groupId),
+                    admin: {
+                        $ne: userId
+                    }
+                }, {
+                    $pull: {
+                        users: userId
+                    }
+                })
+
+                resolve(res)
+            } catch (err) {
+                reject(err)
+            }
+        })
+    },
+    remove_member: ({ groupId, remove }, userId) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let res = await db.collection(collections.GROUP).updateOne({
+                    _id: new ObjectId(groupId),
+                    admin: userId
+                }, {
+                    $pull: {
+                        users: remove
+                    }
+                })
+
+                resolve(res)
+            } catch (err) {
+                reject(err)
+            }
+        })
     }
 }

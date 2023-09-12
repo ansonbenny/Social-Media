@@ -103,8 +103,8 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
     }
   }
 
-  const DeleteChat = async () => {
-    if (window.confirm("Do you want delete entire chat ?")) {
+  const DeleteChat = async (e, remove) => {
+    if (window.confirm(remove ? "Do you want remove user?" : "Do you want delete entire chat ?")) {
       try {
         if (isUser) {
           await axios.delete('/chat-single/delete_chat', {
@@ -113,13 +113,25 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
             }
           })
         } else if (details?.isAdmin) {
-          await axios.delete('/chat-group/delete_chat', {
-            data: {
-              groupId: details?._id
-            }
-          })
+          if (!remove) {
+            await axios.delete('/chat-group/delete_chat', {
+              data: {
+                groupId: details?._id
+              }
+            })
+          } else {
+
+            // for remove user from group
+
+            await axios.delete(`/chat-group/remove_member/${details?._id}`, {
+              data: {
+                groupId: details?._id,
+                remove
+              }
+            })
+          }
         } else {
-          console.log('exit group')
+          await axios.delete(`/chat-group/exit_group/${details?._id}`)
         }
       } catch (err) {
         if (err?.response?.data?.status == 405) {
@@ -321,7 +333,9 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
                       </div>
                       <div className="role">{obj?.isAdmin ? 'Owner' : 'User'}</div>
 
-                      {!obj?.isAdmin && details?.isAdmin ? <button>Remove</button> : null}
+                      {!obj?.isAdmin && details?.isAdmin ? <button onClick={() => {
+                        DeleteChat(null, obj?._id)
+                      }}>Remove</button> : null}
                     </div>
                   );
                 }

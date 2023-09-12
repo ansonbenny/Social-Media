@@ -1222,12 +1222,15 @@
                     -webkit-user-select: none;
                     -ms-user-select: none;
                     user-select: none;
+                    width: 100%;
+                    display: block;
 
                     .selected,
                     .list_friends {
                         display: flex;
                         align-items: center;
                         justify-content: start;
+                        width: 100%;
                         gap: .5rem;
                         overflow-y: auto;
                         overflow-x: hidden;
@@ -1265,6 +1268,7 @@
                             white-space: nowrap;
                             overflow: hidden;
                             text-overflow: ellipsis;
+                            pointer-events: none;
                         }
                     }
 
@@ -1286,6 +1290,7 @@
                                 width: 2rem;
                                 height: 2rem;
                                 @include coverImg;
+                                pointer-events: none;
                             }
 
                             svg {
@@ -1336,6 +1341,7 @@
                                 width: 2.5rem;
                                 height: 2.5rem;
                                 @include coverImg;
+                                pointer-events: none;
                             }
 
                             svg {

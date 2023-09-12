@@ -45,10 +45,46 @@ const reducer = (value, { type, ...actions }) => {
             return { ...value, progrees: actions?.data }
         case "friends":
             if (actions?.intial) {
-                return { ...value, friends: actions?.data }
+                return {
+                    ...value, friends: {
+                        ...actions?.data,
+                        selected: value?.friends?.selected || []
+                    }
+                }
             } else {
-                return { ...value, friends: { total: actions?.data?.total, users: [...value?.friends?.users, ...actions?.data?.users] } }
+                return {
+                    ...value, friends: {
+                        total: actions?.data?.total,
+                        users: [...value?.friends?.users, ...actions?.data?.users],
+                        selected: value?.friends?.selected
+                    }
+                }
             }
+
+        case "selected_friends":
+            let selected = value?.friends?.selected || []
+
+
+            if (!selected?.find((obj) => {
+                return actions?.data?._id === obj?._id
+            })) {
+                selected?.push(actions?.data)
+            }
+
+            return { ...value, friends: { ...value?.friends, selected } }
+
+        case "unselected_friends": {
+
+            let selected = value?.friends?.selected?.filter?.((obj) => obj?._id !== actions?.data?._id)
+
+            return {
+                ...value, friends: {
+                    ...value?.friends,
+                    selected
+                }
+            }
+        }
+
         case "search":
             return { ...value, search: actions?.data }
         default:
@@ -182,7 +218,16 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
         } else {
             try {
                 if (state?.group?.members) {
-                    console.log("ADD")
+                    // for adding members
+                    let res = await axios.put('/chat-group/add_member', {
+                        selected: state?.friends?.selected,
+                        groupId: id
+                    })
+
+                    if (res?.['data']) {
+                        CloseModal?.()
+                    }
+
                 } else if (state?.group?.create) {
                     // for create group
                     const form_data = new FormData(e?.target)
@@ -232,6 +277,7 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
                     })
                 }
             } catch (err) {
+                console.log(err)
                 if (err?.response?.data?.status == 405) {
                     alert("Please Login")
                     navigate('/')
@@ -384,10 +430,15 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
                             state?.group?.members ?
                                 <div className='add_members_group'>
                                     <div className='selected'>
-                                        {[1, 2, 34, 5, 6, 1, 1, 1, 1]?.map?.((obj, key) => {
-                                            return <div className="item" key={key}>
-                                                <img src='http://localhost:5173/files/groups_logo/64fb43fde1cd02cf2eca5fd9.png' />
-                                                <p>ANSNSNSNSNSNS</p>
+                                        {state?.friends?.selected?.map?.((obj, key) => {
+                                            return <div className="item chats_modal_special" key={key} onClick={() => {
+                                                action({ type: "unselected_friends", data: obj })
+                                            }}>
+                                                {
+                                                    obj?.img ? <img src={`/files/profiles/${obj?.img}`} />
+                                                        : <AvatarSvg />
+                                                }
+                                                <p>{obj?.name}</p>
                                             </div>
                                         })}
 
@@ -399,7 +450,9 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
 
                                     <div className="list_friends">
                                         {state?.friends?.users?.map((obj, key) => {
-                                            return <div className="item" key={key}>
+                                            return <div className="item chats_modal_special" key={key} onClick={() => {
+                                                action({ type: "selected_friends", data: obj })
+                                            }}>
                                                 {
                                                     obj?.img ? <img src={`/files/profiles/${obj?.img}`} />
                                                         : <AvatarSvg />
