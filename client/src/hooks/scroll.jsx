@@ -74,7 +74,7 @@ const reducer = (state, { type, data, ...actions }) => {
 
     case "readed":
       const items = state?.items?.map((obj) => {
-        if (obj?.id == data) {
+        if (obj?.id == data && obj?.unread) {
           state.total = state.total - obj?.unread
 
           obj.unread = null

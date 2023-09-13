@@ -281,10 +281,35 @@ export default {
             }
         })
     },
-    get_groups: (userId) => {
+    get_group_details: (groupId) => {
         return new Promise(async (resolve, reject) => {
             try {
-                // move to aggregate for recent msgs based
+                let res = await db.collection(collections.GROUP).aggregate([{
+                    $match: {
+                        _id: new ObjectId(groupId)
+                    }
+                }, {
+                    $project: {
+                        _id: 0,
+                        id: "$_id",
+                        details: {
+                            img: "$img",
+                            name: "$name",
+                            _id: "$_id",
+                            about: "$about"
+                        }
+                    }
+                }]).toArray()
+
+                resolve(res?.[0])
+            } catch (err) {
+                reject(err)
+            }
+        })
+    },
+    get_groups: (userId, offset = 0) => {
+        return new Promise(async (resolve, reject) => {
+            try {
                 const res = await db.collection(collections.GROUP).aggregate([{
                     $match: {
                         users: {
@@ -294,6 +319,9 @@ export default {
                 }, {
                     $project: {
                         id: "$_id",
+                        "last_msg": {
+                            $last: "$chat"
+                        },
                         details: {
                             _id: "$_id",
                             name: "$name",
@@ -301,9 +329,144 @@ export default {
                             img: "$img"
                         }
                     }
+                }, {
+                    $sort: {
+                        "last_msg.id": -1
+                    }
+                }, {
+                    $skip: parseInt(offset)
+                }, {
+                    $limit: 15
+                }, {
+                    $lookup: {
+                        from: collections.GROUP,
+                        let: { id: "$id" },
+                        pipeline: [{
+                            $match: {
+                                $expr: {
+                                    $eq: ["$_id", "$$id"]
+                                }
+                            }
+                        }, {
+                            $unwind: "$chat"
+                        }, {
+                            $match: {
+                                "chat.read": {
+                                    $nin: [userId]
+                                },
+                                "chat.from": {
+                                    $ne: userId
+                                }
+                            }
+                        }, {
+                            $group: {
+                                _id: 1,
+                                total: {
+                                    $sum: 1
+                                }
+                            }
+                        }],
+                        as: "unread"
+                    }
+                }, {
+                    $project: {
+                        _id: 0,
+                        id: 1,
+                        details: 1,
+                        unread: {
+                            $arrayElemAt: ["$unread.total", 0]
+                        }
+                    }
                 }]).toArray()
 
                 resolve(res)
+            } catch (err) {
+                reject(err)
+            }
+        })
+    },
+    get_groups_search: ({ search = '', userId, offset = 0 }) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const res = await db.collection(collections.GROUP).aggregate([{
+                    $match: {
+                        users: {
+                            $in: [userId]
+                        },
+                        name: {
+                            $regex: search,
+                            $options: "i"
+                        }
+                    }
+                }, {
+                    $project: {
+                        id: "$_id",
+                        "last_msg": {
+                            $last: "$chat"
+                        },
+                        details: {
+                            _id: "$_id",
+                            name: "$name",
+                            about: "$about",
+                            img: "$img"
+                        }
+                    }
+                }, {
+                    $sort: {
+                        id: -1
+                    }
+                }, {
+                    $skip: parseInt(offset)
+                }, {
+                    $limit: 15
+                }, {
+                    $project: {
+                        _id: 0,
+                        id: 1,
+                        details: 1,
+                    }
+                }]).toArray()
+
+                resolve(res)
+            } catch (err) {
+                reject(err)
+            }
+        })
+    },
+    get_total_unreaded: (userId) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const res = await db.collection(collections.GROUP).aggregate([{
+                    $match: {
+                        users: {
+                            $in: [userId]
+                        }
+                    }
+                }, {
+                    $sort: {
+                        _id: -1
+                    }
+                }, {
+                    $unwind: "$chat"
+                }, {
+                    $match: {
+                        "chat.read": {
+                            $nin: [userId]
+                        },
+                        "chat.from": {
+                            $ne: userId
+                        }
+                    }
+                }, {
+                    $group: {
+                        _id: 1,
+                        total: {
+                            $sum: 1
+                        }
+                    }
+                }]).toArray()
+
+                resolve(res?.[0]?.total || 0)
             } catch (err) {
                 reject(err)
             }

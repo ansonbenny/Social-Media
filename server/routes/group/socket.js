@@ -16,12 +16,15 @@ export default (socket, io) => {
                     read: []
                 });
 
-                if (res) {
+                let group_data = await group?.get_group_details(data?.groupId)
+
+                if (res && group_data) {
                     io.to(data?.groupId).emit("chat message", {
                         ...chat_msg,
                         user_name: data?.user?.name,
                         group: data?.groupId,
                         profile: data?.user?.img,
+                        group_data
                     });
                 }
 

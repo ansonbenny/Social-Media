@@ -59,12 +59,15 @@ export default (app, io) => {
                 read: []
             });
 
-            if (response) {
+            let group_data = await group?.get_group_details(req?.body?.groupId)
+
+            if (response && group_data) {
                 io.to(req?.body?.groupId).emit("chat message", {
                     ...details,
                     user_name: req?.body?.user?.name,
                     group: req?.body?.groupId,
                     profile: req?.body?.user?.img,
+                    group_data
                 });
 
                 res.status(200).json({
@@ -351,17 +354,17 @@ export default (app, io) => {
         }
     })
 
-    // get recent based groups like users
     router.get('/get_groups', CheckLogged, async (req, res) => {
         try {
-            // get recent based groups & total unreaded msgs
-            let response = await group.get_groups(req?.query?.userId)
+            const total_unreaded = await group.get_total_unreaded(req?.query?.userId)
+
+            const response = await group.get_groups(req?.query?.userId)
 
             res.status(200).json({
                 status: 200,
                 message: "Success",
                 data: {
-                    total: 0,
+                    total: total_unreaded,
                     items: response
                 }
             })
@@ -372,6 +375,58 @@ export default (app, io) => {
             })
         }
     })
-}
 
-// recent groups and unreded msgs
+    router.get('/recent_groups_more', CheckLogged, async (req, res) => {
+        try {
+            const response = await group.get_groups(req?.query?.userId, req?.query?.offset)
+
+            res.status(200).json({
+                status: 200,
+                message: "Success",
+                data: {
+                    items: response
+                }
+            })
+        } catch (err) {
+            res.status(500).json({
+                status: 500,
+                message: err
+            })
+        }
+    })
+
+    router.get('/get_groups_search', CheckLogged, async (req, res) => {
+        try {
+            if (req?.query?.search?.length >= 1) {
+                const response = await group.get_groups_search(req?.query)
+
+                res.status(200).json({
+                    status: 200,
+                    message: "Success",
+                    data: {
+                        items: response
+                    }
+                })
+            } else {
+                const total_unreaded = await group.get_total_unreaded(req?.query?.userId)
+
+                const response = await group.get_groups(req?.query?.userId)
+
+                res.status(200).json({
+                    status: 200,
+                    message: "Success",
+                    data: {
+                        recent: true,
+                        total: total_unreaded,
+                        items: response
+                    }
+                })
+            }
+        } catch (err) {
+            res.status(500).json({
+                status: 500,
+                message: err
+            })
+        }
+    })
+}

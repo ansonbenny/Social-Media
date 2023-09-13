@@ -172,10 +172,17 @@ const Groups = () => {
               ref?.current?.details?.ReloadMedia?.()
             }
 
+            ref?.current?.list?.pushToTop?.(msg?.group_data, true)
+
             Socket?.emit?.("read group msg", {
               groupId: id,
               userId: user?._id,
             })
+          } else {
+            ref?.current?.list?.pushToTop?.({
+              ...msg?.group_data,
+              unReadMsgs: true
+            }, true)
           }
         } else {
           dispatch(

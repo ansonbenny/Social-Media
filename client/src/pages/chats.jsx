@@ -166,6 +166,12 @@ const Chats = () => {
       // recieve messages
       Socket?.on("chat message", (msg) => {
         if (!msg?.group) {
+
+          ref?.current?.list?.pushToTop?.({
+            id: msg?.from,
+            status: msg?.match == `${user?._id}${id}` || msg?.match == `${id}${user?._id}` ? state?.details?.status?.toLowerCase?.() : false
+          })
+
           if (
             msg?.match == `${user?._id}${id}` ||
             msg?.match == `${id}${user?._id}`
@@ -181,6 +187,11 @@ const Chats = () => {
               ref?.current?.details?.ReloadMedia?.()
             }
 
+            ref?.current?.list?.pushToTop?.({
+              id: msg?.from,
+              status: state?.details?.status?.toLowerCase?.()
+            })
+
             Socket?.emit?.("read msg", {
               chatId: id,
               userId: user?._id,
@@ -194,7 +205,10 @@ const Chats = () => {
               }
             }
           } else {
-            ref?.current?.list?.unReadMsgs?.(msg);
+            ref?.current?.list?.pushToTop?.({
+              id: msg?.from,
+              unReadMsgs: true
+            })
 
             dispatch(
               setNotification({ name: msg?.user, url: `/chat/${msg?.from}` })

@@ -375,7 +375,7 @@ export default {
           }
         }, {
           $sort: {
-            "last_msg": -1
+            "last_msg.id": -1
           }
         }, {
           $skip: parseInt(offset)

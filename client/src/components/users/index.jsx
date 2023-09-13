@@ -16,8 +16,8 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
   const user = useSelector((state) => state?.user)
 
   const [refs, state, action] = useScroll({
-    url: `/chat-single/recent_users_more`, // change for users , stories ,groups
-    search_url: `/chat-single/search_users`// change for users , stories ,groups
+    url: isUsers ? `/chat-single/recent_users_more` : `/chat-group/recent_groups_more`, // change for users , stories ,groups
+    search_url: isUsers ? `/chat-single/search_users` : `/chat-group/get_groups_search`// change for users , stories ,groups
   })
 
   const OnInput = async (e) => {
@@ -29,43 +29,53 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
 
     refs.current.abort_search = abortController;
 
-    if (isUsers) {
-      try {
-        const res = await axios.get('/chat-single/search_users', {
+    try {
+      let res;
+
+      if (isUsers) {
+        res = await axios.get('/chat-single/search_users', {
           params: {
             search: e?.target?.value
           },
           signal: abortController?.signal
         })
+      } else {
+        res = await axios.get('/chat-group/get_groups_search', {
+          params: {
+            search: e?.target?.value
+          },
+          signal: abortController?.signal
+        })
+      }
 
-        if (res?.['data']?.data?.recent) {
-          action({
-            type: "initial_search", data: {
-              items: res?.['data']?.data?.items,
-              total: res?.['data']?.data?.total
-            }
-          })
-        } else {
-          action({
-            type: "initial_search", data: {
-              items: res?.['data']?.data?.items,
-              search: e?.target?.value || ' '
-            }
-          })
-        }
-
-      } catch (err) {
-        if (err?.code !== "ERR_CANCELED") {
-          ref?.current?.loading?.classList?.add?.("hide");
-
-          if (err?.response?.data?.status == 405) {
-            navigate("/");
-          } else {
-            alert(err?.response?.data?.message || "Something Went Wrong");
+      if (res?.['data']?.data?.recent) {
+        action({
+          type: "initial_search", data: {
+            items: res?.['data']?.data?.items,
+            total: res?.['data']?.data?.total
           }
+        })
+      } else {
+        action({
+          type: "initial_search", data: {
+            items: res?.['data']?.data?.items,
+            search: e?.target?.value || ' '
+          }
+        })
+      }
+
+    } catch (err) {
+      if (err?.code !== "ERR_CANCELED") {
+        ref?.current?.loading?.classList?.add?.("hide");
+
+        if (err?.response?.data?.status == 405) {
+          navigate("/");
+        } else {
+          alert(err?.response?.data?.message || "Something Went Wrong");
         }
       }
     }
+
   }
 
   useImperativeHandle(ref, () => ({
@@ -99,25 +109,10 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
         }
       } else {
         action({ type: "to_top", data: data?.id })
-      }
-    },
-    unReadMsgs: async (data) => {
-      if (!state?.items?.find((obj) => obj?.id == data?.from)) {
-        try {
-          let res = await axios.get('/chat-single/user_details', {
-            params: {
-              chatId: data?.from
-            }
-          })
 
-          action({
-            type: "new_user", data: res?.['data']?.data, unread: true
-          })
-        } catch (err) {
-          console.log("something went wrong")
+        if (data?.unReadMsgs) {
+          action({ type: "unread", data: data?.id })
         }
-      } else {
-        action({ type: "unread", data: data?.from })
       }
     },
     update_details: (data) => {
