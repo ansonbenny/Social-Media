@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { setLoading, setMenu } from "../redux/additional";
+import { setLoading } from "../redux/additional";
 import { useNavigate } from "react-router-dom";
 
 const FourNotFour = () => {
@@ -10,8 +10,6 @@ const FourNotFour = () => {
 
   useEffect(() => {
     document.title = "Soft Chat - Error"
-
-    dispatch(setMenu(false));
 
     const timer = setTimeout(() => {
       dispatch(setLoading(false));
@@ -23,7 +21,7 @@ const FourNotFour = () => {
   }, []);
 
   return (
-    <section className="error_404">
+    <section data-for="error_404">
       {
         /close_tab/i.test(window.location.pathname)
           ? <h1>409</h1>

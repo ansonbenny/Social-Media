@@ -4,16 +4,11 @@ const additionalSlice = createSlice({
   name: "additional",
   initialState: {
     loading: true,
-    menu: false,
     notification: null,
   },
   reducers: {
     setLoading: (state, { payload }) => {
       state.loading = payload;
-      return state;
-    },
-    setMenu: (state, { payload }) => {
-      state.menu = payload;
       return state;
     },
     setNotification: (state, { payload }) => {
@@ -31,6 +26,6 @@ const additionalSlice = createSlice({
   },
 });
 
-export const { setLoading, setMenu, setNotification } = additionalSlice.actions;
+export const { setLoading, setNotification } = additionalSlice.actions;
 
 export default additionalSlice.reducer;

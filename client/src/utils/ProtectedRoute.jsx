@@ -1,8 +1,10 @@
 import React, { useLayoutEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { setLoading, setMenu } from "../redux/additional";
+import { setLoading } from "../redux/additional";
 import { fetchUser } from "../redux/user";
+import { Menu } from "../components";
+import { Notification } from "../features";
 
 const ProtectedRoute = ({ isAuth }) => {
   const [component, setComponent] = useState(null); // for show component / page
@@ -24,19 +26,25 @@ const ProtectedRoute = ({ isAuth }) => {
       if (res?.payload) {
         // res?.payload is the user details
         if (isAuth) {
-          dispatch(setMenu(true));
-          setComponent(<Outlet context={{ location, user: res?.payload }} />);
+          setComponent(
+            <section data-for="contents">
+              <Notification />
+              <Menu />
+              <Outlet context={{ location, user: res?.payload }} />
+            </section>
+          );
         } else {
-          dispatch(setMenu(false));
           navigate("/");
         }
       } else if (res?.error && res?.error?.code !== "ERR_CANCELED") {
-        dispatch(setMenu(false));
-
         if (isAuth) {
           navigate("/login");
         } else if (!isAuth) {
-          setComponent(<Outlet context={{ location }} />);
+          setComponent(
+            <section data-for="fit-content">
+              <Outlet context={{ location }} />
+            </section>
+          );
         }
       }
     })();

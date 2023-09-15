@@ -321,36 +321,36 @@
         bottom: 0;
         right: 0;
         overflow: hidden;
+    }
 
-        .error_404 {
-            background: transparent;
-            display: flex;
-            height: 100%;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+    section[data-for="error_404"] {
+        background: transparent;
+        display: flex;
+        height: 100vh;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
 
-            h1 {
-                color: $Text-primary;
-                font-size: 5rem;
-            }
+        h1 {
+            color: $Text-primary;
+            font-size: 5rem;
+        }
 
-            p {
-                color: $bg-violet;
-                font-size: medium;
-            }
+        p {
+            color: $bg-violet;
+            font-size: medium;
+        }
 
-            button {
-                padding: .3rem 1rem;
-                margin: .5rem 0;
-                border: 2px solid $bg-violet;
-                background: $bg-primary;
-                color: $Text-primary;
-                text-transform: capitalize;
-                border-radius: 5px;
-                cursor: pointer;
-            }
+        button {
+            padding: .3rem 1rem;
+            margin: .5rem 0;
+            border: 2px solid $bg-violet;
+            background: $bg-primary;
+            color: $Text-primary;
+            text-transform: capitalize;
+            border-radius: 5px;
+            cursor: pointer;
         }
     }
 }
