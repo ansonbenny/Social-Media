@@ -1,0 +1,165 @@
+@import '../../index.scss';
+
+@mixin actionBtnCall {
+    display: flex;
+    align-items: center;
+    height: 2.2rem;
+    border-radius: 9999px;
+    cursor: pointer;
+
+    &:is(.more_actions) {
+        width: 2.2rem;
+        padding: .5rem;
+        background: transparent;
+        backdrop-filter: blur(10px);
+        border: 2px solid $bg-violet;
+        transition: all .5s ease-in-out;
+        -moz-transition: all .5s ease-in-out;
+
+        svg {
+            margin: auto;
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .svg_path_fill path,
+        .svg_fill {
+            fill: $bg-violet;
+        }
+
+
+        &:is(.left) {
+            position: absolute;
+            left: .5rem;
+        }
+
+        &:is(.active) {
+            background: $bg-violet;
+        }
+
+        &:hover {
+            background: $bg-violet;
+
+            .svg_path_fill path,
+            .svg_fill {
+                fill: #fff;
+            }
+        }
+    }
+}
+
+@mixin endBtn {
+    background: #FF4433;
+    font-weight: bold;
+    font-size: small;
+    color: #fff;
+    border: none;
+    outline: none;
+    text-transform: capitalize;
+    padding: 0 1rem;
+}
+
+.mute_call_actions {
+    @include actionBtnCall;
+    position: absolute;
+    top: .5rem;
+    left: .5rem;
+}
+
+.CallActions {
+    width: 100%;
+    position: absolute;
+    bottom: 1rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    background: transparent;
+
+    button {
+        @include actionBtnCall;
+    }
+
+    .end {
+        @include endBtn;
+    }
+}
+
+.call-ringing {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+
+    .user {
+        text-transform: uppercase;
+        font-size: xx-large;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        width: 7rem;
+        height: 7rem;
+        justify-content: center;
+        border-radius: 9999px;
+        background: #F8C8DC;
+        color: #fff;
+        border: 2px solid $bg-violet;
+    }
+
+    h1 {
+        color: var(--text-primary);
+        font-weight: bold;
+        text-transform: capitalize;
+        font-size: small;
+    }
+
+    .status {
+        font-size: small;
+        font-weight: bold;
+        color: $bg-violet;
+        text-transform: uppercase;
+    }
+
+    .actions {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+
+        button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 2.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            width: 7rem;
+            @include endBtn;
+            color: var(--text-primary);
+            transition: all .5s ease-in-out;
+            -moz-transition: all .5s ease-in-out;
+        }
+
+        .accept {
+            background: transparent;
+            border: 2px solid #2AAA8A;
+
+            &:hover {
+                background: #2AAA8A;
+                color: #fff;
+            }
+        }
+
+        .end {
+            border: 2px solid #FF4433;
+            background: transparent;
+
+            &:hover {
+                background: #FF4433;
+                color: #fff;
+            }
+        }
+    }
+}

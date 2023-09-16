@@ -2,8 +2,8 @@ import React, { useEffect, useReducer, useRef, useState } from "react";
 import { Input } from "../components";
 import { AvatarSvg, LogoutSvg } from "../assets";
 import { setLoading } from "../redux/additional";
-import { useDispatch } from "react-redux";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { axios } from "../lib";
 
 const reducer = (value, { type, data }) => {
@@ -49,7 +49,7 @@ const Account = () => {
 
   const ref = useRef({});
 
-  const { location, user } = useOutletContext();
+  const user = useSelector((state) => state?.user)
 
   const [state, action] = useReducer(reducer, {
     form: {
@@ -194,7 +194,7 @@ const Account = () => {
 
       clearTimeout(timer);
     };
-  }, [user, location]);
+  }, []);
 
   return (
     <section className="account">

@@ -1,6 +1,6 @@
 import React, { Fragment } from "react";
 import { Route, Routes } from "react-router-dom";
-import { Account, Chats, Groups, Stories } from "./pages";
+import { Account, AudioCall, Chats, Groups, Stories, VideoCall } from "./pages";
 import { Loading } from "./components";
 import { Login, SignUp } from "./features";
 import { useSelector } from "react-redux";
@@ -21,6 +21,8 @@ function App() {
           <Route path="/chat/:id" element={<Chats />} />
           <Route path="/groups" element={<Groups />} />
           <Route path="/groups/:id" element={<Groups />} />
+          <Route path="/video-call/:id" element={<VideoCall />} />
+          <Route path="/audio-call/:id" element={<AudioCall />} />
           <Route path="/stories" element={<Stories />} />
           <Route path="/stories/:id" element={<Stories />} />
           <Route path="/account" element={<Account />} />

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useOutletContext, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { StoriesUser, Users } from "../components";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setLoading } from "../redux/additional";
 
 const Stories = () => {
@@ -9,7 +9,7 @@ const Stories = () => {
 
   const { id } = useParams();
 
-  const { location, user } = useOutletContext();
+  const user = useSelector((state) => state?.user)
 
   const [size, setSize] = useState({
     sm: window.matchMedia("(max-width:680px)")?.matches,
@@ -39,7 +39,7 @@ const Stories = () => {
 
       clearTimeout(timer);
     };
-  }, [id, user, location]);
+  }, [id]);
 
   return (
     <section className="stories">

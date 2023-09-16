@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Input } from "../../components";
 import { GoogleSvg } from "../../assets";
-import { useNavigate, Link, useOutletContext } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setLoading } from "../../redux/additional";
 import { useGoogleLogin } from "@react-oauth/google";
@@ -13,8 +13,6 @@ const SignUp = () => {
   const dispatch = useDispatch();
 
   const navigate = useNavigate();
-
-  const { location } = useOutletContext();
 
   const [state, setState] = useState({
     form: {},
@@ -128,7 +126,7 @@ const SignUp = () => {
     return () => {
       clearTimeout(timer);
     };
-  }, [location]);
+  }, []);
   return (
     <section className="auth">
       <div className="content">

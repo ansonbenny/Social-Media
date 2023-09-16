@@ -97,12 +97,13 @@
     // small to medium devices
     @media screen and (max-width:680px) {
         top: auto;
-        left: .5rem;
+        left: .1rem;
         right: 0;
         bottom: .1rem;
         height: 3.3rem;
-        width: calc(100% - 1rem);
+        width: calc(100% - .2rem);
         border-radius: 10px;
+        background: var(--bg-secondary);
 
         .main {
             flex-direction: row;

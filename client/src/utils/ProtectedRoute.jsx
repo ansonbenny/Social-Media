@@ -30,7 +30,7 @@ const ProtectedRoute = ({ isAuth }) => {
             <section data-for="contents">
               <Notification />
               <Menu />
-              <Outlet context={{ location, user: res?.payload }} />
+              <Outlet />
             </section>
           );
         } else {
@@ -42,7 +42,7 @@ const ProtectedRoute = ({ isAuth }) => {
         } else if (!isAuth) {
           setComponent(
             <section data-for="fit-content">
-              <Outlet context={{ location }} />
+              <Outlet />
             </section>
           );
         }

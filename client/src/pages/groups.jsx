@@ -1,7 +1,7 @@
 import React, { Fragment, useCallback, useEffect, useReducer, useRef } from "react";
 import { ChatDetails, ChatLive, Users } from "../components";
-import { useNavigate, useOutletContext, useParams } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { setLoading, setNotification } from "../redux/additional";
 import { useSocket } from "../hooks";
 import { axios } from "../lib";
@@ -47,7 +47,7 @@ const Groups = () => {
 
   const { id } = useParams();
 
-  const { location, user } = useOutletContext();
+  const user = useSelector((state) => state?.user)
 
   const [state, action] = useReducer(reducer, {
     size: {
@@ -119,7 +119,7 @@ const Groups = () => {
 
   const emitUser = useCallback(() => {
     Socket?.emit("user", user?._id);
-  }, [Socket, user]);
+  }, [Socket]);
 
   useEffect(() => {
     document.title = "Soft Chat - Groups";
@@ -277,7 +277,7 @@ const Groups = () => {
 
       clearTimeout(timer);
     };
-  }, [id, location, emitUser]);
+  }, [id, emitUser]);
 
   return (
     <section className="chats">
