@@ -56,7 +56,6 @@
     border: none;
     outline: none;
     text-transform: capitalize;
-    padding: 0 1rem;
 }
 
 .mute_call_actions {
@@ -83,6 +82,19 @@
 
     .end {
         @include endBtn;
+        height: 2.7rem;
+        width: 2.7rem;
+        border: 2px solid #fff;
+
+        svg {
+            margin: auto;
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+
+        .svg_fill {
+            fill: #fff;
+        }
     }
 }
 
@@ -114,7 +126,7 @@
     }
 
     .status {
-        font-size: small;
+        font-size: x-small;
         font-weight: bold;
         color: $bg-violet;
         text-transform: uppercase;

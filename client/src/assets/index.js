@@ -24,4 +24,5 @@ export { default as HeadsetSvg } from "./headset";
 export { default as PenSvg } from './pen'
 export { default as SpeakerSvg } from './speaker'
 export { default as MicSvg } from './mic'
+export { default as EndSvg } from './end_call'
 

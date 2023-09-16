@@ -312,6 +312,7 @@
         .video_call,
         .call-ringing {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             margin: 1rem;
@@ -344,6 +345,8 @@
         }
 
         .audio_call {
+            gap: 1rem;
+
             audio {
                 visibility: hidden;
             }
@@ -376,6 +379,27 @@
                     margin-left: -2rem;
                     background: #F8C8DC;
                     color: #fff;
+                }
+            }
+
+            .in {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: .3rem;
+
+                p {
+                    color: var(--text-primary);
+                    font-weight: bold;
+                    font-size: x-small;
+                    text-transform: capitalize;
+                }
+
+                h1 {
+                    color: $bg-violet;
+                    font-weight: bold;
+                    font-size: small;
+                    text-transform: capitalize;
                 }
             }
         }

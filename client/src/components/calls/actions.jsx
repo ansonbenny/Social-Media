@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react'
-import { MicSvg, SpeakerSvg, VideoSvg } from '../../assets'
+import { EndSvg, MicSvg, SpeakerSvg, VideoSvg } from '../../assets'
 import './style.scss'
 
 const CallActions = ({ isAudio }) => {
@@ -24,7 +24,9 @@ const CallActions = ({ isAudio }) => {
                     </button>
                 }
 
-                <button className='end'>End Call</button>
+                <button className='end'>
+                    <EndSvg />
+                </button>
 
                 <button className='more_actions'>
                     <MicSvg />

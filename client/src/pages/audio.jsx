@@ -35,6 +35,10 @@ const AudioCall = () => {
                 B
             </div>
         </div>
+        <div className='in'>
+            <p>In Call With</p>
+            <h1>Anson Benny</h1>
+        </div>
         <audio src='https://www.learningcontainer.com/download/sample-mp3-file/?wpdmdl=1676&refresh=64e81122764691692930338' className='from_audio' />
 
         <CallActions isAudio />
