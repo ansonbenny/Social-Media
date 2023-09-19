@@ -4,12 +4,12 @@ import jwt from "jsonwebtoken";
 import user from "../helper/user.js";
 import { RoutePrivate, SocketPrivate } from "./private/index.js";
 import { RouteGroup, SocketGroup } from "./group/index.js";
-
-// express route middleware to check user is logged or not
+import { RouteCall, SocketCall } from "./call/index.js";
 
 export default (app, io) => {
 
   // socket io
+  // middleware to check user is logged or not
   io.use((socket, next) => {
     const { token = null } = socket?.request?.cookies;
 
@@ -69,7 +69,9 @@ export default (app, io) => {
     // socket io routes / callback
     SocketPrivate(socket, io);
 
-    SocketGroup(socket, io)
+    SocketGroup(socket, io);
+
+    SocketCall(socket, io);
 
     socket.on("disconnect", async () => {
       let previous = await chat?.removeSocketId?.(socket.id)?.catch?.(() => { });
@@ -86,4 +88,6 @@ export default (app, io) => {
   RoutePrivate(app, io)
 
   RouteGroup(app, io)
+
+  RouteCall(app, io)
 };

@@ -216,10 +216,18 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
             {
               isUser && (
                 <>
-                  <button>
+                  <button onClick={async () => {
+                    let Call = await import('./functions/call').catch(() => console.error("fun import error"))
+
+                    Call.default(details, true).then((login) => { if (login) { navigate('/login') } })
+                  }}>
                     <PhoneSvg width={"18px"} height={"18px"} />
                   </button>
-                  <button>
+                  <button onClick={async () => {
+                    let Call = await import('./functions/call').catch(() => console.error("fun import error"))
+
+                    Call.default(details).then((login) => { if (login) { navigate('/login') } })
+                  }}>
                     <VideoSvg width={"20px"} height={"20px"} />
                   </button>
                 </>)

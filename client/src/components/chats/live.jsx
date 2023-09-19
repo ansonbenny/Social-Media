@@ -20,10 +20,13 @@ import { LoadingCircle } from "../";
 import useScroll from "../../hooks/scroll";
 import Modal from "./modal";
 import { useAudio } from "../../hooks";
+import { useNavigate } from "react-router-dom";
 import "./style.scss";
 
 const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
   const audio = useAudio();
+
+  const navigate = useNavigate()
 
   const [refs, state, action] = useScroll({
     url: `${details?.user ? `/chat-single/userChat/${details?._id}` : `/chat-group/get_group/${details?._id}`}`,
@@ -94,10 +97,18 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
 
         {
           details?.user && <div className="actions">
-            <button>
+            <button onClick={async () => {
+              let Call = await import('./functions/call').catch(() => console.error("fun import error"))
+
+              Call.default(details, true).then((login) => { if (login) { navigate('/login') } })
+            }}>
               <PhoneSvg width={"18px"} height={"18px"} />
             </button>
-            <button>
+            <button onClick={async () => {
+              let Call = await import('./functions/call').catch(() => console.error("fun import error"))
+
+              Call.default(details).then((login) => { if (login) { navigate('/login') } })
+            }}>
               <VideoSvg width={"25px"} height={"25px"} />
             </button>
           </div>

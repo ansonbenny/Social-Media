@@ -130,6 +130,10 @@
         font-weight: bold;
         color: $bg-violet;
         text-transform: uppercase;
+
+        &:is(.ended) {
+            color: #FF4433 !important;
+        }
     }
 
     .actions {
@@ -173,5 +177,9 @@
                 color: #fff;
             }
         }
+    }
+
+    audio {
+        visibility: hidden;
     }
 }

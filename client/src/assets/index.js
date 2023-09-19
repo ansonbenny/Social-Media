@@ -26,3 +26,5 @@ export { default as SpeakerSvg } from './speaker'
 export { default as MicSvg } from './mic'
 export { default as EndSvg } from './end_call'
 
+export { default as ringing } from './ringing.mp3'
+

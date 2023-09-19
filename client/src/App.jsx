@@ -21,8 +21,8 @@ function App() {
           <Route path="/chat/:id" element={<Chats />} />
           <Route path="/groups" element={<Groups />} />
           <Route path="/groups/:id" element={<Groups />} />
-          <Route path="/video-call/:id" element={<VideoCall />} />
-          <Route path="/audio-call/:id" element={<AudioCall />} />
+          <Route path="/video-call" element={<VideoCall />} />
+          <Route path="/audio-call" element={<AudioCall />} />
           <Route path="/stories" element={<Stories />} />
           <Route path="/stories/:id" element={<Stories />} />
           <Route path="/account" element={<Account />} />
