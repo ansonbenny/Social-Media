@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useReducer, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { setLoading } from '../redux/additional';
 import { CallActions, CallRinging } from '../components';
@@ -6,16 +6,25 @@ import { useSocket } from '../hooks';
 import { Peer } from 'peerjs'
 import { addEnded } from '../redux/call';
 
+const reducer = (state, { type, data, ...action }) => {
+    switch (type) {
+        default:
+            return state
+    }
+}
+
 const VideoCall = () => {
     const ref = useRef({});
 
     const dispatch = useDispatch();
 
-    const Socket = useSocket();
+    const Socket = useSocket(true);
 
     const user = useSelector((state) => state?.user)
 
     const call = useSelector((state) => state?.call)
+
+    //const [state, actions] = useReducer(reducer, {})
 
     const emitUser = useCallback(() => {
         Socket?.emit("user", user?._id);
@@ -26,6 +35,8 @@ const VideoCall = () => {
 
         // for p2p
         const myPeer = new Peer();
+
+        let peers = [] // for close all active connections
 
         let timer;
 
@@ -46,37 +57,38 @@ const VideoCall = () => {
                         ref.current.small.srcObject = stream;
                     }
 
-                    myPeer.on('call', (call) => { // When we join someone's room we will receive a call from them
-                        call.answer(stream); // Stream them our video/audio
+                    myPeer.on('call', (call_peer) => { // When we join someone's room we will receive a call from them
 
-                        call.on("stream", (userVideoStream) => { // when we recieve their stream
+                        peers?.push(call_peer)
+
+                        call_peer.answer(stream); // Stream them our video/audio
+
+                        call_peer.on("stream", (userVideoStream) => { // when we recieve their stream
                             ref.current.big.srcObject = userVideoStream;
+                        })
+
+                        call_peer.on('close', () => {
+                            // when user left call end
+                            dispatch(addEnded());
                         })
                     })
 
-                    Socket.on("user joined video", ({ id, userId }) => { // This runs when someone joins our room
-
+                    Socket.on("user joined video", (id) => { // This runs when someone joins our room
                         let call_peer = myPeer.call(id, stream) // Call the user who just joined
+
+                        peers?.push(call_peer)
 
                         call_peer.on('stream', (userVideoStream) => {
                             ref.current.big.srcObject = userVideoStream;
                         })
 
-                        call_peer.on('close', () => { // If they leave, remove their video
-                            ref?.current?.big?.remove?.();
-
+                        call_peer.on('close', () => {
                             // when user left call end
                             dispatch(addEnded());
                         })
-
-                        Socket.on("all user status", (data) => {
-                            if (data?.offline && data?._id == userId) {
-                                call_peer?.close()
-                            }
-                        })
                     })
                 }).catch((err) => {
-                    console.log(err)
+                    alert(err)
                 })
 
                 myPeer.on("open", (id) => {
@@ -86,6 +98,10 @@ const VideoCall = () => {
                         myId: user?._id
                     })
                 })
+
+                navigator.mediaDevices.ondevicechange = (event) => {
+                    console.log(event)
+                }
             }
         } else {
             dispatch(setLoading(true));
@@ -109,9 +125,12 @@ const VideoCall = () => {
 
             myPeer.off("stream");
 
-            myPeer.disconnect();
+            peers?.forEach?.((peer) => {
+                // closing active connections when user left
+                peer?.close?.()
+            })
 
-            Socket?.off("all user status");
+            myPeer?.disconnect?.();
 
             Socket?.off("user joined video");
 

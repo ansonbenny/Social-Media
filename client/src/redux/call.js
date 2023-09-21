@@ -8,10 +8,10 @@ const callSlice = createSlice({
             return payload
         },
         addAttend: (state, { payload }) => {
-            return { ...state, attend: true }
+            return { ...state, attend: true, ended: null }
         },
         addEnded: (state, { payload }) => {
-            return { ...state, ended: true }
+            return { ...state, attend: null, ended: true }
         },
     }
 })

@@ -7,7 +7,7 @@ import { useSocket } from '../hooks';
 const AudioCall = () => {
     const dispatch = useDispatch()
 
-    const Socket = useSocket();
+    const Socket = useSocket(true);
 
     const { user, call } = useSelector((state) => state)
 

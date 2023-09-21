@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
 import { addAttend, addCall, addEnded } from "../redux/call";
 
-const useSocket = () => {
+const useSocket = (isCall) => {
   const SocketRef = useRef(null);
 
   const dispatch = useDispatch();
@@ -31,12 +31,14 @@ const useSocket = () => {
 
     // for video / audio calls
     SocketRef?.current?.on("call user", (data) => {
-      dispatch(addCall(data));
+      if (!isCall) {
+        dispatch(addCall(data));
 
-      if (data?.audio) {
-        navigate("/audio-call")
-      } else {
-        navigate("/video-call")
+        if (data?.audio) {
+          navigate("/audio-call")
+        } else {
+          navigate("/video-call")
+        }
       }
     })
 
