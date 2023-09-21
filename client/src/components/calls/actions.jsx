@@ -6,7 +6,7 @@ import { addCall } from '../../redux/call';
 import { EndSvg, MicSvg, SpeakerSvg, VideoSvg } from '../../assets'
 import './style.scss'
 
-const CallActions = ({ isAudio }) => {
+const CallActions = ({ isAudio, Mute, On_Media_Change }) => {
     const navigate = useNavigate();
 
     const dispatch = useDispatch()
@@ -41,20 +41,28 @@ const CallActions = ({ isAudio }) => {
     return (
         <Fragment>
             {
-                !isAudio && <button className="mute_call_actions more_actions">
+                !isAudio && <button onClick={Mute} className="mute_call_actions more_actions">
                     <SpeakerSvg />
                 </button>
             }
 
             <div className='CallActions'>
                 {
-                    isAudio && <button className="more_actions">
+                    isAudio && <button onClick={Mute} className="more_actions">
                         <SpeakerSvg />
                     </button>
                 }
 
                 {
-                    !isAudio && <button className='more_actions'>
+                    !isAudio && <button className='more_actions' onClick={(e) => {
+                        if (e?.target?.classList?.contains("active")) {
+                            e?.target?.classList?.remove("active")
+                            On_Media_Change(false, 'true')
+                        } else {
+                            e?.target?.classList?.add("active")
+                            On_Media_Change(false, 'false')
+                        }
+                    }}>
                         <VideoSvg />
                     </button>
                 }
@@ -63,7 +71,15 @@ const CallActions = ({ isAudio }) => {
                     <EndSvg />
                 </button>
 
-                <button className='more_actions'>
+                <button className='more_actions' onClick={(e) => {
+                    if (e?.target?.classList?.contains("active")) {
+                        e?.target?.classList?.remove("active")
+                        On_Media_Change('true')
+                    } else {
+                        e?.target?.classList?.add("active")
+                        On_Media_Change('false')
+                    }
+                }}>
                     <MicSvg />
                 </button>
             </div>

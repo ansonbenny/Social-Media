@@ -1,17 +1,73 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { setLoading } from '../redux/additional';
 import { CallActions, CallRinging } from '../components';
 import { useSocket } from '../hooks';
+import Peer from 'peerjs';
+import { addEnded } from '../redux/call';
 
 const AudioCall = () => {
+    const myPeer = new Peer();
+
+    const ref = useRef({});
+
     const dispatch = useDispatch()
 
     const Socket = useSocket(true);
 
-    const { user, call } = useSelector((state) => state)
+    const user = useSelector((state) => state?.user)
 
-    // when change route or exit site end call & already in a call wont call
+    const call = useSelector((state) => state?.call)
+
+    const Mute = (e) => {
+        if (e?.target?.classList?.contains("active")) {
+            e?.target?.classList?.remove("active");
+
+            ref.current.call.muted = false
+        } else {
+            e?.target?.classList?.add("active");
+
+            ref.current.call.muted = true
+        }
+    }
+
+    const setPeerData = (active_peer, peerId) => {
+        // for saving & update peer data
+
+        ref.current = {
+            ...ref.current,
+            peer: {
+                active_peer,
+                peerId: peerId ? peerId : ref?.current?.peer?.peerId
+            }
+        }
+    }
+
+    const On_WebRTC_Change = (stream) => {
+        const call_peer = myPeer.call(ref?.current?.peer?.peerId, stream)
+
+        setPeerData(call_peer)
+
+        call_peer?.on?.('close', () => {
+            // when user left call end
+            dispatch(addEnded());
+        })
+    }
+
+    const On_Media_Change = (audio = false) => {
+        navigator?.mediaDevices?.getUserMedia({
+            video: false,
+            audio: true
+        }).then((stream) => {
+            for (let audioTrack of stream.getAudioTracks()) {
+                audioTrack.enabled = audio === 'true' ? true : false;
+            }
+
+            On_WebRTC_Change(stream)
+        }).catch((err) => {
+            console.info(err)
+        })
+    }
 
     const emitUser = useCallback(() => {
         Socket?.emit("user", user?._id);
@@ -28,12 +84,91 @@ const AudioCall = () => {
             timer = setTimeout(() => {
                 dispatch(setLoading(false));
             }, 1000);
+
+            if (call?.attend) {
+                // webrtc
+                navigator?.mediaDevices?.getUserMedia({
+                    video: false,
+                    audio: true
+                }).then((stream) => {
+                    myPeer.on('call', (call_peer) => { // When we join someone's room we will receive a call from them
+
+                        setPeerData(call_peer)
+
+                        call_peer.answer(stream); // Stream them our video/audio
+
+                        call_peer.on("stream", (userVideoStream) => { // when we recieve their stream
+                            ref.current.call.srcObject = userVideoStream;
+                        })
+
+                        call_peer.on('close', () => {
+                            // when user left call end
+                            dispatch(addEnded());
+                        })
+                    })
+
+                    Socket.on("user joined video", (id) => { // This runs when someone joins our room
+
+                        const call_peer = myPeer.call(id, stream) // Call the user who just joined
+
+                        setPeerData(call_peer, id)
+
+                        call_peer.on('stream', (userVideoStream) => {
+                            ref.current.call.srcObject = userVideoStream;
+                        })
+
+                        call_peer.on('close', () => {
+                            // when user left call end
+                            dispatch(addEnded());
+                        })
+                    })
+                }).catch((err) => {
+                    alert(err)
+                })
+
+                myPeer.on("open", (id) => {
+                    Socket.emit("join video call", {
+                        id,
+                        to: call?.from == user?._id ? call?.to : call?.from,
+                        myId: user?._id
+                    })
+                })
+
+                // when device change
+                navigator?.mediaDevices?.addEventListener('devicechange', () => On_Media_Change('true'))
+            }
         } else {
             dispatch(setLoading(true));
         }
 
+        // event listeners
+        const onMetaData = (e) => {
+            e?.target?.play()
+        }
+
+        ref?.current?.call?.addEventListener('loadedmetadata', onMetaData)
+
         return () => {
             clearTimeout(timer);
+
+            myPeer.off("open");
+
+            myPeer.off("call");
+
+            myPeer.off("stream");
+
+            ref?.current?.peer?.active_peer?.close?.() // closing active connections when user left
+
+            myPeer?.disconnect?.();
+
+            Socket?.off("user joined video");
+
+            ref?.current?.call?.removeEventListener('loadedmetadata', onMetaData);
+
+            if (call?.attend) {
+                // when device change
+                navigator?.mediaDevices?.removeEventListener('devicechange', () => On_Media_Change('true'))
+            }
         };
     }, [call, emitUser]);
 
@@ -57,9 +192,13 @@ const AudioCall = () => {
                 call?.from == user?._id ? call?.toName : call?.from_name
             }</h1>
         </div>
-        <audio src='https://www.learningcontainer.com/download/sample-mp3-file/?wpdmdl=1676&refresh=64e81122764691692930338' className='from_audio' />
+        <audio className='from_audio' ref={(elm) => {
+            if (ref?.current) {
+                ref.current.call = elm
+            }
+        }} />
 
-        <CallActions isAudio />
+        <CallActions isAudio Mute={Mute} On_Media_Change={On_Media_Change} />
 
     </section>
         : <CallRinging />
