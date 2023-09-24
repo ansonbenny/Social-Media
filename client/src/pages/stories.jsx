@@ -44,7 +44,7 @@ const Stories = () => {
   return (
     <section className="stories">
       {!id || !size?.sm ? (
-        <Users stories selected={id ? true : undefined} />
+        <Users stories />
       ) : null}
 
       {id ? (

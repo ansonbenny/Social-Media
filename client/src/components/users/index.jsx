@@ -1,14 +1,13 @@
 import React, { Fragment, forwardRef, useEffect, useImperativeHandle } from "react";
 import { AvatarSvg, PlusSvg, SearchSvg } from "../../assets";
 import { useNavigate, useParams } from "react-router-dom";
-import { LoadingCircle } from "..";
+import { LoadingCircle, Modal } from "..";
 import { axios } from "../../lib";
 import { useSelector } from "react-redux";
 import { useScroll } from "../../hooks";
-import Modal from "../chats/modal";
 import "./style.scss";
 
-const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
+const Users = forwardRef(({ stories, isUsers }, ref) => {
   const { id } = useParams()
 
   const navigate = useNavigate();
@@ -165,24 +164,6 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
           : null
       }
 
-      {!selected && stories ? (
-        <div className="stories-recent">
-          <div className="item">
-            <img
-              src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
-              alt="profile"
-            />
-          </div>
-
-          <div className="item">
-            <img
-              src="https://img.i-scmp.com/cdn-cgi/image/fit=contain,width=425,format=auto/sites/default/files/styles/768x768/public/d8/images/methode/2021/01/11/d5ed0832-5001-11eb-ad83-255e1243236c_image_hires_113755.jpg?itok=6PsAhoy2&v=1610336282"
-              alt="profile"
-            />
-          </div>
-        </div>
-      ) : null}
-
       {!stories && (
         <Fragment>
           <div className="title">
@@ -207,7 +188,13 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
         {
           stories || isUsers ? <div
             className={`card ${id && id == user?._id ? "active" : ""}`}
-            onClick={() => navigate(`/chat/${user?._id}`)}
+            onClick={() => {
+              if (stories) {
+                navigate(`/stories/${user?._id}`)
+              } else {
+                navigate(`/chat/${user?._id}`)
+              }
+            }}
           >
             <div className="cover">
               {
@@ -217,7 +204,10 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
                 />
                   : <AvatarSvg />
               }
-              <div data-for="status" />
+
+              {
+                isUsers && <div data-for="status" />
+              }
             </div>
             <div className="content">
               <h1>(You) {user?.name}</h1>
@@ -238,7 +228,7 @@ const Users = forwardRef(({ selected, stories, isUsers }, ref) => {
                   if (isUsers) {
                     navigate(`/chat/${obj?.id}`)
                   } else if (stories) {
-                    // for stories
+                    navigate(`/stories/${obj?.id}`)
                   } else {
                     navigate(`/groups/${obj?.id}`)
                   }

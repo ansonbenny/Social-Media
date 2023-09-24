@@ -16,9 +16,8 @@ import {
   VideoSvg,
 } from "../../assets";
 import { useSelector } from "react-redux";
-import { LoadingCircle } from "../";
+import { LoadingCircle, Modal } from "../";
 import useScroll from "../../hooks/scroll";
-import Modal from "./modal";
 import { useAudio } from "../../hooks";
 import { useNavigate } from "react-router-dom";
 import "./style.scss";

@@ -5,6 +5,7 @@ import user from "../helper/user.js";
 import { RoutePrivate, SocketPrivate } from "./private/index.js";
 import { RouteGroup, SocketGroup } from "./group/index.js";
 import { RouteCall, SocketCall } from "./call/index.js";
+import RouteStories from './stories.js'
 
 export default (app, io) => {
 
@@ -90,4 +91,6 @@ export default (app, io) => {
   RouteGroup(app, io)
 
   RouteCall(app, io)
+
+  RouteStories(app, io)
 };

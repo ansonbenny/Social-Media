@@ -12,7 +12,7 @@ import {
   VideoSvg,
   Xsvg,
 } from "../../assets";
-import Modal from "./modal";
+import { Modal } from "../";
 import { axios } from "../../lib";
 import { useNavigate } from "react-router-dom";
 import "./style.scss";

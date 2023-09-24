@@ -67,29 +67,6 @@
         }
     }
 
-    .stories-recent {
-        margin-left: .5rem;
-        margin-bottom: .5rem;
-        display: flex;
-        flex-direction: row;
-        gap: 1rem;
-
-        @media screen and (max-height:600px) {
-            margin-bottom: 0;
-        }
-
-        .item {
-            cursor: pointer;
-
-            img {
-                width: 3rem;
-                height: 3rem;
-                border: 2px solid $bg-violet;
-                @include coverImg;
-            }
-        }
-    }
-
     .list {
         width: 100%;
         height: auto;

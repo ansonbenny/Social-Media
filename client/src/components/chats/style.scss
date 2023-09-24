@@ -1030,39 +1030,10 @@
     }
 
     section[data-for="modal_outer"] {
-        position: absolute;
-        left: 0;
-        top: 0;
-        z-index: 888;
-        width: 100%;
-        height: 100%;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        backdrop-filter: blur(1px);
 
-        &:is(.active) {
-            display: flex;
-        }
+        @include specialModal;
 
         .inner_modal {
-            box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
-            width: 350px;
-            height: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: .5rem;
-            background: var(--bg-primary);
-            border-radius: 10px;
-            margin: .5rem;
-
-            @media screen and (max-width: 350px) {
-                height: auto;
-                width: 100%;
-            }
-
             .scroll_bar {
                 width: 100%;
                 height: auto;
@@ -1100,100 +1071,9 @@
                 }
             }
 
-            video {
-                width: 100%;
-                height: auto;
-            }
-
             @include audio_controls;
 
             form {
-                width: 100%;
-                display: flex;
-                flex-direction: row;
-                gap: 1rem;
-                margin: 1rem 0;
-                align-items: center;
-
-                .upload {
-                    width: 2rem;
-                    height: 2rem;
-                    position: relative;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    border: 2px solid $Text-Secondary;
-                    border-radius: 999px;
-                    cursor: pointer;
-                    margin-right: auto;
-                    transition: all .3s ease-in-out;
-                    -moz-transition: all .3s ease-in-out;
-
-                    svg {
-                        width: 1.5rem;
-                        height: 1.5rem;
-                        fill: $Text-Secondary;
-                        transition: all .3s ease-in-out;
-                        -moz-transition: all .3s ease-in-out;
-                    }
-
-                    &:hover {
-                        border-color: $bg-violet;
-
-                        svg {
-                            fill: $bg-violet;
-                        }
-                    }
-
-                    input {
-                        cursor: pointer;
-                        position: absolute;
-                        width: 2rem;
-                        height: 2rem;
-                        border-radius: 999px;
-                        opacity: 0;
-
-                        &::-webkit-file-upload-button {
-                            cursor: pointer;
-                        }
-                    }
-                }
-
-                button {
-                    cursor: pointer;
-                    width: auto;
-                    height: auto;
-                    background: transparent;
-                    border: none;
-                    border-radius: 10px;
-
-                    svg {
-                        width: 18px;
-                        height: 18px;
-                    }
-
-                    .svg_path_fill path {
-                        fill: $Text-Secondary;
-                        transition: all .3s ease-in-out;
-                        -moz-transition: all .3s ease-in-out;
-                    }
-
-                    .svg_path_stroke path {
-                        stroke: $Text-Secondary;
-                        transition: all .3s ease-in-out;
-                        -moz-transition: all .3s ease-in-out;
-                    }
-
-                    &:hover {
-                        .svg_path_stroke path {
-                            stroke: $bg-violet;
-                        }
-
-                        .svg_path_fill path {
-                            fill: $bg-violet;
-                        }
-                    }
-                }
 
                 .group_create {
                     width: 100%;
@@ -1374,37 +1254,6 @@
                         text-transform: uppercase;
                         font-weight: bold;
                     }
-                }
-
-                button[data-for="bordered"] {
-                    padding: .5rem .7rem;
-                    color: var(--text-primary);
-                    border: 2px solid $bg-violet;
-                    text-transform: capitalize;
-                    border-radius: 10px;
-                    background: linear-gradient(to right, $bg-violet 50%, transparent 50%);
-                    background-size: 250% 100%;
-                    background-position: right;
-                    transition: all .5s ease-in-out;
-                    -moz-transition: all .5s ease-in-out;
-
-                    &:hover {
-                        background-position: left;
-                        color: #fff;
-                    }
-                }
-            }
-
-            .progress {
-                width: calc(100% - 2rem);
-                display: none;
-                height: .4rem;
-                margin: 0 1rem;
-                border-radius: 999px;
-                background: linear-gradient(to right, $bg-violet 0%, $bg-violet 0%, $Text-Secondary 0%, $Text-Secondary 100%);
-
-                &:is(.active) {
-                    display: block;
                 }
             }
         }

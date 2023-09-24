@@ -1,4 +1,4 @@
-import React, { Fragment, forwardRef, useEffect, useImperativeHandle, useReducer, useRef } from 'react'
+import React, { Fragment, forwardRef, useEffect, useImperativeHandle, useReducer } from 'react'
 import { AvatarSvg, ClipSvg, PauseSvg, PlaySvg, SendSvg, Xsvg } from '../../assets'
 import { useAudio } from '../../hooks'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -92,7 +92,7 @@ const reducer = (value, { type, ...actions }) => {
     }
 }
 
-const Modal = forwardRef(({ audio_live, isUser }, ref) => {
+const Modal = forwardRef(({ audio_live, isUser, isStories }, ref) => {
 
     const refs = useAudio()
 
@@ -205,6 +205,20 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
                     signal: abortController?.signal,
                     onUploadProgress
                 })
+            } catch (err) {
+                if (err?.response?.data?.status == 405) {
+                    alert("Please Login")
+                    navigate('/')
+                } else if (err?.code !== "ERR_CANCELED") {
+                    alert(err?.response?.data?.message || "Something Went Wrong");
+                } else {
+                    alert("Cancelled Old Request")
+                }
+            }
+        } else if (isStories) {
+            try {
+                console.log(id)
+                // socket io for reload my own stories when uploaded in back end
             } catch (err) {
                 if (err?.response?.data?.status == 405) {
                     alert("Please Login")
@@ -412,7 +426,7 @@ const Modal = forwardRef(({ audio_live, isUser }, ref) => {
                                             e.target.files[0].url = URL.createObjectURL(e?.target?.files?.[0])
                                             action({ type: "file", file: e?.target?.files?.[0] })
                                         }
-                                    }} type="file" accept="image/* , video/* , audio/*" required />
+                                    }} type="file" accept={isStories ? 'video/*' : 'image/* , video/* , audio/*'} required />
 
                                     <ClipSvg />
                                 </div>
