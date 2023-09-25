@@ -53,28 +53,30 @@ const StoriesUser = forwardRef((params, ref) => {
   }
 
   const TrashStory = async (data) => {
-    if (refs?.current?.abortControl) {
-      refs?.current?.abortControl?.abort?.()
-    }
-
-    refs.current.abortControl = new AbortController();
-
-    try {
-      let res = await axios.delete(`/stories/delete_story/`, {
-        data,
-        signal: refs?.current?.abortControl?.signal,
-      });
-
-      if (res?.['data']) {
-        getStories()
+    if (window.confirm("Do you want delete?")) {
+      if (refs?.current?.abortControl) {
+        refs?.current?.abortControl?.abort?.()
       }
 
-    } catch (err) {
-      if (err?.response?.data?.status == 405) {
-        alert("Please Login")
-        navigate('/')
-      } else if (err?.code !== "ERR_CANCELED") {
-        alert(err?.response?.data?.message || "Something Went Wrong");
+      refs.current.abortControl = new AbortController();
+
+      try {
+        let res = await axios.delete(`/stories/delete_story/`, {
+          data,
+          signal: refs?.current?.abortControl?.signal,
+        });
+
+        if (res?.['data']) {
+          getStories()
+        }
+
+      } catch (err) {
+        if (err?.response?.data?.status == 405) {
+          alert("Please Login")
+          navigate('/')
+        } else if (err?.code !== "ERR_CANCELED") {
+          alert(err?.response?.data?.message || "Something Went Wrong");
+        }
       }
     }
   }
