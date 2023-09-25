@@ -95,4 +95,24 @@ export default {
       },
     }),
   }),
+  share_storie:multer?.({
+    storage: multer.diskStorage({
+      destination: async (req, file, cb) => {
+        let dir = `./files/stories/${req?.query?.userId}`;
+
+        try {
+          await fs?.access(dir);
+        } catch (err) {
+          await fs?.mkdir(dir, {
+            recursive: true,
+          });
+        }
+
+        cb(null, dir);
+      },
+      filename: (req, file, cb) => {
+        cb(null, `${Date?.now()?.toString?.(16)}_${file.originalname}`);
+      },
+    }),
+  }),
 };

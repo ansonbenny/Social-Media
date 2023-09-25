@@ -1,21 +1,97 @@
-import React, { useRef } from "react";
-import { PlaySvg, PlusSvg, TrashSvg } from "../../assets";
+import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import { AvatarSvg, PlaySvg, PlusSvg, TrashSvg } from "../../assets";
 import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Modal } from "../";
+import { axios } from "../../lib";
 import "./style.scss";
 
-const StoriesUser = () => {
+const StoriesUser = forwardRef((params, ref) => {
 
   const { id } = useParams();
 
-  const ref = useRef();
+  const refs = useRef({});
+
+  const navigate = useNavigate();
 
   const user = useSelector((state) => state?.user);
 
+  const [state, setState] = useState({})
+
+  const getStories = async (offset = 0) => {
+    if (refs?.current?.abortControl) {
+      refs?.current?.abortControl?.abort?.()
+    }
+
+    refs.current.abortControl = new AbortController();
+
+    try {
+      let res = await axios.get(`/stories/get_stories/${id}`, {
+        params: {
+          offset
+        },
+        signal: refs?.current?.abortControl?.signal,
+      });
+
+      if (offset >= 1 && res?.['data']?.data?.stories?.length >= 1) {
+        setState((state) => ({
+          total: res?.['data']?.data?.total,
+          stories: [...state?.stories, ...res?.['data']?.data?.stories]
+        }))
+      } else if (res?.['data']?.data) {
+        setState(res?.['data']?.data)
+      }
+
+    } catch (err) {
+      if (err?.response?.data?.status == 405) {
+        alert("Please Login")
+        navigate('/')
+      } else if (err?.code !== "ERR_CANCELED") {
+        alert(err?.response?.data?.message || "Something Went Wrong");
+      }
+    }
+  }
+
+  const TrashStory = async (data) => {
+    if (refs?.current?.abortControl) {
+      refs?.current?.abortControl?.abort?.()
+    }
+
+    refs.current.abortControl = new AbortController();
+
+    try {
+      let res = await axios.delete(`/stories/delete_story/`, {
+        data,
+        signal: refs?.current?.abortControl?.signal,
+      });
+
+      if (res?.['data']) {
+        getStories()
+      }
+
+    } catch (err) {
+      if (err?.response?.data?.status == 405) {
+        alert("Please Login")
+        navigate('/')
+      } else if (err?.code !== "ERR_CANCELED") {
+        alert(err?.response?.data?.message || "Something Went Wrong");
+      }
+    }
+  }
+
+  useImperativeHandle(ref, () => ({
+    setInitial: (data) => {
+      setState(data)
+    }
+  }), [])
+
   return (
     <section className="stories-user">
-      <Modal isStories ref={ref} />
+      <Modal isStories ref={(elm) => {
+        if (refs?.current) {
+          refs.current.modal = elm
+        }
+      }} />
 
       <div className="items">
         {
@@ -23,7 +99,7 @@ const StoriesUser = () => {
             <button
               className="chats_modal_special"
               onClick={() => {
-                ref?.current?.Modal?.(true)
+                refs?.current?.modal?.Modal?.(true)
               }}>
               <PlusSvg />
             </button>
@@ -35,36 +111,64 @@ const StoriesUser = () => {
           </div>
         }
 
-        <div className="card">
-          <img
-            className="thumb"
-            src="https://nextluxury.com/wp-content/uploads/Bedroom-Computer-Room-Ideas-8-rombeethuwon.jpg"
-          />
-          <div className="user">
-            <img
-              className="cover-user"
-              src="https://m.media-amazon.com/images/M/MV5BMjI4NDE1MjE1Nl5BMl5BanBnXkFtZTgwNzQ2MTMzOTE@._V1_.jpg"
-              alt=""
-            />
-            <h1 className="user-name">Anson Benny</h1>
-          </div>
+        {
+          state?.stories?.map((obj, key) => {
+            return (
+              <div className="card" key={key}>
+                <video
+                  className="thumb"
+                  autoPlay={false}
+                  muted={true}
+                  controls={false}
+                  src={obj?.url}
+                />
 
-          <div className="actions">
-            <button>
-              <PlaySvg width={"25px"} height={"25px"} />
-            </button>
+                <div className="user">
 
-            {
-              id == user?._id && <button className="trash">
-                <TrashSvg width={'16px'} height={'16px'} />
-              </button>
-            }
-          </div>
+                  {
+                    obj?.user?.img ?
+                      <img src={`/files/profiles/${obj?.user?.img}`} />
+                      : <AvatarSvg />
+                  }
 
-        </div>
+                  <h1 className="user-name">{obj?.user?.name}</h1>
+                </div>
+
+                <div className="actions">
+                  <button
+                    className="chats_modal_special"
+                    onClick={() => {
+                      refs?.current?.modal?.Modal?.({
+                        ...obj,
+                        type: "video"
+                      })
+                    }}>
+                    <PlaySvg width={"25px"} height={"25px"} />
+                  </button>
+
+                  {
+                    id == user?._id && <button onClick={() => TrashStory({
+                      url: obj?.url,
+                      _id: obj?._id
+                    })} className="trash">
+                      <TrashSvg width={'16px'} height={'16px'} />
+                    </button>
+                  }
+                </div>
+
+              </div>
+            )
+          })
+        }
       </div>
+
+      {
+        state?.total > state?.stories?.length && <button onClick={() => {
+          getStories(state?.stories?.length)
+        }} data-for="load_more">Load More</button>
+      }
     </section>
   );
-};
+});
 
 export default StoriesUser;

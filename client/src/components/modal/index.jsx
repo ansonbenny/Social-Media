@@ -217,8 +217,19 @@ const Modal = forwardRef(({ audio_live, isUser, isStories }, ref) => {
             }
         } else if (isStories) {
             try {
-                console.log(id)
-                // socket io for reload my own stories when uploaded in back end
+                const formdata = new FormData();
+
+                if (state?.video) {
+                    formdata.append("file", state?.video)
+                }
+
+                axios.post('/stories/new_story', formdata, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                    signal: abortController?.signal,
+                    onUploadProgress
+                })
             } catch (err) {
                 if (err?.response?.data?.status == 405) {
                     alert("Please Login")

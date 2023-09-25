@@ -68,7 +68,8 @@
                     left: .5rem;
                     bottom: 1rem;
 
-                    .cover-user {
+                    img,
+                    svg {
                         max-width: 2.5rem;
                         max-height: 2.5rem;
                         border: 2px solid $bg-violet;
@@ -78,6 +79,11 @@
                             max-width: 2rem;
                             max-height: 2rem;
                         }
+                    }
+
+                    svg {
+                        padding: .1rem;
+                        fill: $bg-violet;
                     }
 
                     .user-name {
@@ -210,6 +216,28 @@
                     font-size: small;
                     font-weight: normal;
                 }
+            }
+        }
+
+        button[data-for="load_more"] {
+            width: 7rem;
+            height: 2.3rem;
+            border-radius: .5rem;
+            font-size: small;
+            text-transform: uppercase;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+            background: $bg-violet;
+            border: 2px solid $bg-violet;
+            margin: 0 auto;
+            margin-bottom: .5rem;
+            transition: all .5s ease-in-out;
+            -moz-transition: all .5s ease-in-out;
+
+            &:hover {
+                background: transparent;
+                color: var(--text-primary)
             }
         }
     }

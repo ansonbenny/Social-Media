@@ -3,4 +3,5 @@ export default {
   TEMP: "temp",
   PRIVATE: "private",
   GROUP: "group",
+  STORIES: "stories"
 };

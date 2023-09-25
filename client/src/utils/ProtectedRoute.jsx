@@ -52,7 +52,7 @@ const ProtectedRoute = ({ isAuth }) => {
     return () => {
       abortControl?.abort?.();
     };
-  }, [location, isAuth]);
+  }, [location?.pathname, isAuth]);
 
   return component;
 };

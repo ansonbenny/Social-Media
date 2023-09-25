@@ -15,8 +15,8 @@ const Users = forwardRef(({ stories, isUsers }, ref) => {
   const user = useSelector((state) => state?.user)
 
   const [refs, state, action] = useScroll({
-    url: isUsers ? `/chat-single/recent_users_more` : `/chat-group/recent_groups_more`, // change for users , stories ,groups
-    search_url: isUsers ? `/chat-single/search_users` : `/chat-group/get_groups_search`// change for users , stories ,groups
+    url: isUsers ? `/chat-single/recent_users_more` : stories ? `/stories/get_users` : `/chat-group/recent_groups_more`,
+    search_url: isUsers ? `/chat-single/search_users` : `/chat-group/get_groups_search`
   })
 
   const OnInput = async (e) => {
@@ -131,7 +131,9 @@ const Users = forwardRef(({ stories, isUsers }, ref) => {
             signal: abortControl?.signal
           })
         } else if (stories) {
-
+          res = await axios.get("/stories/get_users", {
+            signal: abortControl?.signal
+          })
         } else {
           res = await axios.get("/chat-group/get_groups", {
             signal: abortControl?.signal
