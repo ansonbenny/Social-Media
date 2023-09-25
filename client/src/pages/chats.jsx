@@ -355,7 +355,7 @@ const Chats = () => {
                 ref.current.live = elm
               }
             }}
-            details={state?.details}
+            details={{ ...state?.details, me: id == user?._id }}
             onChat={onChat}
             onInput={onInput}
             setModal={!state?.size?.lg
@@ -372,7 +372,7 @@ const Chats = () => {
                   ref.current.details = elm
                 }
               }}
-              details={state?.details}
+              details={{ ...state?.details, me: id == user?._id }}
               isUser
               setModal={
                 state?.modal?.details && !state?.size?.lg

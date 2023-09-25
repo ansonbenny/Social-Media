@@ -202,7 +202,7 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
           <h1>{details?.name}</h1>
           <p className="status">{details?.status || "offline"}</p>
 
-          <div className={`more_actions ${!details?.user ? 'left' : ''}`}>
+          <div className={`more_actions ${!details?.user ? 'left' : details?.me && 'left'}`}>
             <button
               onClick={() => {
                 setModal?.((state) => ({
@@ -214,7 +214,7 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
               <ChatsSvg width={"20px"} height={"20px"} />
             </button>
             {
-              isUser && (
+              isUser && !details?.me ? (
                 <>
                   <button onClick={async () => {
                     let Call = await import('./functions/call').catch(() => console.error("fun import error"))
@@ -231,6 +231,7 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
                     <VideoSvg width={"20px"} height={"20px"} />
                   </button>
                 </>)
+                : null
             }
             <button onClick={DeleteChat}>
               <TrashSvg isFull width={"18px"} height={"18px"} />

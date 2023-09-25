@@ -95,7 +95,7 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
         </div>
 
         {
-          details?.user && <div className="actions">
+          details?.user && !details?.me ? (<div className="actions">
             <button onClick={async () => {
               let Call = await import('./functions/call').catch(() => console.error("fun import error"))
 
@@ -110,7 +110,8 @@ const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
             }}>
               <VideoSvg width={"25px"} height={"25px"} />
             </button>
-          </div>
+          </div>)
+            : null
         }
       </div>
 
