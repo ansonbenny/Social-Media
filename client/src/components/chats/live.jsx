@@ -18,12 +18,12 @@ import {
 import { useSelector } from "react-redux";
 import { LoadingCircle, Modal } from "../";
 import useScroll from "../../hooks/scroll";
-import { useAudio } from "../../hooks";
+import { useTrack } from "../../hooks";
 import { useNavigate } from "react-router-dom";
 import "./style.scss";
 
 const ChatLive = forwardRef(({ setModal, onChat, details, onInput }, ref) => {
-  const audio = useAudio();
+  const audio = useTrack();
 
   const navigate = useNavigate()
 

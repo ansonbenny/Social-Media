@@ -1,6 +1,6 @@
 import React, { Fragment, forwardRef, useEffect, useImperativeHandle, useReducer } from 'react'
 import { AvatarSvg, ClipSvg, PauseSvg, PlaySvg, SendSvg, Xsvg } from '../../assets'
-import { useAudio } from '../../hooks'
+import { useTrack } from '../../hooks'
 import { useNavigate, useParams } from 'react-router-dom'
 import { axios } from '../../lib'
 import { useSelector } from 'react-redux'
@@ -92,9 +92,9 @@ const reducer = (value, { type, ...actions }) => {
     }
 }
 
-const Modal = forwardRef(({ audio_live, isUser, isStories }, ref) => {
+const Modal = forwardRef(({ audio_live, isUser }, ref) => {
 
-    const refs = useAudio()
+    const refs = useTrack()
 
     const navigate = useNavigate()
 
@@ -199,31 +199,6 @@ const Modal = forwardRef(({ audio_live, isUser, isStories }, ref) => {
                 }
 
                 await axios.post('/chat-single/share_file', formdata, {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                    signal: abortController?.signal,
-                    onUploadProgress
-                })
-            } catch (err) {
-                if (err?.response?.data?.status == 405) {
-                    alert("Please Login")
-                    navigate('/')
-                } else if (err?.code !== "ERR_CANCELED") {
-                    alert(err?.response?.data?.message || "Something Went Wrong");
-                } else {
-                    alert("Cancelled Old Request")
-                }
-            }
-        } else if (isStories) {
-            try {
-                const formdata = new FormData();
-
-                if (state?.video) {
-                    formdata.append("file", state?.video)
-                }
-
-                axios.post('/stories/new_story', formdata, {
                     headers: {
                         "Content-Type": "multipart/form-data",
                     },
@@ -367,7 +342,7 @@ const Modal = forwardRef(({ audio_live, isUser, isStories }, ref) => {
                 }
 
                 {
-                    state?.video && <video controls src={state?.video?.url} />
+                    state?.video && <video controls controlsList="nodownload" src={state?.video?.url} />
                 }
 
                 {
@@ -437,7 +412,7 @@ const Modal = forwardRef(({ audio_live, isUser, isStories }, ref) => {
                                             e.target.files[0].url = URL.createObjectURL(e?.target?.files?.[0])
                                             action({ type: "file", file: e?.target?.files?.[0] })
                                         }
-                                    }} type="file" accept={isStories ? 'video/*' : 'image/* , video/* , audio/*'} required />
+                                    }} type="file" accept='image/* , video/* , audio/*' required />
 
                                     <ClipSvg />
                                 </div>

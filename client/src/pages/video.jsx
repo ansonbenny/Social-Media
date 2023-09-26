@@ -44,7 +44,7 @@ const VideoCall = () => {
         ref.current = {
             ...ref.current,
             peer: {
-                active_peer,
+                active_peer: active_peer ? active_peer : ref?.current?.peer?.active_peer,
                 peerId: peerId ? peerId : ref?.current?.peer?.peerId
             }
         }
@@ -104,6 +104,10 @@ const VideoCall = () => {
             }, 1000);
 
             if (call?.attend) {
+                Socket.on("user joined call", (id) => {
+                    setPeerData(null, id)
+                })
+
                 // webrtc
                 navigator?.mediaDevices?.getUserMedia({
                     video: true,
@@ -129,11 +133,10 @@ const VideoCall = () => {
                         })
                     })
 
-                    Socket.on("user joined video", (id) => { // This runs when someone joins our room
-
+                    const CallPeer = (id) => {
                         const call_peer = myPeer.call(id, stream) // Call the user who just joined
 
-                        setPeerData(call_peer, id)
+                        setPeerData(call_peer)
 
                         call_peer.on('stream', (userVideoStream) => {
                             ref.current.big.srcObject = userVideoStream;
@@ -143,7 +146,16 @@ const VideoCall = () => {
                             // when user left call end
                             dispatch(addEnded());
                         })
-                    })
+                    }
+
+                    if (ref?.current?.peer?.peerId) {
+                        CallPeer(ref?.current?.peer?.peerId)
+                    } else {
+                        Socket.on("user joined call", (id) => {
+                            setPeerData(null, id)
+                            CallPeer(id)
+                        })
+                    }
                 }).catch((err) => {
                     alert(err)
                 })
@@ -185,7 +197,7 @@ const VideoCall = () => {
 
             myPeer?.disconnect?.();
 
-            Socket?.off("user joined video");
+            Socket?.off("user joined call");
 
             ref?.current?.small?.removeEventListener('loadedmetadata', onMetaData);
 

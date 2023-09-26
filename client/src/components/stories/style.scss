@@ -244,5 +244,81 @@
 
     section[data-for="modal_outer"] {
         @include specialModal;
+
+        .inner_modal {
+            margin: 1.5rem;
+            width: auto;
+
+            .video {
+                width: 100%;
+                display: none;
+
+                video {
+                    cursor: pointer;
+                    height: auto;
+                    max-height: 65vh;
+                }
+
+                input[type="range"] {
+                    position: relative;
+                    width: 100%;
+                    height: .3rem;
+                    -webkit-appearance: none;
+                    appearance: none;
+                    background: linear-gradient(to right, $bg-violet 0%, $bg-violet 0%, $Text-Secondary 0%, $Text-Secondary 100%);
+                    border-radius: 999px;
+                    transition: all .5s ease-in-out;
+                    -moz-transition: all .5s ease-in-out;
+
+                    &::-webkit-slider-thumb {
+                        -webkit-appearance: none;
+                        appearance: none;
+                        height: .5rem;
+                        width: .5rem;
+                        border-radius: 999px;
+                        background: var(--text-primary);
+                        border: none;
+                    }
+
+                    &::-moz-range-thumb {
+                        appearance: none;
+                        height: .5rem;
+                        width: .5rem;
+                        border-radius: 999px;
+                        background: var(--text-primary);
+                        border: none;
+                    }
+
+                    &:is(.non_active) {
+                        &::-webkit-slider-thumb {
+                            visibility: hidden;
+                        }
+
+                        &::-moz-range-thumb {
+                            visibility: hidden;
+                        }
+                    }
+                }
+            }
+
+            form {
+                width: 350px;
+
+                @media screen and (max-width: 350px) {
+                    width: 100%;
+                }
+            }
+
+            &:is(.active-full) {
+                .video {
+                    display: block;
+                }
+
+                form {
+                    width: 100%;
+                }
+            }
+        }
+
     }
 }

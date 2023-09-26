@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-const useAudio = () => {
+const useTrack = () => {
     const ref = useRef({});
 
     useEffect(() => {
@@ -63,4 +63,4 @@ const useAudio = () => {
     return ref
 }
 
-export default useAudio
+export default useTrack
