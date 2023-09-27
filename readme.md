@@ -13,7 +13,7 @@ This project is a Social Media platform, It's made for live private/group chat &
 - Unreaded Messages Count
 - File Share (Audio, Video, Image )
 - Create/Edit/Delete Group
-- You can add members to the group if they are friends
+- Admin can add members to the group if they are friends
 - Share Stories
 - Search for Users (name search for friends, global id/number search)
 - Search for Group (only for joined groups)
