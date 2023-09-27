@@ -18,7 +18,7 @@ This project is a Social Media platform, It's made for live private/group chat &
 - Search for Users (name search for friends, global id/number search)
 - Search for Group (only for joined groups)
 - Account Edit Option
-- Messages Copy & Delete Option & Delete Entire Chat
+- Messages Copy/Delete/Delete Entire Chat Options
 - Light & Dark mode
 - Responsive Design
 
