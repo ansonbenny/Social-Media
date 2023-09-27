@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import http from "http";
+import path from "path";
 import { Server } from "socket.io";
 
 // routes
@@ -39,6 +40,8 @@ const io = new Server(server, {
 
 io.use(wrapSocketIo(cookieParser()));
 
+app.use(express.static("dist"));
+
 app.use("/files", express.static("files"));
 
 app.use("/api/user", userRoute);
@@ -48,6 +51,10 @@ app.get("/api", (req, res) => {
 });
 
 socketRoute(app, io); // express route with socket io
+
+app.get("/*", (req, res) => {
+  res.sendFile(path.join(path.resolve(`${path.dirname("")}/dist/index.html`)));
+});
 
 server.listen(port, () => {
   connectDB((done, err) => {
