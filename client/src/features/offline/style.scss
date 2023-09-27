@@ -1,0 +1,42 @@
+@import '../../index.scss';
+
+section[data-for="offline"] {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background: #fff;
+
+    h1 {
+        font-weight: bolder;
+        font-size: large;
+        color: $bg-violet;
+    }
+
+    button {
+        width: 6rem;
+        height: 2rem;
+        border-radius: 10px;
+        border: 2px solid #444;
+        background: #444;
+        text-transform: uppercase;
+        font-size: small;
+        font-weight: bold;
+        color: #fff;
+        cursor: pointer;
+        transition: all .5s ease-in-out;
+        -moz-transition: all .5s ease-in-out;
+
+        &:hover {
+            background: transparent;
+            color: #444;
+        }
+    }
+}

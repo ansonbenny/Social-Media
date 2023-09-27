@@ -2,7 +2,7 @@ import React, { Fragment } from "react";
 import { Route, Routes } from "react-router-dom";
 import { Account, AudioCall, Chats, Groups, Stories, VideoCall } from "./pages";
 import { Loading } from "./components";
-import { Login, SignUp } from "./features";
+import { Login, Offline, SignUp } from "./features";
 import { useSelector } from "react-redux";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import FourNotFour from "./pages/404";
@@ -13,6 +13,8 @@ function App() {
 
   return (
     <Fragment>
+      <Offline />
+
       {loading && <Loading />}
 
       <Routes>

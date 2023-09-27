@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       devOptions: {
-        enabled: false
+        enabled: true
       },
       manifest: {
         "theme_color": "#fff",
