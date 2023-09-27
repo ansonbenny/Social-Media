@@ -1,5 +1,5 @@
 import React, { useEffect, useReducer, useRef, useState } from "react";
-import { Input } from "../components";
+import { Input, Modal } from "../components";
 import { AvatarSvg, LogoutSvg } from "../assets";
 import { setLoading } from "../redux/additional";
 import { useDispatch, useSelector } from "react-redux";
@@ -199,6 +199,12 @@ const Account = () => {
   return (
     <section className="account">
       <div className="content">
+        <Modal ref={(elm) => {
+          if (ref?.current) {
+            ref.current.PopUp = elm
+          }
+        }} />
+
         <button className="logout" onClick={LogOut}>
           <LogoutSvg width={"20px"} height={"20px"} />
         </button>
@@ -233,9 +239,13 @@ const Account = () => {
                   >
                     <div className="list">
                       <button
+                        className="chats_modal_special"
                         type="button"
                         onClick={() => {
-                          window?.open?.(state?.form?.img, "_blank");
+                          ref?.current?.PopUp?.Modal?.({
+                            url: state?.form?.img,
+                            type: "image"
+                          })
                         }}
                       >
                         Show Image

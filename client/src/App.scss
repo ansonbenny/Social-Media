@@ -119,6 +119,7 @@
                 display: flex;
                 flex-direction: column;
                 align-items: center;
+                position: relative;
 
                 .logout {
                     display: none;
@@ -304,6 +305,49 @@
                     font-size: small;
                     font-weight: normal;
                     color: var(--text-primary);
+                }
+            }
+
+            section[data-for="modal_outer"] {
+                @include specialModal;
+
+                .inner_modal {
+                    .scroll_bar {
+                        width: 100%;
+                        height: auto;
+                        max-height: 350px;
+                        overflow: auto;
+                        scrollbar-width: 10px !important;
+                        scroll-behavior: smooth;
+                        scrollbar-color: var(--text-primary) var(--bg-grey);
+
+                        &::-webkit-scrollbar {
+                            height: 5px;
+                            width: 5px;
+                        }
+
+                        &::-webkit-scrollbar-track {
+                            border-radius: 5px;
+                        }
+
+                        &::-webkit-scrollbar-track {
+                            background: var(--bg-grey);
+                        }
+
+                        &::-webkit-scrollbar-thumb {
+                            background: var(--text-primary);
+                            border-radius: 5px;
+                        }
+
+                        img {
+                            width: 100%;
+                            height: auto;
+
+                            &:is(.zoom) {
+                                width: 200%;
+                            }
+                        }
+                    }
                 }
             }
         }

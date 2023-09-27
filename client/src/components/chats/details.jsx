@@ -189,8 +189,12 @@ const ChatDetails = forwardRef(({ setModal, isUser, details }, ref) => {
           <div className="cover">
             {details?.img ? (
               <img
+                className="chats_modal_special"
                 onClick={() => {
-                  window.open(details?.img?.url ? details?.img?.url : `/files/profiles/${details?.img}`, "_blank");
+                  modalRef?.current?.Modal?.({
+                    url: details?.img?.url || `/files/profiles/${details?.img}`,
+                    type: "image"
+                  })
                 }}
                 src={details?.img?.url ? details?.img?.url : `/files/profiles/${details?.img}`}
                 alt="profile"

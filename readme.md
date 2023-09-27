@@ -15,6 +15,7 @@ This project is a Social Media platform, It's made for live private/group chat &
 - Create/Edit/Delete Group
 - Admin can add members to the group if they are friends
 - Share Stories
+- Stories Video Controls - AutoPlay/SeekBar/When Click On Video if paused it will play or not it will pause
 - Search for Users (name search for friends, global id/number search)
 - Search for Group (only for joined groups)
 - Account Edit Option
