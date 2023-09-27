@@ -38,7 +38,7 @@ const VideoCall = () => {
         }
     }
 
-    const setPeerData = (active_peer, peerId) => {
+    const setPeerData = (active_peer, peerId, stream) => {
         // for saving & update peer data
 
         ref.current = {
@@ -46,7 +46,15 @@ const VideoCall = () => {
             peer: {
                 active_peer: active_peer ? active_peer : ref?.current?.peer?.active_peer,
                 peerId: peerId ? peerId : ref?.current?.peer?.peerId
-            }
+            },
+            stream: stream ? stream : ref?.current?.stream
+        }
+    }
+
+    const CloseStream = () => {
+        if (ref?.current?.stream) {
+            ref?.current?.stream?.getTracks()?.forEach((track) => track.stop?.());
+            ref?.current?.stream?.release?.();
         }
     }
 
@@ -76,6 +84,10 @@ const VideoCall = () => {
             video: true,
             audio: ref?.current?.controls?.audio
         }).then((stream) => {
+
+            CloseStream?.();
+
+            setPeerData(null, null, stream);
 
             for (let videoTrack of stream.getVideoTracks()) {
                 videoTrack.enabled = ref?.current?.controls?.video
@@ -113,6 +125,10 @@ const VideoCall = () => {
                     video: true,
                     audio: true
                 }).then((stream) => {
+                    CloseStream?.()
+
+                    setPeerData(null, null, stream);
+
                     if (ref?.current?.small) {
                         ref.current.small.srcObject = stream;
                     }
@@ -196,6 +212,8 @@ const VideoCall = () => {
             ref?.current?.peer?.active_peer?.close?.() // closing active connections when user left
 
             myPeer?.disconnect?.();
+
+            CloseStream?.();
 
             Socket?.off("user joined call");
 

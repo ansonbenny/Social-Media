@@ -31,7 +31,7 @@ const AudioCall = () => {
         }
     }
 
-    const setPeerData = (active_peer, peerId) => {
+    const setPeerData = (active_peer, peerId, stream) => {
         // for saving & update peer data
 
         ref.current = {
@@ -39,7 +39,15 @@ const AudioCall = () => {
             peer: {
                 active_peer: active_peer ? active_peer : ref?.current?.peer?.active_peer,
                 peerId: peerId ? peerId : ref?.current?.peer?.peerId
-            }
+            },
+            stream: stream ? stream : ref?.current?.stream
+        }
+    }
+
+    const CloseStream = () => {
+        if (ref?.current?.stream) {
+            ref?.current?.stream?.getTracks()?.forEach((track) => track.stop?.());
+            ref?.current?.stream?.release?.();
         }
     }
 
@@ -59,6 +67,10 @@ const AudioCall = () => {
             video: false,
             audio: true
         }).then((stream) => {
+            CloseStream?.();
+
+            setPeerData(null, null, stream);
+
             for (let audioTrack of stream.getAudioTracks()) {
                 audioTrack.enabled = audio === 'true' ? true : false;
             }
@@ -95,6 +107,10 @@ const AudioCall = () => {
                     video: false,
                     audio: true
                 }).then((stream) => {
+                    CloseStream?.();
+
+                    setPeerData(null, null, stream);
+
                     myPeer.on('call', (call_peer) => { // When we join someone's room we will receive a call from them
 
                         setPeerData(call_peer)
@@ -172,6 +188,8 @@ const AudioCall = () => {
             ref?.current?.peer?.active_peer?.close?.() // closing active connections when user left
 
             myPeer?.disconnect?.();
+
+            CloseStream?.();
 
             Socket?.off("user joined call");
 
