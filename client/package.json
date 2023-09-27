@@ -20,8 +20,7 @@
     "react-redux": "^8.1.1",
     "react-router-dom": "^6.12.1",
     "sass": "^1.63.4",
-    "socket.io-client": "^4.7.1",
-    "vite-plugin-mkcert": "^1.16.0"
+    "socket.io-client": "^4.7.1"
   },
   "devDependencies": {
     "@types/react": "^18.0.37",
