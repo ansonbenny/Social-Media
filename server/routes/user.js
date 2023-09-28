@@ -131,31 +131,14 @@ router.post("/register", CheckLogged, async (req, res) => {
             number,
             secret,
           });
-        } catch (err) {
-          if (err?.status) {
-            res.status(err.status).json(err);
-          } else {
-            res.status(500).json({
-              status: 500,
-              message: err,
-            });
-          }
-        } finally {
+
           if (response) {
-            sendMail(
+            await sendMail(
               {
                 to: email,
                 subject: `Soft Chat Register Verification Code`,
                 text: secret,
-              },
-              (err, done) => {
-                if (err) {
-                  console.log(err);
-                } else {
-                  console.log(`Email sent: ${done.response}`);
-                }
-              }
-            );
+              })
 
             res.status(200).json({
               status: 200,
@@ -163,6 +146,15 @@ router.post("/register", CheckLogged, async (req, res) => {
               data: {
                 otp: true,
               },
+            });
+          }
+        } catch (err) {
+          if (err?.status) {
+            res.status(err.status).json(err);
+          } else {
+            res.status(500).json({
+              status: 500,
+              message: err,
             });
           }
         }
@@ -302,6 +294,19 @@ router.post("/login-otp", CheckLogged, async (req, res) => {
         email: `${email}_login`,
         secret,
       });
+
+      if (response) {
+        await sendMail({
+          to: email,
+          subject: `Soft Chat Login Verification Code`,
+          text: secret,
+        })
+
+        res.status(200).json({
+          status: 200,
+          message: "Login Otp Sented",
+        });
+      }
     } catch (err) {
       if (err?.status) {
         res.status(err.status).json(err);
@@ -309,28 +314,6 @@ router.post("/login-otp", CheckLogged, async (req, res) => {
         res.status(500).json({
           status: 500,
           message: err,
-        });
-      }
-    } finally {
-      if (response) {
-        sendMail(
-          {
-            to: email,
-            subject: `Soft Chat Login Verification Code`,
-            text: secret,
-          },
-          (err, done) => {
-            if (err) {
-              console.log(err);
-            } else {
-              console.log(`Email sent: ${done.response}`);
-            }
-          }
-        );
-
-        res.status(200).json({
-          status: 200,
-          message: "Login Otp Sented",
         });
       }
     }
@@ -406,31 +389,14 @@ router.post(
     let response;
     try {
       response = await user.edit_request(secret, req?.query?.userId, req?.body);
-    } catch (err) {
-      if (err?.status) {
-        res.status(err.status).json(err);
-      } else {
-        res.status(500).json({
-          status: 500,
-          message: err,
-        });
-      }
-    } finally {
+
       if (response) {
-        sendMail(
+        await sendMail(
           {
             to: req?.query?.email,
             subject: `Soft Chat Profile Edit Verification Code`,
             text: secret,
-          },
-          (err, done) => {
-            if (err) {
-              console.log(err);
-            } else {
-              console.log(`Email sent: ${done.response}`);
-            }
-          }
-        );
+          })
 
         res.status(200).json({
           status: 200,
@@ -438,6 +404,15 @@ router.post(
           data: {
             otp: true,
           },
+        });
+      }
+    } catch (err) {
+      if (err?.status) {
+        res.status(err.status).json(err);
+      } else {
+        res.status(500).json({
+          status: 500,
+          message: err,
         });
       }
     }

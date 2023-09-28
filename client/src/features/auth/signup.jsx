@@ -78,11 +78,21 @@ const SignUp = () => {
           navigate("/login");
         }
       } else {
+        setState((state) => ({
+          ...state,
+          otp: {
+            sent: resend
+          }
+        }))
+
         let res = await instance.post("/user/register", state?.form);
+
         if (res?.["data"]?.data?.otp) {
           setState((state) => ({
             ...state,
-            otp: true,
+            otp: {
+              sent: true
+            },
           }));
         } else if (res?.["data"]?.data?.google) {
           navigate("/login");
@@ -95,6 +105,7 @@ const SignUp = () => {
           typeof err?.response?.data?.message === "string"
             ? err?.response?.data?.message
             : "Something Went Wrong",
+        otp: state?.otp?.sent && { sent: true }
       }));
     }
   };
@@ -176,34 +187,35 @@ const SignUp = () => {
             required
           />
 
-          {state?.otp && (
-            <div className="otp">
-              <Input
-                name={"OTP"}
-                placeholder={"Enter OTP"}
-                label={"OTP*"}
-                type={"number"}
-                value={state?.form?.OTP || ""}
-                onChange={InputHandle}
-                required
-              />
-              <button
-                type="button"
-                className="resend"
-                onClick={() => {
-                  FormHandle(undefined, true);
-                }}
-              >
-                Resend
-              </button>
-            </div>
-          )}
+          {state?.otp ?
+            (state?.otp?.sent ? <>
+              <div className="otp">
+                <Input
+                  name={"OTP"}
+                  placeholder={"Enter OTP"}
+                  label={"OTP*"}
+                  type={"number"}
+                  value={state?.form?.OTP || ""}
+                  onChange={InputHandle}
+                  required
+                />
+                <button
+                  type="button"
+                  className="resend"
+                  onClick={() => {
+                    FormHandle(undefined, true);
+                  }}
+                >
+                  Resend
+                </button>
+              </div>
 
-          {state?.otp || state?.form?.google ? (
-            <button type="submit">Create account</button>
-          ) : (
-            <button type="submit">Sent Otp</button>
-          )}
+              <button data-for="form_submit" type="submit">Create account</button>
+            </>
+              : <button data-for="form_submit" type="button">Senting</button>
+            )
+            : <button data-for="form_submit" type="submit">Sent Otp</button>}
+
         </form>
 
         <p className="or">

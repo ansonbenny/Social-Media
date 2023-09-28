@@ -134,7 +134,7 @@
                 }
             }
 
-            button[type="submit"] {
+            button[data-for="form_submit"] {
                 margin: 1rem 0;
                 width: 100%;
                 height: 2.3rem;

@@ -11,18 +11,22 @@ let transporter = nodemailer.createTransport({
   },
 });
 
-export const sendMail = (details, callback) => {
-  transporter.sendMail(
-    {
-      from: `Soft Chat <${process.env.MAIL_EMAIL}>`,
-      ...details,
-    },
-    (err, done) => {
-      if (err) {
-        callback(err, null);
-      } else {
-        callback(null, done);
-      }
+export const sendMail = (details) => {
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      let done = await transporter.sendMail(
+        {
+          from: `Soft Chat <${process.env.MAIL_EMAIL}>`,
+          ...details,
+        })
+
+      resolve(done)
+    } catch (err) {
+      reject({
+        status: 500,
+        message: "Email Send Failed"
+      })
     }
-  );
+  })
 };

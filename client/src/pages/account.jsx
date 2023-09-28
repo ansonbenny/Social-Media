@@ -32,7 +32,7 @@ const reducer = (value, { type, data }) => {
       return { ...value, otp: undefined, form: { ...value?.form, OTP: "" } }
 
     case "otp_sented":
-      return { ...value, otp: true }
+      return { ...value, otp: data }
 
     case "remove_avatar":
       return { ...value, form: { ...value?.form, img: null } }
@@ -118,6 +118,8 @@ const Account = () => {
           action({ type: "reset_form" })
         }
       } else {
+        action({ type: "otp_sented", data: { sent: resend } })
+
         let res = await axios.post(`/user/edit-profile-otp`, {
           name: state?.form?.name,
           about: state?.form?.about,
@@ -126,7 +128,7 @@ const Account = () => {
         });
 
         if (res?.["data"]?.data?.otp) {
-          action({ type: "otp_sented" })
+          action({ type: "otp_sented", data: { sent: true } })
         }
       }
     } catch (err) {
@@ -139,6 +141,8 @@ const Account = () => {
             ? err?.response?.data?.message
             : "Something Went Wrong"
         );
+
+        action({ type: "otp_sented", data: state?.otp?.sent && { sent: true } })
       }
     }
   };
@@ -356,36 +360,40 @@ const Account = () => {
             required
           />
 
-          {state?.otp && (
-            <div className="otp">
-              <Input
-                name={"OTP"}
-                placeholder={"Enter OTP"}
-                label={"OTP*"}
-                value={state?.form?.OTP || ""}
-                onChange={InputHandle}
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  FormHandle(undefined, true);
-                }}
-                className="resend"
-              >
-                Resend
-              </button>
-            </div>
-          )}
-
           {state?.otp ? (
-            <button data-for="submit" type="submit">
-              Submit
-            </button>
-          ) : (
+            state?.otp?.sent ? <>
+              <div className="otp">
+                <Input
+                  name={"OTP"}
+                  placeholder={"Enter OTP"}
+                  label={"OTP*"}
+                  value={state?.form?.OTP || ""}
+                  onChange={InputHandle}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    FormHandle(undefined, true);
+                  }}
+                  className="resend"
+                >
+                  Resend
+                </button>
+              </div>
+
+              <button data-for="submit" type="submit">
+                Submit
+              </button>
+            </>
+
+              : <button data-for="submit" type="button">
+                Senting
+              </button>
+          ) :
             <button data-for="submit" type="submit">
               Sent Otp
-            </button>
-          )}
+            </button>}
+
         </form>
       </div>
 
