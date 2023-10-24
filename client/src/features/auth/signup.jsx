@@ -214,7 +214,8 @@ const SignUp = () => {
             </>
               : <button data-for="form_submit" type="button">Senting</button>
             )
-            : <button data-for="form_submit" type="submit">Sent Otp</button>}
+            : state?.form?.google ? <button data-for="form_submit" type="submit">Create account</button> : <button data-for="form_submit" type="submit">Sent Otp</button>
+          }
 
         </form>
 
